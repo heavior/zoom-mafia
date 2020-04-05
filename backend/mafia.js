@@ -77,36 +77,44 @@ class MafiaGame {
   constructor(){
   },
 
-  startGames(playersNames){
+  start(playersNames){
     //This method starts new game based on the array of player names
 
-    var playersRoles = this.shuffle(players.length); // Shuffle the roles
+    var playersRoles = this._shuffle(players.length); // Shuffle the roles
 
     // Generate states for everyPlayer
     this.players = playersNames.map(function callback(element, index, array) {
         // Return value for new_array
         return {
-          number: index,
+          number: index + 1,
           name: element,
           role: playersRoles[index],
-          isMafia: (playersRoles[index] === Roles.Mafia) || (playersRoles[index] === Roles.Don),
+          isMafia: _isMafia(playersRoles[index]),
           alive: true
         }
     });
     this.gameOn = true;
   },
 
-  shuffle(numberOfCards){
+  _isMafia(role){
+    return (role === Roles.Mafia) || (role === Roles.Don);
+  },
+
+  _shuffle(numberOfCards){
     // This method generates an array of roles based on number of players
     var cardsToPlay = CardsDeck.slice(numberOfCards);
     cardsToPlay.sort(() => Math.random() - 0.5); // Shuffle the array, solution from here: https://javascript.info/task/shuffle
     return cardsToPlay;
   },
 
-  kill (playerNumber){
-    this.players[playerNumber].alive = false;
+  kill(playerNumber){
+    this.players[playerNumber-1].alive = false;
     this.checkGameOver(); // Check if game is over with every kill
     return false;
+  },
+
+  voteToKill(whoVotes, choicePlayer, checkMafia){
+
   },
 
   checkGameOver(){
