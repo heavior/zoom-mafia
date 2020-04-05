@@ -8,7 +8,12 @@
 // Option: mafia doesn't talk (in original everyone has to write down "I'm civilian", or name of the player to eliminate). This way prevents cheating as no one has to close their eyes
 // Option: First dead becomes game host (downside - not everyone is a good host)
 // Idea: we could make our tool talk to players to voice commands
-//
+// TODO: implement voting for mafia and maybe daytime voting
+// TODO: check if special night logic is required
+
+exports.Game = MafiaGame;
+exports.Roles = MafiaRoles;
+
 /*
   mafia should have 1/3 or less of players
   Profeccional rules: 10 people: mafiaBoss, 2x mafia, detective, 6x civilian
@@ -21,9 +26,9 @@ From original rules:
  */
 
 
-const Roles = Object.freeze({
+const MafiaRoles = Object.freeze({
   Guest: 0, // No role, just sitting there
-  Host: 1,
+  Master: 1,
   Civilian: 2,
   Detective: 3,
   Mafia: 4,
@@ -59,7 +64,7 @@ const CardsDeck = [
       Roles.Mafia,     // 14 players
       Roles.Civilian,  // 15 players
       Roles.Civilian,  // 16 players
-      Roles.Host,      // 17 players - too much, someone gets to be a host
+      Roles.Master,      // 17 players - too much, someone gets to be a host
 
       // Now, here I'm too lazy to think, so I just add a bunch of guests here:
       Roles.Guest, Roles.Guest, Roles.Guest, Roles.Guest, Roles.Guest, Roles.Guest, Roles.Guest, Roles.Guest,
