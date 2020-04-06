@@ -9,13 +9,15 @@ app.use(express.static(__dirname + '/dist'));
 server.listen(process.env.PORT || 8080);
 
 io.on('connection', (socket) => {
-  socket.emit('serverStatus', 'Welcome!');
+  let roomId = socket.handshake.query.id;
+  socket.join(roomId);
+  socket.to(roomId).emit('serverStatus', 'Welcome to ' + roomId);
 
   socket.on('server', (data) =>{
     switch(data.action) {
       case 'usernameSet':
-        socket.broadcast.emit('serverStatus', `${data.username} has joined the server`);
-        socket.emit('serverStatus', `Welcome to the server ${data.username}`);
+        socket.broadcast.to(roomId).emit('serverStatus', `${data.username} has joined the server`);
+        socket.to(roomId).emit('serverStatus', `Welcome to the server ${data.username}`);
         break;
       default:
         return;
@@ -23,6 +25,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', (data) => {
-    socket.broadcast.emit('message', data);
+    socket.broadcast.to(roomId).emit('message', data);
   });
 });
