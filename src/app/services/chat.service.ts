@@ -11,7 +11,7 @@ export class ChatService {
   username: string;
 
   constructor() {
-    this.socket = io(this,url,
+    this.socket = io(this.url,
       {
         query: {
           id: 'testroomid'
