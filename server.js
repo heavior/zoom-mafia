@@ -8,7 +8,6 @@ const io = socketIo(server);
 const rooms = require("./backend/roomManager");
 const roomManager = new rooms.RoomManager();
 
-
 /**
  * General architecture:
  * server.js handles connections and has no room or game logic
@@ -29,6 +28,7 @@ const roomManager = new rooms.RoomManager();
  *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
  *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
  *
+ * userId is optional for now and assumed to be equal to userName
  */
 
 app.use(express.static(__dirname + '/dist'));
@@ -42,6 +42,7 @@ io.on('connection', (socket) => {
 
   if(roomId){
     room = roomManager.findRoom(roomId);
+
     if(!room){
       console.warn("Can't find the room " + roomId);
       socket.emit("message", "Can't find the room " + roomId);
@@ -59,10 +60,13 @@ io.on('connection', (socket) => {
   // roomCommands interact with roomManager and room
   // TODO: move them inside the room and manager for unification
   socket.on('roomCommand', (data) =>{
+    console.debug("roomCommand " + data.action);
     switch(data.action) {
       case 'create':
         // expects data.videoLink, data.userName, data.userId
         if(roomId){
+          console.warn("User already in the room " + roomId);
+          socket.emit("message", "You are already in the room " + roomId);
           return; // Cannot create new room from here
         }
          // (hostName, videoLink, hostId, roomId)
@@ -83,16 +87,22 @@ io.on('connection', (socket) => {
         // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
         break;
       case 'join': // alternative join method
-        if(!roomId){
+        if(roomId){
+          console.warn("User already in the room " + roomId);
+          socket.emit("message", "You are already in the room " + roomId);
           return; // Cannot create new room from here
         }
-        socket.join(data.roomId);
+        roomId = data.roomId;
+        room = roomManager.findRoom(roomId);
+        socket.join(roomId);
         user = room.join(data.userName, data.userId);
         socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
         break;
       case 'startGame':
         if(!roomId){
-          return; // Cannot create new room from here
+          console.warn("No room to start game in");
+          socket.emit("message", "You are not in the room");
+          return;
         }
         room.startGame();
         break;
@@ -101,7 +111,10 @@ io.on('connection', (socket) => {
 
   // Game commands are transparently relayed into the game itself
   socket.on('gameCommand', (data) =>{
+    console.debug("gameCommand " + data.action);
     if(!roomId){
+      console.warn("No room to send game command to");
+      socket.emit("message", "You are not in the room");
       return; // No game commands without rooms!
     }
     room.gameCommand(data, user.id);
@@ -110,9 +123,6 @@ io.on('connection', (socket) => {
   // find shared game room object
   // recieve the name from the user
   // join the game room using the name
-
-  socket.join(roomId);
-  socket.to(roomId).emit('serverStatus', 'Welcome to ' + roomId);
 
   socket.on('server', (data) =>{
     switch(data.action) {
@@ -126,7 +136,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', (data) => {
-    socket.broadcast.to(roomId).emit('message', data);
+    if(roomId){
+      io.to(roomId).emit('message', data);
+    }else{
+      socket.broadcast.emit('message', data);
+    }
   });
 
   socket.on('disconnect', (reason) => {
