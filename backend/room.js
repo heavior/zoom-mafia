@@ -27,99 +27,80 @@ IDEA: Maybe be people can leave the room, this makes them dead in the game, but 
 IDEA: Later - maybe there is a time coordination for the room later
 */
 
-
-exports.Room = Room;
-
-const shortid = require('shortid');
-const mafia = require('mafia');
+const mafia = require('./mafia');
 
 class Room {
 
-  constructor(hostName, videoLink, hostId, roomId){
-    // Creating the room. requires the host to put in his name and video conference link
-    // The id should be provided by external code which ensures uniqueness. For now we use shortid library as a fallback
-    if(!hostId){
-      hostId = hostName;
-    }
-    if(!roomId){
-      roomId = shortid.generate();
-    }
-    this.hostId = hostId;
+  constructor(videoLink, roomId){
+    // Creating the room. requires the host to put video conference link
+    // The id should be provided by external code which ensures uniqueness.
     this.videoLink = videoLink;
     this.id = roomId;
-
-    this.players = [
-      {
-        name: hostName,
-        id: hostId,
-        isHost: true,
-        isOnline: true
-      }
-    ]
-  },
+    this.players = [];
+  }
 
   roomUpdated(){
     // TODO: Notify everyone that people in the room changed
 
-  },
+  }
 
   gameUpdated(){
     // TODO: Notify everyone that game status updated
-  },
+  }
 
-  join(guestName, guestId){
-    if(!guestId){ // For now use name as guest authenticator
-      guestId = guestName;
+  join(playerName, playerId){
+    if(!playerId){ // For now use name as guest authenticator
+      playerId = playerName;
     }
 
     // Check for rejoin
-    var existingPlayer = this.players.find(function(element){
-      return element.id == guestId;
+    let existingPlayer = this.players.find(function(element){
+      return element.id === playerId;
     });
     if(existingPlayer){
       existingPlayer.isOnline = true;
       return;
     }
+
     this.players.push({
-      name: guestName,
-      id: guestId,
+      name: playerName,
+      id: playerId,
       isHost: false,
       isOnline: true
     });
     this.roomUpdated();
-  },
+  }
 
-  disconnect(guestId){
+  disconnect(playerId){
     // Connection with player lost
-    var player = this.players.find(function(element){
-      return element.id == guestId;
+    let player = this.players.find(function(element){
+      return element.id === playerId;
     });
     if(!player){
       return; //Maybe the player was kicked out
     }
     player.isOnline = false;
     this.roomUpdated();
-  },
+  }
 
-  leave(guestId){
+  leave(playerId){
     // Guest left the room, or was kicked out - remove them from the list of players
-    var playerIndex = this.players.findIndex(function(element){
-      return element.id == guestId;
+    let playerIndex = this.players.findIndex(function(element){
+      return element.id === playerId;
     });
     if(playerIndex>0){
       this.players.list.splice(playerIndex, 1);
     }
     this.roomUpdated();
-  },
+  }
 
   startGame(){
     this.game = new mafia.Game();
-    var playersNames = this.players.filter(player => player.isOnline).map(player => player.name);
+    // Only online players join the game
+    let playersNames = this.players.filter(player => player.isOnline).map(player => player.name);
     this.game.start(playersNames);
     this.gameUpdated();
-  },
-
-
-
-
+  }
 }
+
+exports.Room = Room;

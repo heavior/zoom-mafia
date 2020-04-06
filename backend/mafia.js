@@ -78,13 +78,14 @@ class MafiaGame {
               isMafiaVoteUnanimous = false) // Should mafia vote by unanimous (professional rules)
   {
     this.isVoteMandatory = isVoteMandatory;
-    this.isMafiaVoteUnanimous = isMafiaVoteUnanimous
-  },
-
+    this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
+    this.gameOn = false;
+    this.civiliansWin = false;
+  }
   start(playersNames){
     //This method starts new game based on the array of player names
 
-    let playersRoles = this._shuffle(players.length); // Shuffle the roles
+    let playersRoles = this._shuffle(playersNames.length); // Shuffle the roles
 
     // Generate states for everyPlayer
     this.players = playersNames.map(function callback(element, index) {
@@ -98,27 +99,27 @@ class MafiaGame {
         }
     });
     this.gameOn = true;
-  },
+  }
 
   static _isMafiaRole(role){
     return (role === MafiaRoles.Mafia) || (role === MafiaRoles.Don);
-  },
+  }
   static _isActiveRole(role){
     return role > 1;
-  },
+  }
 
   static _shuffle(numberOfCards){
     // This method generates an array of roles based on number of players
     let cardsToPlay = CardsDeck.slice(numberOfCards);
     cardsToPlay.sort(() => Math.random() - 0.5); // Shuffle the array, solution from here: https://javascript.info/task/shuffle
     return cardsToPlay;
-  },
+  }
 
   kill(playerNumber){
     this.players[playerNumber-1].isAlive = false;
     this.checkGameOver(); // Check if game is over with every kill
     return false;
-  },
+  }
 
 
   startVote(mafiaOnly){
@@ -130,10 +131,10 @@ class MafiaGame {
     // TODO: remember and check who should be voted for in scenario 2
     this.votes = {};
     this.mafiaVotes = mafiaOnly;
-  },
+  }
   shouldVote(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
-  },
+  }
 
   vote(whoVotes, choicePlayer){
     if(!this.shouldVote(this.players[whoVotes-1].isAlive)){
@@ -144,14 +145,14 @@ class MafiaGame {
     if(this.checkAllVoted()){
       this.resolveVote();
     }
-  },
+  }
   showShouldVote(){
     return this.players.filter(player => this.shouldVote(player));
-  },
+  }
   checkAllVoted(){
     // For automatic vote resolve - once everyone votes
     return !this.showShouldVote().some(player => !this.votes[player.number]);
-  },
+  }
   resolveVote(){
     // Didn't vote - vote goes to the first of the list
     let unusedVotesCounter = 0;
@@ -186,7 +187,7 @@ class MafiaGame {
 
     votes.sort(element => -element[1]); // Sort by votes in reverse order
     return votes[0][0]; // return the first voted
-  },
+  }
 
 
   checkGameOver(){
