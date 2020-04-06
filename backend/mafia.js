@@ -111,6 +111,11 @@ class MafiaGame {
     let player = this.players[playerNumber-1];
 
     // Game process:
+    /*
+      // day starts
+      // People talk and vote for suspects
+      //
+     */
 
     switch (data.action){
       case 'vote':
