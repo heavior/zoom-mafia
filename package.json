@@ -36,6 +36,7 @@
     "bootstrap": "^4.4.1",
     "express": "^4.17.1",
     "jquery": "^3.4.1",
+    "ngx-clipboard": "^13.0.0",
     "rxjs": "~6.5.4",
     "shortid": "^2.2.15",
     "socket.io": "^2.3.0",

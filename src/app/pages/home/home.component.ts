@@ -8,6 +8,7 @@ import {BehaviorSubject} from "rxjs";
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  joining: boolean = false;
   needsUsernameSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
   userName: string;
   videoLink: string = '';
@@ -23,10 +24,15 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.joining = !!this.chatService.roomId;
   }
 
   createRoom() {
     this.chatService.createRoom();
+  }
+
+  joinRoom() {
+    this.chatService.joinRoom();
   }
 
   setUsername() {

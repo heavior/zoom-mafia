@@ -1,31 +1,44 @@
-import { Injectable } from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {ActivatedRoute, Router} from "@angular/router";
 import * as io from 'socket.io-client';
 import { Observable } from "rxjs";
-import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   private socket: any;
-  private url: string = 'http://localhost:8080/';
+  private url: string = '/';
   data: any = {};
+  roomLink: string = '';
 
-  constructor(private router: Router) {
+  constructor(@Inject(DOCUMENT) private document: Document,
+              private route: ActivatedRoute,
+              private router: Router) {
     this.socket = io(this.url);
     this.socket.on('roomEvent', (data) => {
       switch(data.event) {
         case 'created':
+        case 'joined':
           this.data.roomId = data.id;
+          this.roomLink = `${this.document.location.origin}?id=${data.id}`;
           return this.router.navigate(['room']);
         default:
           return;
       }
-    })
+    });
+    // @ts-ignore
+    this.data.roomId = this.route.queryParams.value.id || '';
   }
 
   createRoom() {
     const data = Object.assign({}, this.data, {action: 'create'});
+    this.socket.emit('roomCommand', data);
+  }
+
+  joinRoom() {
+    const data = Object.assign({}, this.data, {action: 'join'});
     this.socket.emit('roomCommand', data);
   }
 
@@ -44,6 +57,10 @@ export class ChatService {
     this.socket.emit('message', { from: this.userName, msg });
   }
 
+  get roomId() {
+    return this.data.roomId;
+  }
+
   get userName() {
     return this.data.userName;
   }
@@ -51,7 +68,7 @@ export class ChatService {
   set userName(userName) {
     this.data.userId = userName;
     this.data.userName = userName;
-    this.socket.emit('server', { action: 'usernameSet', userName });
+    this.socket.emit('server', { action: 'setUserName', userName });
   }
 
   get videoLink() {

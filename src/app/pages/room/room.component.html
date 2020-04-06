@@ -1,4 +1,14 @@
 <h1>Welcome to the lobby</h1>
+
+<div class="input-group mb-3">
+  <input class="form-control" type="text"
+         aria-label="Room Link" aria-describedby="roomLink"
+         [value]="roomLink" #link readonly>
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="roomLink" [ngxClipboard]="link">Copy</button>
+  </div>
+</div>
+
 <div>
   <h2>Send</h2>
   <input [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"/>

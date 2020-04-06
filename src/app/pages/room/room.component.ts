@@ -11,6 +11,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   newMessage: string;
   messages: string[];
   receiverSubject: Subscription;
+  roomLink: string;
 
   constructor(private chatService: ChatService) { }
 
@@ -19,6 +20,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
     });
+    this.roomLink = this.chatService.roomLink;
   }
 
   sendMessage() {

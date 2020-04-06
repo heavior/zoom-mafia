@@ -14,12 +14,17 @@
     </div>
 
     <ng-template #makeRoom>
-      <label for="username">Video link</label>
-      <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
-      <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
-      <div class="mt-3 d-flex justify-content-center">
-        <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
-      </div>
+      <ng-container *ngIf="!joining else join">
+        <label for="videoLink">Video link</label>
+        <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
+        <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
+        <div class="mt-3 d-flex justify-content-center">
+          <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
+        </div>
+      </ng-container>
+      <ng-template #join>
+        <button class="btn btn-primary" (click)="joinRoom()">Join Room</button>
+      </ng-template>
     </ng-template>
   </div>
 </div>
