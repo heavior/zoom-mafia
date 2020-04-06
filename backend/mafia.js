@@ -116,10 +116,10 @@ class MafiaGame {
     this.gameState = GameStates.Discussion;
   }
 
+  /* External game interface */
   start(playersNames){
     //This method starts new game based on the array of player names
-
-    let playersRoles = this._shuffle(playersNames.length); // Shuffle the roles
+    let playersRoles = this.shuffle(playersNames.length); // Shuffle the roles
 
     // Generate states for everyPlayer
     this.players = playersNames.map(function callback(element, index) {
@@ -137,7 +137,6 @@ class MafiaGame {
     this.gameState = GameStates.Discussion;
     this.gameEventCallback("started", this.publicInfo());
   }
-
   next(){
     // This function implements main game process:
     /*
@@ -182,14 +181,12 @@ class MafiaGame {
     }
 
     if(this.checkGameOver()){
-      this.gameEventCallback("ended", this.publicInfo()); // inform all players about game over
       return;
     }
 
     this.startVote(); // restart the vote for the new state
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
-
   command(data, playerNumber, isHost){
     let player = this.players[playerNumber-1];
 
@@ -204,11 +201,21 @@ class MafiaGame {
         break;
     }
   }
+  /* /end of External game interface */
 
-
+  /* Role helpers */
   static _roleName(role){
     return MafiaRoleNames[role];
   }
+  static _isMafiaRole(role){
+    return (role === MafiaRoles.Mafia) || (role === MafiaRoles.Don);
+  }
+  static _isActiveRole(role){
+    return !((role === MafiaRoles.Guest) || (role === MafiaRoles.Master));
+  }
+  /* /end of Role helpers */
+
+  /* Game public info */
   static _playerPublicInfo(player){
 
     let publicInfo = {
@@ -236,15 +243,10 @@ class MafiaGame {
       players: this.players.map(player => this._playerPublicInfo(player))
     };
   }
+  /* /end of Game public info */
 
-  static _isMafiaRole(role){
-    return (role === MafiaRoles.Mafia) || (role === MafiaRoles.Don);
-  }
-  static _isActiveRole(role){
-    return !((role === MafiaRoles.Guest) || (role === MafiaRoles.Master));
-  }
 
-  static _shuffle(numberOfCards){
+  static shuffle(numberOfCards){
     // This method generates an array of roles based on number of players
     let cardsToPlay = CardsDeck.slice(numberOfCards);
     cardsToPlay.sort(() => Math.random() - 0.5); // Shuffle the array, solution from here: https://javascript.info/task/shuffle
@@ -253,11 +255,10 @@ class MafiaGame {
 
   kill(playerNumber){
     this.players[playerNumber-1].isAlive = false;
-    return false;
   }
 
-  /* Vote logic starts */
-  _checkcandidates(gameState){
+  /* Vote logic */
+  checkCandidates(gameState){
     gameState = gameState || this.gameState;
     // Calculate vote candidates based on for the state
     switch(gameState){
@@ -277,6 +278,13 @@ class MafiaGame {
         return this.votes.filter(item => item[1] === tieCounter).map(item => item[0]);
     }
   },
+  shouldVote(player){
+    return player.isAlive && (!this.mafiaVotes || player.isMafia);
+  }
+  whoShouldVote(){
+    return this.players.filter(player => this.shouldVote(player));
+  }
+
   startVote(){
     /* Votes in the game:
     1) Daytime - who are suspects (who shall we nominate for killing)
@@ -285,14 +293,11 @@ class MafiaGame {
     4) Nighttime - mafia only - who to eliminate
      */
     // TODO: remember and check who should be voted for in scenario 2
-    this.candidates = this._checkcandidates();
+    this.candidates = this.checkCandidates();
     this.votes = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = false; //autoCompleteVote || mafiaOnly;
     // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
-  }
-  shouldVote(player){
-    return player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
   vote(whoVotes, choicePlayer){
     if(!this.shouldVote(this.players[whoVotes-1].isAlive)){
@@ -303,9 +308,6 @@ class MafiaGame {
     if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
     }
-  }
-  whoShouldVote(){
-    return this.players.filter(player => this.shouldVote(player));
   }
   checkAllVoted(){
     // For automatic vote resolve - once everyone votes
@@ -358,7 +360,7 @@ class MafiaGame {
 
     return true;
   }
-  /* /Vote logic ends  */
+  /* /end of Vote logic */
 
 
   endGame(civiliansWin){
@@ -366,7 +368,6 @@ class MafiaGame {
      this.civiliansWin = civiliansWin;
      this.gameEventCallback("ended", this.publicInfo());
   }
-
   checkGameOver(){
     // Game over conditions:
     // MafiaWins: number of alive mafia is >= number of alive civilians
