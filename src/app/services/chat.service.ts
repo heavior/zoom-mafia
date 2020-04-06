@@ -11,7 +11,13 @@ export class ChatService {
   username: string;
 
   constructor() {
-    this.socket = io(this.url);
+    this.socket = io(
+      {
+        url: this.url,
+        query: {
+          id: 'testroomid'
+        }
+      });
   }
 
   receiveMessages() {
