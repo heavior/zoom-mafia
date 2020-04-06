@@ -350,7 +350,6 @@ class MafiaGame {
     if(this.votes.length > 1 && this.votes[0][1] === this.votes[1][1]){
       return false;      // It is a tie
     }
-
     return true;
   }
   /* /end of Vote logic */
