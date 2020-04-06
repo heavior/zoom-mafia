@@ -16,6 +16,7 @@ io.on('connection', (socket) => {
   console.log("new connection");
   let roomId = socket.handshake.query.id;
   let room;
+  let user;
 
   if(roomId){
     room = roomManager.findRoom(roomId);
@@ -25,10 +26,16 @@ io.on('connection', (socket) => {
       socket.disconnect();
       return;
     }
+
+    socket.join(roomId);
+    user = room.join(socket.handshake.query.userName, socket.handshake.query.userId);
+    socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
   }else{
 
   }
 
+  // roomCommands interact with roomManager and room
+  // TODO: move them inside the room and manager for unification
   socket.on('roomCommand', (data) =>{
     switch(data.action) {
       case 'create':
@@ -37,33 +44,46 @@ io.on('connection', (socket) => {
           return; // Cannot create new room from here
         }
          // (hostName, videoLink, hostId, roomId)
-        room = roomManager.createRoom(data.videoLink, (event, roomId)=>{
-          io.to(roomId).emit('roomEvent', event);
-        }, (event)=>{
-          io.to(roomId).emit('gameEvent', event);
-        });
+        room = roomManager.createRoom(data.videoLink,
+          (event, roomId)=>{
+            io.to(roomId).emit('roomEvent', event);
+          },
+          (event, roomId)=>{
+            io.to(roomId).emit('gameEvent', event);
+          });
         roomId = room.id;
 
-        let user = room.join(data.userName, data.userId);
+        user = room.join(data.userName, data.userId);
 
         socket.join(roomId);
+
         socket.emit("roomEvent", {event:"created", id:roomId, userId: user.id});
+        // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
+        break;
+      case 'startGame':
+        if(!roomId){
+          return; // Cannot create new room from here
+        }
+        room.startGame();
+        break;
+      case 'join': // alternative join method
+        if(!roomId){
+          return; // Cannot create new room from here
+        }
+        socket.join(data.roomId);
+        user = room.join(data.userName, data.userId);
+        socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
         break;
     }
   });
 
-
+  // Game commands are transparently relayed into the game itself
   socket.on('gameCommand', (data) =>{
     if(!roomId){
       return; // No game commands without rooms!
     }
-    switch(data.action) {
-      case 'start':
-        room.startGame();
-    }
+    room.gameCommand(data, user.id);
   });
-
-
 
   // find shared game room object
   // recieve the name from the user
@@ -88,6 +108,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
-    // ...
+    if(!roomId){
+      return; // No room, so whatever
+    }
+    room.disconnect(user.id); //Let the room know that player left
   });
 });

@@ -6,7 +6,7 @@
 //
 // Option: dead disclose their role or not (default - no)
 // Option: mafia doesn't talk (in original everyone has to write down "I'm civilian", or name of the player to eliminate). This way prevents cheating as no one has to close their eyes
-// Option: First dead becomes game host (downside - not everyone is a good host)
+// Option: First dead becomes game master (downside - not everyone is a good master)
 // Option: dead see who is who
 // Option: vote is mandatory (default - yes) - implemented
 // Idea: we could make our tool talk to players to voice commands
@@ -63,7 +63,7 @@ const CardsDeck = [
       MafiaRoles.Mafia,     // 14 players
       MafiaRoles.Civilian,  // 15 players
       MafiaRoles.Civilian,  // 16 players
-      MafiaRoles.Master,      // 17 players - too much, someone gets to be a host
+      MafiaRoles.Master,      // 17 players - too much, someone gets to be a game master
 
       // Now, here I'm too lazy to think, so I just add a bunch of guests here:
       MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest,
@@ -103,8 +103,18 @@ class MafiaGame {
         }
     });
     this.gameOn = true;
-    this.gameEventCallback("gameStarted", this.publicInfo());
+    this.gameEventCallback("started", this.publicInfo());
   }
+
+  command(data, playerNumber){
+    let player = this.players[playerNumber-1];
+
+
+    // TODO: execute commands here
+
+  }
+
+
   static _roleName(role){
     return MafiaRoles.entries().find(role => role[1] === role)[0];
   }
@@ -233,6 +243,7 @@ class MafiaGame {
      if(mafiaCount === 0){
        this.gameOn = false;
        this.civiliansWin = true;
+       this.gameEventCallback("ended", this.publicInfo());
        return true;
      }
 
@@ -244,6 +255,7 @@ class MafiaGame {
      if(mafiaCount >= civilianCount){
        this.gameOn = false;
        this.civiliansWin = false;
+       this.gameEventCallback("ended", this.publicInfo());
        return true;
      }
 

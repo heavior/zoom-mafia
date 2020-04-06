@@ -41,14 +41,13 @@ class Room {
     this.gameEventCallback = gameEventCallback;
   }
 
-  roomUpdated(){
+  roomUpdated(event){
     let playerPublicInfo = this.players.map(player=>{ return {name: player.name, isOnline: player.isOnline}});
-    this.roomEventCallback({event:"roomUpdated", players:playerPublicInfo});
+    this.roomEventCallback({event:event, players:playerPublicInfo}, this.id);
   }
 
-  gameUpdated(){
-    // TODO: Notify everyone that game status updated
-     this.gameEventCallback({event:"gameUpdated", game:this.game.publicInfo()});
+  gameUpdated(event, data){
+     this.gameEventCallback({event:event, game:data}, this.id);
   }
 
   join(playerName, playerId){
@@ -70,7 +69,7 @@ class Room {
       isOnline: true
     };
     this.players.push(newPlayer);
-    this.roomUpdated();
+    this.roomUpdated("playerJoined");
     return newPlayer;
   }
 
@@ -83,7 +82,7 @@ class Room {
       return; //Maybe the player was kicked out
     }
     player.isOnline = false;
-    this.roomUpdated();
+    this.roomUpdated("playerDisconnect");
   }
 
   leave(playerId){
@@ -94,14 +93,21 @@ class Room {
     if(playerIndex>0){
       this.players.list.splice(playerIndex, 1);
     }
-    this.roomUpdated();
+    this.roomUpdated("playerLeft");
   }
 
   startGame(){
-    this.game = new mafia.Game(this.gameEventCallback);
+    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data));
     // Only online players join the game
-    let playersNames = this.players.filter(player => player.isOnline).map(player => player.name);
-    this.game.start(playersNames);
+    this.gamePlayerNames = this.players.filter(player => player.isOnline).map(player => player.name);
+    this.game.start(this.gamePlayerNames);
+  }
+
+  gameCommand(data, playerId){
+    // Find user's game number by id
+    // TODO: this is bad!!! This doesn't account for name dublicates and operates with index in the array
+    let number = this.gamePlayerNames.findIndex(name => name === this.players[playerId].name);
+    this.game.command(data, number+1);
   }
 }
 
