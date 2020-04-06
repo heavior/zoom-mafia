@@ -11,7 +11,6 @@
 // Idea: we could make our tool talk to players to voice commands
 
 // TODO: First dead becomes game master
-// TODO: implement reliable user identification
 // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
 
 /*
@@ -110,18 +109,20 @@ class MafiaGame {
   }
 
   /* External game interface, main game logic */
-  start(playersNames){
+  start(playersNames, hostId){
     //This method starts new game based on the array of player names
     let playersRoles = this.shuffle(playersNames.length); // Shuffle the roles
 
     // Generate states for everyPlayer
-    this.players = playersNames.map(function callback(element, index) {
+    this.players = playersNames.map(function callback(player, index) {
         // Return value for new_array
+        let role = playersRoles[index];
         return {
+          id: player.id,
+          name: player.name,
           number: index + 1,
-          name: element,
-          role: playersRoles[index],
-          isMaster: false,
+          role: role,
+          isMaster: role === MafiaRoles.Master || hostId === player.id,
           isMafia: this._isMafiaRole(playersRoles[index]),
           isAlive: this._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
         }
@@ -154,13 +155,13 @@ class MafiaGame {
           this.gameState = GameStates.Tie; // Front end must support this
         }
 
-        this.kill(this.votes[0][0]); // Kill a player
+        this._kill(this.votes[0][0]); // Kill a player
         this.gameState = GameStates.Night;
         break;
 
       case GameStates.Night:
         if(this.resolveVote()) {
-          this.kill(this.votes[0][0]);
+          this._kill(this.votes[0][0]);
         }
         this.gameState = GameStates.Discussion;
         break;
@@ -168,7 +169,7 @@ class MafiaGame {
       case GameStates.Tie:
         // People vote to kill both, or spare both: 0 or 1
         if(this.resolveVote() && this.votes[0][0] === 0){ // Failed vote = double tie - save both
-          this.candidates.forEach(candidate => this.kill(candidate));
+          this.candidates.forEach(candidate => this._kill(candidate));
         }
         break;
     }
@@ -180,17 +181,22 @@ class MafiaGame {
     this.startVote(); // restart the vote for the new state
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
-  command(data, playerNumber, isHost){
-    let player = this.players[playerNumber-1];
+  command(data, playerId){
+    let playerIndex = this.players.findIndex(player=>player.id === playerId);
+    if(playerIndex < 0){
+      return false;
+    }
+    let player = this.players[playerIndex];
 
     switch (data.action){
       case 'next': // {action: next} Next trigger in normal statemachine flow
-        if(isHost || player.role === MafiaRoles.Master) { // Only master can advance the game to the next step
-          this.next();
+        if(!player.isMaster) { // Only master can advance the game to the next step
+          return false;
         }
+        this.next();
         break;
       case 'vote': // {action: vote, vote: otherplayernumber}
-        this.vote(playerNumber, data.vote);
+        this.vote(playerIndex+1, data.vote);
         break;
     }
   }
@@ -212,9 +218,9 @@ class MafiaGame {
   static _playerPublicInfo(player){
 
     let publicInfo = {
-      number:player.number,
-      name:player.name,
-      isAlive:player.isAlive,
+      number: player.number,
+      name: player.name,
+      isAlive: player.isAlive,
       role:this._roleName(player.role)
     };
 
@@ -246,7 +252,13 @@ class MafiaGame {
     return cardsToPlay;
   }
 
-  kill(playerNumber){
+  kick(playerId){
+    let playerIndex = this.players.findIndex(player => player.id === playerId);
+    if(playerIndex >= 0){
+      this._kill(playerIndex+1);
+    }
+  }
+  _kill(playerNumber){
     this.players[playerNumber-1].isAlive = false;
   }
 

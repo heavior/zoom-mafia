@@ -16,17 +16,28 @@
 Note: ideally the game doesn't depend on every player connectivitiy, so game master has control over it.
 Reason: maybe we shouldn't force players to be in the UI all the time - let them focus on video while master enters their votes
 
-TODO: array of players vs object of players? Object help find people by Id
-TODO: How should the game identify players?
-TODO: later - generate some authenticator for people to rejoin as the same people
-TODO: RoomManager or RoomFactory
-TODO: Game operates with player numbers
-TODO: Make sure that joins or disconnects are broadcasted within the room
+LATER: array of players vs object of players? Object help find people by Id
+LATER: generate some authenticator for people to rejoin as the same people
 IDEA: Maybe rooms has chats and game-driven subrooms (mafia chat, etc)
 IDEA: Maybe be people can leave the room, this makes them dead in the game, but we don't want to make it too apparent
 IDEA: Later - maybe there is a time coordination for the room later
 */
 
+
+/**
+ * Room prototocol:
+ *
+ * roomCommand
+ *  {action:"create", userName, userId}, returns ("roomEvent", {event:"created", id:roomId, userId: user.id})
+ *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
+ *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
+ *
+ * roomEvent
+ *  playerJoined
+ *  playerLeft
+ *  playerDisconnect
+ *
+ */
 const mafia = require('./mafia');
 
 class Room {
@@ -39,6 +50,8 @@ class Room {
     this.players = [];
     this.roomEventCallback = roomEventCallback;
     this.gameEventCallback = gameEventCallback;
+
+    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data));
   }
 
   roomUpdated(event){
@@ -93,21 +106,18 @@ class Room {
     if(playerIndex>0){
       this.players.list.splice(playerIndex, 1);
     }
+    this.game.kick(playerId);
     this.roomUpdated("playerLeft");
   }
 
   startGame(){
-    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data));
     // Only online players join the game
-    this.gamePlayerNames = this.players.filter(player => player.isOnline).map(player => player.name);
-    this.game.start(this.gamePlayerNames);
+    let gamePlayerNames = this.players.filter(player => player.isOnline).map(player => player.name);
+    this.game.start(gamePlayerNames);
   }
 
   gameCommand(data, playerId){
-    // Find user's game number by id
-    // TODO: this is bad!!! This doesn't account for name dublicates and operates with index in the array
-    let number = this.gamePlayerNames.findIndex(name => name === this.players[playerId].name);
-    this.game.command(data, number+1);
+    this.game.command(data, playerId);
   }
 }
 
