@@ -19,8 +19,9 @@ io.on('connection', (socket) => {
   if(roomId){
     room = roomManager.findRoom(roomId);
     if(!room){
-      socket.emit("error", "Can't find the room");
+      socket.emit("message", "Can't find the room");
       socket.disconnect();
+      return;
     }
   }else{
 
