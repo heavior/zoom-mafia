@@ -135,11 +135,11 @@ class MafiaGame {
   }
   publicInfo(){
     // Whatever is publicly available
-    return{
+    return {
       gameOn: this.gameOn,
       civiliansWin: this.civiliansWin,
-      players: this.players.map(player => this._playerPublicInfo(player));
-    }
+      players: this.players.map(player => this._playerPublicInfo(player))
+    };
   }
 
   static _isMafiaRole(role){

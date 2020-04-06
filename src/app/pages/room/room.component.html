@@ -1,0 +1,11 @@
+<h1>Welcome to the lobby</h1>
+<div>
+  <h2>Send</h2>
+  <input [(ngModel)]="message" (keyup.enter)="sendMessage()"/>
+  <button (click)="sendMessage()">Send</button>
+</div>
+
+<div>
+  <h3>Messages</h3>
+  <div *ngFor="let message of messages">{{message}}</div>
+</div>
