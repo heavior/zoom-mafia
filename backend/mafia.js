@@ -98,6 +98,7 @@ class MafiaGame {
           number: index + 1,
           name: element,
           role: playersRoles[index],
+          isMaster: false,
           isMafia: this._isMafiaRole(playersRoles[index]),
           isAlive: this._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
         }
@@ -109,8 +110,16 @@ class MafiaGame {
   command(data, playerNumber){
     let player = this.players[playerNumber-1];
 
+    // Game process:
+
+    switch (data.action){
+      case 'vote'
+    }
 
     // TODO: execute commands here
+    /*
+
+     */
 
   }
 
@@ -183,7 +192,7 @@ class MafiaGame {
     }
 
     this.votes[whoVotes] = choicePlayer; // Using array to have unique vote per player
-    if(this.checkAllVoted()){
+    if(this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
     }
   }
@@ -230,6 +239,11 @@ class MafiaGame {
     return votes[0][0]; // return the first voted
   }
 
+  endGame(civiliansWin){
+     this.gameOn = false;
+     this.civiliansWin = civiliansWin;
+     this.gameEventCallback("ended", this.publicInfo());
+  }
 
   checkGameOver(){
     // Game over conditions:
@@ -241,9 +255,7 @@ class MafiaGame {
      }, 0);
 
      if(mafiaCount === 0){
-       this.gameOn = false;
-       this.civiliansWin = true;
-       this.gameEventCallback("ended", this.publicInfo());
+       this.endGame(true);
        return true;
      }
 
@@ -253,9 +265,7 @@ class MafiaGame {
 
 
      if(mafiaCount >= civilianCount){
-       this.gameOn = false;
-       this.civiliansWin = false;
-       this.gameEventCallback("ended", this.publicInfo());
+       this.endGame(false);
        return true;
      }
 
