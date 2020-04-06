@@ -126,7 +126,7 @@ io.on('connection', (socket) => {
 
   socket.on('server', (data) =>{
     switch(data.action) {
-      case 'usernameSet':
+      case 'setUserName':
         socket.broadcast.to(roomId).emit('serverStatus', `${data.username} has joined the server`);
         io.to(roomId).emit('serverStatus', `Welcome to the server ${data.username}`);
         break;
