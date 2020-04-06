@@ -25,6 +25,7 @@ From original rules:
 
 
 const MafiaRoles = Object.freeze({
+  Player: -1, // hardcoded
   Guest: 0, // No role, just sitting there
   Master: 1,
   Civilian: 2,
@@ -99,6 +100,32 @@ class MafiaGame {
         }
     });
     this.gameOn = true;
+  }
+  static _roleName(role){
+    return MafiaRoles.entries().find(role => role[1] === role)[0];
+  }
+  static _playerPublicInfo(player){
+
+    let publicInfo = {
+      number:player.number,
+      name:player.name,
+      isAlive:player.isAlive,
+      role:this._roleName(player.role)
+    };
+
+    if(this._isActiveRole(player.role)){
+      publicInfo.role = "Player";
+    }
+    return publicInfo;
+
+  }
+  publicInfo(){
+    // Whatever is publicly available
+    return{
+      gameOn: this.gameOn,
+      civiliansWin: this.civiliansWin,
+      players: this.players.map(player => this._playerPublicInfo(player));
+    }
   }
 
   static _isMafiaRole(role){

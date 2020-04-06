@@ -14,7 +14,7 @@ export class ChatService {
     this.socket = io(this.url,
       {
         query: {
-          id: 'testroomid'
+          id: ''
         }
       });
   }

@@ -31,21 +31,24 @@ const mafia = require('./mafia');
 
 class Room {
 
-  constructor(videoLink, roomId){
+  constructor(videoLink, roomId, roomEventCallback, gameEventCallback){
     // Creating the room. requires the host to put video conference link
     // The id should be provided by external code which ensures uniqueness.
     this.videoLink = videoLink;
     this.id = roomId;
     this.players = [];
+    this.roomEventCallback = roomEventCallback;
+    this.gameEventCallback = gameEventCallback;
   }
 
   roomUpdated(){
-    // TODO: Notify everyone that people in the room changed
-
+    let playerPublicInfo = this.players.map(player=>{ return {name: player.name, isOnline: player.isOnline}});
+    this.roomEventCallback({event:"roomUpdated", players:playerPublicInfo});
   }
 
   gameUpdated(){
     // TODO: Notify everyone that game status updated
+     this.gameEventCallback({event:"gameUpdated", game:this.game.publicInfo()});
   }
 
   join(playerName, playerId){
@@ -61,14 +64,14 @@ class Room {
       existingPlayer.isOnline = true;
       return;
     }
-
-    this.players.push({
+    let newPlayer = {
       name: playerName,
       id: playerId,
-      isHost: false,
       isOnline: true
-    });
+    };
+    this.players.push(newPlayer);
     this.roomUpdated();
+    return newPlayer;
   }
 
   disconnect(playerId){
