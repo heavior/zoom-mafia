@@ -8,10 +8,11 @@
 // Option: mafia doesn't talk (in original everyone has to write down "I'm civilian", or name of the player to eliminate). This way prevents cheating as no one has to close their eyes
 // Option: First dead becomes game master (downside - not everyone is a good master)
 // Option: dead see who is who
-// Option: vote is mandatory (default - yes) - implemented
 // Idea: we could make our tool talk to players to voice commands
 
+// TODO: First dead becomes game master
 // TODO: implement reliable user identification
+// TODO: Cannot do autocomplete vote for now, don't know how - figure it out
 
 /*
   Game protocol for the client:
@@ -24,17 +25,6 @@
     ended
     next
 */
-
-/*
-  mafia should have 1/3 or less of players
-  Profeccional rules: 10 people: mafiaBoss, 2x mafia, detective, 6x civilian
-
-From original rules:
-  6-7 players: two mafia
-  8-10 players: 3 mafia
-  11-13 players: 4 mafia
-  14-16 players: 5 mafia
- */
 
 const MafiaRoles = Object.freeze({
   Player: -1, // hardcoded
@@ -59,6 +49,9 @@ const MafiaRoleNames = (function swap(obj){
 })(MafiaRoles);
 
 /*
+ mafia should have 1/3 or less of players
+  Profeccional rules: 10 people: mafiaBoss, 2x mafia, detective, 6x civilian
+
   6-7 players: two mafia
   8-10 players: 3 mafia
   11-13 players: 4 mafia
@@ -116,7 +109,7 @@ class MafiaGame {
     this.gameState = GameStates.Discussion;
   }
 
-  /* External game interface */
+  /* External game interface, main game logic */
   start(playersNames){
     //This method starts new game based on the array of player names
     let playersRoles = this.shuffle(playersNames.length); // Shuffle the roles
@@ -277,7 +270,7 @@ class MafiaGame {
         let tieCounter = this.votes[0][1];
         return this.votes.filter(item => item[1] === tieCounter).map(item => item[0]);
     }
-  },
+  }
   shouldVote(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
@@ -292,12 +285,10 @@ class MafiaGame {
     3) Daytime - tie braker (kill both or not)
     4) Nighttime - mafia only - who to eliminate
      */
-    // TODO: remember and check who should be voted for in scenario 2
     this.candidates = this.checkCandidates();
     this.votes = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = false; //autoCompleteVote || mafiaOnly;
-    // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
   }
   vote(whoVotes, choicePlayer){
     if(!this.shouldVote(this.players[whoVotes-1].isAlive)){
@@ -332,16 +323,17 @@ class MafiaGame {
 
     this.votes = votedDown.entries();
 
-    if(this.votes.length == 0){
-      if(this.isVoteMandatory){
-        this.votes.push([this.whoShouldVote()[0].number,unusedVotesCounter]);
-        return true; // No one voted - their problems, someone will die!
+    if(this.votes.length === 0){
+      if(this.isVoteMandatory && this.gameState === GameStates.MainVote){
+        // No one voted - their problems, someone will die!
+        this.votes.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
+        return true;
       }
       return false; // No one voted
     }
 
     if(this.mafiaVotes && this.isMafiaVoteUnanimous){
-      if(unusedVotesCounter > 0 || votes.length > 1){
+      if(unusedVotesCounter > 0 || this.votes.length > 1){
         return false;
       }
     }
@@ -354,6 +346,7 @@ class MafiaGame {
 
     this.votes.sort(element => -element[1]); // Sort by votes in reverse order
 
+    // noinspection RedundantIfStatementJS
     if(this.votes.length > 1 && this.votes[0][1] === this.votes[1][1]){
       return false;      // It is a tie
     }
