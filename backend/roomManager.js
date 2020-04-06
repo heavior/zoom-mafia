@@ -11,7 +11,7 @@ class RoomManager {
     let roomId;
     do { // Generate ids until we have a unique one
       roomId = shortId.generate();
-    }while(!(roomId in this.rooms));
+    }while(roomId in this.rooms);
     this.rooms[roomId] = new room.Room(videoLink, roomId, roomEventCallback, gameEventCallback);
     return this.rooms[roomId];
   }
