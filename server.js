@@ -9,6 +9,28 @@ const rooms = require("./backend/roomManager");
 const roomManager = new rooms.RoomManager();
 
 
+/**
+ * General architecture:
+ * server.js handles connections and has no room or game logic
+ * RoomManager handles unique identifier and room storage
+ * Room is a log of people joining and leaving, class has no game logic and can be reused for various games
+ * Game actually handles commands and logic. Basically, only front and and game know something about how game actually works
+ *
+ * Each game defines own command protocol
+ * Rooms protocol:
+ *
+ * User can join with query parameters (roomIs, userName) or without
+ * If there are no parameters - he can only create game
+ *
+ * room protocol:
+ *
+ * roomCommand
+ *  {action:"create", userName, userId}, returns ("roomEvent", {event:"created", id:roomId, userId: user.id})
+ *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
+ *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
+ *
+ */
+
 app.use(express.static(__dirname + '/dist'));
 server.listen(process.env.PORT || 8080);
 
@@ -60,12 +82,6 @@ io.on('connection', (socket) => {
         socket.emit("roomEvent", {event:"created", id:roomId, userId: user.id});
         // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
         break;
-      case 'startGame':
-        if(!roomId){
-          return; // Cannot create new room from here
-        }
-        room.startGame();
-        break;
       case 'join': // alternative join method
         if(!roomId){
           return; // Cannot create new room from here
@@ -73,6 +89,12 @@ io.on('connection', (socket) => {
         socket.join(data.roomId);
         user = room.join(data.userName, data.userId);
         socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
+        break;
+      case 'startGame':
+        if(!roomId){
+          return; // Cannot create new room from here
+        }
+        room.startGame();
         break;
     }
   });
