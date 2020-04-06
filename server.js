@@ -47,8 +47,19 @@ io.on('connection', (socket) => {
         let user = room.join(data.userName, data.userId);
 
         socket.join(roomId);
-        socket.emit("roomEvent", {event:"roomCreated", id:roomId, userId: user.id});
+        socket.emit("roomEvent", {event:"created", id:roomId, userId: user.id});
         break;
+    }
+  });
+
+
+  socket.on('gameCommand', (data) =>{
+    if(!roomId){
+      return; // No game commands without rooms!
+    }
+    switch(data.action) {
+      case 'start':
+        room.startGame();
     }
   });
 

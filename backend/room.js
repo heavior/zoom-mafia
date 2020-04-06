@@ -98,11 +98,10 @@ class Room {
   }
 
   startGame(){
-    this.game = new mafia.Game();
+    this.game = new mafia.Game(this.gameEventCallback);
     // Only online players join the game
     let playersNames = this.players.filter(player => player.isOnline).map(player => player.name);
     this.game.start(playersNames);
-    this.gameUpdated();
   }
 }
 

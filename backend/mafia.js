@@ -75,11 +75,14 @@ const CardsDeck = [
     ];
 
 class MafiaGame {
-  constructor(isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
+  constructor(gameEventCallback,
+              isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
               isMafiaVoteUnanimous = false) // Should mafia vote by unanimous (professional rules)
   {
     this.isVoteMandatory = isVoteMandatory;
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
+
+    this.gameEventCallback = gameEventCallback;
     this.gameOn = false;
     this.civiliansWin = false;
   }
@@ -100,6 +103,7 @@ class MafiaGame {
         }
     });
     this.gameOn = true;
+    this.gameEventCallback("gameStarted", this.publicInfo());
   }
   static _roleName(role){
     return MafiaRoles.entries().find(role => role[1] === role)[0];
