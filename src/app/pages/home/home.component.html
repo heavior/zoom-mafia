@@ -1,1 +1,18 @@
 <h1>Welcome</h1>
+<div *ngIf="!ready else showChat">
+  <h2>Set Username</h2>
+  <input [(ngModel)]="username" />
+  <button (click)="setUsername()">Set Name</button>
+</div>
+<ng-template #showChat>
+  <div>
+    <h2>Send</h2>
+    <input [(ngModel)]="message" (keyup.enter)="sendMessage()"/>
+    <button (click)="sendMessage()">Send</button>
+  </div>
+
+  <div>
+    <h3>Messages</h3>
+    <div *ngFor="let message of messages">{{message}}</div>
+  </div>
+</ng-template>
