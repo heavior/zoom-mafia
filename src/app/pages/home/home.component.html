@@ -1,18 +1,25 @@
-<h1>Welcome</h1>
-<div *ngIf="!ready else showChat">
-  <h2>Set Username</h2>
-  <input [(ngModel)]="username" />
-  <button (click)="setUsername()">Set Name</button>
-</div>
-<ng-template #showChat>
-  <div>
-    <h2>Send</h2>
-    <input [(ngModel)]="message" (keyup.enter)="sendMessage()"/>
-    <button (click)="sendMessage()">Send</button>
-  </div>
+<div class="card" [style.width]="'50vw'">
+  <div class="card-header">Welcome To Mafia</div>
+  <div class="card-body">
+    <h5 class="card-title text-center">About</h5>
+    <p class="card-text">Basic info blurb</p>
 
-  <div>
-    <h3>Messages</h3>
-    <div *ngFor="let message of messages">{{message}}</div>
+    <div *ngIf="!ready else makeRoom" class="form-group">
+      <label for="username">Username</label>
+      <input id="username" class="form-control" [(ngModel)]="userName" required />
+      <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
+      <div class="mt-3 d-flex justify-content-center">
+        <button class="btn btn-primary" (click)="setUsername()">Set Name</button>
+      </div>
+    </div>
+
+    <ng-template #makeRoom>
+      <label for="username">Video link</label>
+      <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
+      <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
+      <div class="mt-3 d-flex justify-content-center">
+        <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
+      </div>
+    </ng-template>
   </div>
-</ng-template>
+</div>
