@@ -23,7 +23,6 @@ From original rules:
   14-16 players: 5 mafia
  */
 
-
 const MafiaRoles = Object.freeze({
   Player: -1, // hardcoded
   Guest: 0, // No role, just sitting there
@@ -37,6 +36,14 @@ const MafiaRoles = Object.freeze({
   Executioner: 8 // Later
 });
 
+// Inverted object to map names vs numbers
+const MafiaRoleNames = (function swap(obj){
+  let ret = {};
+  for(let key in obj){
+    ret[obj[key]] = key;
+  }
+  return ret;
+})(MafiaRoles);
 
 /*
   6-7 players: two mafia
@@ -74,6 +81,14 @@ const CardsDeck = [
       MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest
     ];
 
+const GameStates = Object.freeze({
+  Discussion: 'Discussion', // Day - main conversation between players and nominating candidates
+  MainVote: 'MainVote',     // Day - vote for guilty party
+  Night: 'Night',           // Night - mafia votes
+  Tie: 'Tie'                // Day - a tie during vote process
+});
+
+
 class MafiaGame {
   constructor(gameEventCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
@@ -85,7 +100,9 @@ class MafiaGame {
     this.gameEventCallback = gameEventCallback;
     this.gameOn = false;
     this.civiliansWin = false;
+    this.gameState = GameStates.Discussion;
   }
+
   start(playersNames){
     //This method starts new game based on the array of player names
 
@@ -104,20 +121,64 @@ class MafiaGame {
         }
     });
     this.gameOn = true;
+    this.gameState = GameStates.Discussion;
     this.gameEventCallback("started", this.publicInfo());
+  }
+
+  next(){
+    // This function implements main game process:
+    /*
+      A: Day starts, voting for suspects starts, but doesn't end
+      B: (Trigger or everyone voted) -> Voting for suspects ends, voting for guilty starts
+      C: (Trigger or everyone voted) -> Trigger or automatically Voting for guilty ends, someone dies, night starts, mafia vote starts
+      D: (Everyone voted) -> Mafia vote ends, someone dies, day starts -> A
+     */
+
+    switch(this.gameState){
+      case GameStates.Discussion:
+        this.resolveVote(); // Count vote outcome
+        this.gameState = GameStates.MainVote;
+        break;
+
+      case GameStates.MainVote:
+        if(!this.resolveVote()){
+          if(!this.votes.length){ // Edge case - no one voted at all
+            break; // Keep the state, sestart the vote
+          }
+          // tie breaker
+          this.gameState = GameStates.Tie; // Front end must support this
+        }
+
+        this.kill(this.votes[0][0]); // Kill a player
+        this.gameState = GameStates.Night;
+        break;
+
+      case GameStates.Night:
+        if(this.resolveVote()) {
+          this.kill(this.votes[0][0]);
+        }
+        this.gameState = GameStates.Discussion;
+        break;
+
+      case GameStates.Tie:
+        // People vote to kill both, or spare both: 0 or 1
+        if(this.resolveVote() && this.votes[0][0] === 0){ // Failed vote = double tie - save both
+          this.candidates.forEach(candidate => this.kill(candidate));
+        }
+        break;
+    }
+
+    this.startVote(); // restart the vote for the new state
+    this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
 
   command(data, playerNumber){
     let player = this.players[playerNumber-1];
 
-    // Game process:
-    /*
-      // day starts
-      // People talk and vote for suspects
-      //
-     */
-
     switch (data.action){
+      case 'next': // Next trigger in normal statemachine flow
+        this.next();
+        break;
       case 'vote':
         break;
     }
@@ -131,7 +192,7 @@ class MafiaGame {
 
 
   static _roleName(role){
-    return MafiaRoles.entries().find(role => role[1] === role)[0];
+    return MafiaRoleNames[role];
   }
   static _playerPublicInfo(player){
 
@@ -143,7 +204,9 @@ class MafiaGame {
     };
 
     if(this._isActiveRole(player.role)){
-      publicInfo.role = "Player";
+      publicInfo.role = this._roleName(MafiaRoles.Player);
+      // A bit stupid transformation,
+      // but it is more or less clear what happens
     }
     return publicInfo;
 
@@ -153,6 +216,8 @@ class MafiaGame {
     return {
       gameOn: this.gameOn,
       civiliansWin: this.civiliansWin,
+      gameState: this.gameState,
+      candidates: this.candidates,
       players: this.players.map(player => this._playerPublicInfo(player))
     };
   }
@@ -161,7 +226,7 @@ class MafiaGame {
     return (role === MafiaRoles.Mafia) || (role === MafiaRoles.Don);
   }
   static _isActiveRole(role){
-    return role > 1;
+    return !((role === MafiaRoles.Guest) || (role === MafiaRoles.Master));
   }
 
   static _shuffle(numberOfCards){
@@ -177,22 +242,44 @@ class MafiaGame {
     return false;
   }
 
+  /* Vote logic starts */
+  _checkcandidates(gameState){
+    gameState = gameState || this.gameState;
+    // Calculate vote candidates based on for the state
+    switch(gameState){
+      case GameStates.Discussion:
+      case GameStates.Night: // Note: mafia can vote to kill one of their own
+        return this.players.filter(player => player.isAlive).map(player => player.number);
 
-  startVote(mafiaOnly, autoCompleteVote){
-    /* There are three votes in the game:
+      case GameStates.MainVote:
+        if(!this.votes.length){
+          return this.players.filter(player => player.isAlive).map(player => player.number);
+        }
+        return this.votes.map(vote => vote[0]);
+
+      case GameStates.Tie:
+        // if tie happens - people vote to kill all or spare all
+        let tieCounter = this.votes[0][1];
+        return this.votes.filter(item => item[1] === tieCounter).map(item => item[0]);
+    }
+  },
+  startVote(){
+    /* Votes in the game:
     1) Daytime - who are suspects (who shall we nominate for killing)
     2) Daytime - who is guilty (who shall be killed)
-    3) Nighttime - mafia only - who to eliminate
+    3) Daytime - tie braker (kill both or not)
+    4) Nighttime - mafia only - who to eliminate
      */
     // TODO: remember and check who should be voted for in scenario 2
+    this.candidates = this._checkcandidates();
     this.votes = {};
-    this.mafiaVotes = mafiaOnly;
-    this.autoCompleteVote = autoCompleteVote || mafiaOnly;
+    this.mafiaVotes = this.gameState === GameStates.Night;
+    this.autoCompleteVote = false; //autoCompleteVote || mafiaOnly;
+    // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
   }
   shouldVote(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
-
   vote(whoVotes, choicePlayer){
     if(!this.shouldVote(this.players[whoVotes-1].isAlive)){
       return; //This vote doesn't count
@@ -203,19 +290,19 @@ class MafiaGame {
       this.resolveVote();
     }
   }
-  showShouldVote(){
+  whoShouldVote(){
     return this.players.filter(player => this.shouldVote(player));
   }
   checkAllVoted(){
     // For automatic vote resolve - once everyone votes
-    return !this.showShouldVote().some(player => !this.votes[player.number]);
+    return !this.whoShouldVote().some(player => !this.votes[player.number]);
   }
   resolveVote(){
     // Didn't vote - vote goes to the first of the list
     let unusedVotesCounter = 0;
 
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
-      unusedVotesCounter = this.showShouldVote().find(player => !this.votes[player.number]).length;
+      unusedVotesCounter = this.whoShouldVote().find(player => !this.votes[player.number]).length;
     }
 
     // Count votes
@@ -227,7 +314,15 @@ class MafiaGame {
       votedDown[vote] ++;
     });
 
-    let votes = votedDown.entries();
+    this.votes = votedDown.entries();
+
+    if(this.votes.length == 0){
+      if(this.isVoteMandatory){
+        this.votes.push([this.whoShouldVote()[0].number,unusedVotesCounter]);
+        return true; // No one voted - their problems, someone will die!
+      }
+      return false; // No one voted
+    }
 
     if(this.mafiaVotes && this.isMafiaVoteUnanimous){
       if(unusedVotesCounter > 0 || votes.length > 1){
@@ -237,14 +332,19 @@ class MafiaGame {
 
     if(this.isVoteMandatory && !this.mafiaVotes){
       // Add all unused votes to the smallest player number
-      votes.sort(element => element[0]);
-      votes[0][1] += unusedVotesCounter;
+      this.votes.sort(element => element[0]);
+      this.votes[0][1] += unusedVotesCounter;
     }
 
-    votes.sort(element => -element[1]); // Sort by votes in reverse order
-    return votes[0][0]; // return the first voted
-  }
+    this.votes.sort(element => -element[1]); // Sort by votes in reverse order
 
+    if(this.votes.length > 1 && this.votes[0][1] === this.votes[1][1]){
+      return false;      // It is a tie
+    }
+
+    return true;
+  }
+  /* /Vote logic ends  */
 
 
   endGame(civiliansWin){
@@ -282,6 +382,5 @@ class MafiaGame {
 }
 
 exports.Game = MafiaGame;
-exports.Roles = MafiaRoles;
 
 
