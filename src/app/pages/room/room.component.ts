@@ -8,7 +8,7 @@ import { ChatService } from "../../services/chat.service";
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  message: string;
+  newMessage: string;
   messages: string[];
   receiverSubject: Subscription;
 
@@ -22,9 +22,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   sendMessage() {
-    this.chatService.sendMessage(this.message);
-    this.messages.push(`${this.chatService.userName}: ${this.message}`);
-    this.message = '';
+    this.chatService.sendMessage(this.newMessage);
+    this.newMessage = '';
   }
 
   ngOnDestroy(): void {
