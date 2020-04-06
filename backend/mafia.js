@@ -10,7 +10,20 @@
 // Option: dead see who is who
 // Option: vote is mandatory (default - yes) - implemented
 // Idea: we could make our tool talk to players to voice commands
-// TODO: implement day-night state
+
+// TODO: implement reliable user identification
+
+/*
+  Game protocol for the client:
+  GameAction:
+    {action:next} (host only)
+    {action:vote, vote: number} (any player)
+
+  GameEvent: (always contains current game info)
+    started
+    ended
+    next
+*/
 
 /*
   mafia should have 1/3 or less of players
@@ -168,26 +181,28 @@ class MafiaGame {
         break;
     }
 
+    if(this.checkGameOver()){
+      this.gameEventCallback("ended", this.publicInfo()); // inform all players about game over
+      return;
+    }
+
     this.startVote(); // restart the vote for the new state
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
 
-  command(data, playerNumber){
+  command(data, playerNumber, isHost){
     let player = this.players[playerNumber-1];
 
     switch (data.action){
-      case 'next': // Next trigger in normal statemachine flow
-        this.next();
+      case 'next': // {action: next} Next trigger in normal statemachine flow
+        if(isHost || player.role === MafiaRoles.Master) { // Only master can advance the game to the next step
+          this.next();
+        }
         break;
-      case 'vote':
+      case 'vote': // {action: vote, vote: otherplayernumber}
+        this.vote(playerNumber, data.vote);
         break;
     }
-
-    // TODO: execute commands here
-    /*
-
-     */
-
   }
 
 
@@ -238,7 +253,6 @@ class MafiaGame {
 
   kill(playerNumber){
     this.players[playerNumber-1].isAlive = false;
-    this.checkGameOver(); // Check if game is over with every kill
     return false;
   }
 
