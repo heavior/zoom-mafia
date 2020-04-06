@@ -113,7 +113,8 @@ class MafiaGame {
     // Game process:
 
     switch (data.action){
-      case 'vote'
+      case 'vote':
+        break;
     }
 
     // TODO: execute commands here
@@ -172,7 +173,7 @@ class MafiaGame {
   }
 
 
-  startVote(mafiaOnly){
+  startVote(mafiaOnly, autoCompleteVote){
     /* There are three votes in the game:
     1) Daytime - who are suspects (who shall we nominate for killing)
     2) Daytime - who is guilty (who shall be killed)
@@ -181,6 +182,7 @@ class MafiaGame {
     // TODO: remember and check who should be voted for in scenario 2
     this.votes = {};
     this.mafiaVotes = mafiaOnly;
+    this.autoCompleteVote = autoCompleteVote || mafiaOnly;
   }
   shouldVote(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
@@ -192,7 +194,7 @@ class MafiaGame {
     }
 
     this.votes[whoVotes] = choicePlayer; // Using array to have unique vote per player
-    if(this.checkAllVoted()){ // Important: do not resolve suspects vote
+    if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
     }
   }
@@ -210,7 +212,6 @@ class MafiaGame {
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
       unusedVotesCounter = this.showShouldVote().find(player => !this.votes[player.number]).length;
     }
-
 
     // Count votes
     let votedDown = {};
@@ -238,6 +239,8 @@ class MafiaGame {
     votes.sort(element => -element[1]); // Sort by votes in reverse order
     return votes[0][0]; // return the first voted
   }
+
+
 
   endGame(civiliansWin){
      this.gameOn = false;
