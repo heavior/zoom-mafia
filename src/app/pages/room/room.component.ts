@@ -43,7 +43,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   vote() {
-    this.chatService.vote();
+    this.chatService.vote(parseInt(this.newMessage));
+    this.newMessage = '';
   }
 
   ngOnDestroy(): void {
