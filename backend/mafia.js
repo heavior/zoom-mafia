@@ -11,7 +11,6 @@
 // Idea: we could make our tool talk to players to voice commands
 
 // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
-// TODO: Implement timer-based transition during vote
 /*
   Game protocol for the client:
   GameAction:
@@ -27,6 +26,8 @@
       'you' represents current player information and everything he is allowed to know about the game
     {event: "gameOver", data:{you:...}}
 */
+
+const TIMER_LATENCY = 1000; // One second we add to every timer to cover latency issues. Basically timer should end strictly after user sees 0 on his screen
 
 const MafiaRoles = Object.freeze({
   Player: -1, // hardcoded
@@ -101,7 +102,11 @@ class MafiaGame {
   constructor(gameEventCallback,
               directMessageCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
-              isMafiaVoteUnanimous = false) // Should mafia vote by unanimous (professional rules)
+              isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
+              discussionTimeout = 0, // Discussion phase - no time limit
+              mainVoteTimeout = 30,  // 30 seconds to let them vote during day
+              nightTimetout = 60      // 60 seconds night time
+              )
   {
     this.isVoteMandatory = isVoteMandatory;
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
@@ -111,6 +116,10 @@ class MafiaGame {
     this.gameOn = false;
     this.civiliansWin = false;
     this.gameState = GameStates.Discussion;
+
+    this.discussionTimeout = discussionTimeout;
+    this.mainVoteTimeout = mainVoteTimeout;
+    this.nightTimetout = nightTimetout;
   }
 
   /* External game interface, main game logic */
@@ -134,13 +143,11 @@ class MafiaGame {
     });
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
-    this.gameEventCallback("started", this.publicInfo());
 
+    let gameInfo = this.publicInfo();
     this.players.forEach(player => {
-      this._playerUpdate(player);
+      this._playerUpdate(player, gameInfo);
     });
-
-
   }
   next(){
     // This function implements main game process:
@@ -150,11 +157,12 @@ class MafiaGame {
       C: (Trigger or everyone voted) -> Trigger or automatically Voting for guilty ends, someone dies, night starts, mafia vote starts
       D: (Everyone voted) -> Mafia vote ends, someone dies, day starts -> A
      */
-
+    let timeout = 0;
     switch(this.gameState){
       case GameStates.Discussion:
         this.resolveVote(); // Count vote outcome
         this.gameState = GameStates.MainVote;
+        timeout = this.mainVoteTimeout;
         break;
 
       case GameStates.MainVote:
@@ -164,10 +172,12 @@ class MafiaGame {
           }
           // tie breaker
           this.gameState = GameStates.Tie; // Front end must support this
+          timeout = this.mainVoteTimeout;
         }
 
         this._kill(this.votes[0][0]); // Kill a player
         this.gameState = GameStates.Night;
+        timeout = this.nightTimetout;
         break;
 
       case GameStates.Night:
@@ -175,6 +185,7 @@ class MafiaGame {
           this._kill(this.votes[0][0]);
         }
         this.gameState = GameStates.Discussion;
+        timeout = this.discussionTimeout;
         break;
 
       case GameStates.Tie:
@@ -182,15 +193,39 @@ class MafiaGame {
         if(this.resolveVote() && this.votes[0][0] === 0){ // Failed vote = double tie - save both
           this.candidates.forEach(candidate => this._kill(candidate));
         }
+
+        this.gameState = GameStates.Night;
+        timeout = this.nightTimetout;
         break;
     }
 
     if(this.checkGameOver()){
       return;
     }
-
     this.startVote(); // restart the vote for the new state
+    this.startTimer(timeout);
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
+  }
+  startTimer(timeout){
+    if(this.timer){ // Stop old timer
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+
+    if(!timeout) {
+      return;
+    }
+    this.timerStarted = Date.now();
+    this.timerDuration = timeout*1000;
+    this.timer = setTimeout(()=>{
+      this.next(); // Always forces to the next step
+    }, timeout*1000 + TIMER_LATENCY);
+  }
+  timeLeft(){
+    if(this.timer){
+      return null;
+    }
+    return Math.floor((this.timerDuration + this.timerStarted - Date.now())/1000);
   }
   command(data, playerId, isHost){
     let playerIndex = this.getPlayerIndex(playerId);
@@ -243,9 +278,10 @@ class MafiaGame {
     return this.players.findIndex(player=>player.id === playerId);
   }
 
-  _playerUpdate(player){
+  _playerUpdate(player, publicInfo){
+    // publicInfo introduced here for optimization
     this.directMessageCallback(player.id, "gameStatus", {
-      "game": this.publicInfo(),
+      "game": publicInfo || this.publicInfo(),
       "you": this._playerPrivateInfo(player)
     });
   }
@@ -297,6 +333,7 @@ class MafiaGame {
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
       candidates: this.candidates,
+      countdown: this.timeLeft(),
       players: this.players.map(player => this._playerPublicInfo(player))
     };
   }
