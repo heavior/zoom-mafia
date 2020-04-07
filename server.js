@@ -45,13 +45,14 @@ app.use(express.static(__dirname + '/dist'));
 server.listen(process.env.PORT || 8080);
 
 function joinRoom(socket, roomId, userName, userId){
+  console.log("joinRoom", roomId, userName, userId);
   let room = roomManager.findRoom(roomId);
 
   if(!room){
     console.warn("Can't find the room " + roomId);
     socket.emit("message", "Can't find the room " + roomId);
     socket.disconnect();
-    return;
+    return null;
   }
 
   socket.join(roomId);
@@ -74,27 +75,19 @@ io.on('connection', (socket) => {
   let user;
 
   if(roomId){
-    joinRoom(socket, roomId, socket.handshake.query.userName, socket.handshake.query.userId);
-    room = roomManager.findRoom(roomId);
-
-    if(!room){
-      console.warn("Can't find the room " + roomId);
-      socket.emit("message", "Can't find the room " + roomId);
-      socket.disconnect();
+    let result = joinRoom(socket, roomId, socket.handshake.query.userName, socket.handshake.query.userId);
+    if(!result){
       return;
     }
-
-    socket.join(roomId);
-    user = room.join(socket.handshake.query.userName, socket.handshake.query.userId);
-    socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
-  }else{
-
+    room = result.room;
+    user = result.user;
   }
 
   // roomCommands interact with roomManager and room
   // TODO: move them inside the room and manager for unification
   socket.on('roomCommand', (data) =>{
-    console.debug("roomCommand " + data.action);
+    console.debug("roomCommand " + JSON.stringify(data, null, 2));
+
     switch(data.action) {
       case 'create':
         // expects data.videoLink, data.userName, data.userId
@@ -131,7 +124,12 @@ io.on('connection', (socket) => {
         }
         roomId = data.roomId;
 
-        joinRoom(socket, roomId, data.userName, data.userId);
+        let result = joinRoom(socket, roomId, data.userName, data.userId);
+        if(!result){
+          return;
+        }
+        room = result.room;
+        user = result.user;
         break;
       case 'startGame':
         if(!roomId){
@@ -152,6 +150,11 @@ io.on('connection', (socket) => {
     if(!roomId){
       console.warn("No room to send game command to");
       socket.emit("message", "You are not in the room");
+      return; // No game commands without rooms!
+    }
+    if(!room){
+      console.error("No room created");
+      socket.emit("message", "No room created");
       return; // No game commands without rooms!
     }
     room.gameCommand(data, user.id);

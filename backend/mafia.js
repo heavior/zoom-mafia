@@ -10,7 +10,10 @@
 // Option: dead see who is who
 // Idea: we could make our tool talk to players to voice commands
 
-// TODO: Cannot do autocomplete vote for now, don't know how - figure it out
+// TODO: Autocomplete vote when everyone voted - option
+// TODO: Make civilians vote - option
+
+
 /*
   Game protocol for the client:
   GameAction:
@@ -105,7 +108,8 @@ class MafiaGame {
               isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
               discussionTimeout = 0, // Discussion phase - no time limit
               mainVoteTimeout = 30,  // 30 seconds to let them vote during day
-              nightTimetout = 60      // 60 seconds night time
+              nightTimetout = 60,      // 60 seconds night time
+              expectCivilianVoteAtNight = true // Force civilians to vote somehow to enable open-eye game
               )
   {
     this.isVoteMandatory = isVoteMandatory;
@@ -123,12 +127,12 @@ class MafiaGame {
   }
 
   /* External game interface, main game logic */
-  start(playersNames){
+  start(players){
     //This method starts new game based on the array of player names
-    let playersRoles = MafiaGame.shuffle(playersNames.length); // Shuffle the roles
+    let playersRoles = MafiaGame.shuffle(players.length); // Shuffle the roles
 
     // Generate states for everyPlayer
-    this.players = playersNames.map(function callback(player, index) {
+    this.players = players.map((player, index) => {
         // Return value for new_array
         let role = playersRoles[index];
         return {
@@ -137,8 +141,9 @@ class MafiaGame {
           number: index + 1,
           role: role,
           //isMaster: role === MafiaRoles.Master || hostId === player.id,
-          isMafia: MafiaGame._isMafiaRole(playersRoles[index]),
-          isAlive: MafiaGame._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
+          //isMaster: role === MafiaRoles.Master || hostId === player.id,
+          isMafia: MafiaGame._isMafiaRole(role),
+          isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
         }
     });
     this.gameOn = true;

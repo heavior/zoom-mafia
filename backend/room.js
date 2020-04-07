@@ -163,8 +163,8 @@ class Room {
 
   startGame(){
     // Only online players join the game
-    let gamePlayerNames = this.players.filter(player => player.isOnline).map(player => player.name);
-    this.game.start(gamePlayerNames);
+    let onlinePlayers = this.players.filter(player => player.isOnline);
+    this.game.start(onlinePlayers);
   }
 
   gameCommand(data, playerId){
