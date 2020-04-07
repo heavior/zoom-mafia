@@ -40,5 +40,9 @@ export class HomeComponent implements OnInit {
     this.chatService.userName = this.userName;
     this.chatService.videoLink = this.videoLink;
   }
+  setUsernameAndJoin() {
+    this.setUsername();
+    this.joinRoom();
+  }
 
 }

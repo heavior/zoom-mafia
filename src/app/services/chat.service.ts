@@ -22,14 +22,13 @@ export class ChatService {
         case 'created':
         case 'joined':
           this.data.roomId = data.id;
-          this.roomLink = `${this.document.location.origin}?id=${data.id}`;
+          this.roomLink = `${this.document.location.origin}/${data.id}`;
           return this.router.navigate(['room']);
         default:
           return;
       }
     });
-    // @ts-ignore
-    this.data.roomId = this.route.queryParams.value.id || '';
+    this.data.roomId = this.router.url.replace('/', '');
   }
 
   createRoom() {

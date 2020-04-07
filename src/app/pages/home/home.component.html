@@ -9,22 +9,20 @@
       <input id="username" class="form-control" [(ngModel)]="userName" required />
       <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
       <div class="mt-3 d-flex justify-content-center">
-        <button class="btn btn-primary" (click)="setUsername()">Set Name</button>
+        <button *ngIf="!joining else join" class="btn btn-primary" (click)="setUsername()">Set Name</button>
+        <ng-template #join>
+          <button class="btn btn-primary" (click)="setUsernameAndJoin()">Join Room</button>
+        </ng-template>
       </div>
     </div>
 
     <ng-template #makeRoom>
-      <ng-container *ngIf="!joining else join">
-        <label for="videoLink">Video link</label>
-        <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
-        <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
-        <div class="mt-3 d-flex justify-content-center">
-          <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
-        </div>
-      </ng-container>
-      <ng-template #join>
-        <button class="btn btn-primary" (click)="joinRoom()">Join Room</button>
-      </ng-template>
+      <label for="videoLink">Video link</label>
+      <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
+      <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
+      <div class="mt-3 d-flex justify-content-center">
+        <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
+      </div>
     </ng-template>
   </div>
 </div>
