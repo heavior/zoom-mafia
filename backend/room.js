@@ -106,19 +106,16 @@ class Room {
   }
 
   findNewHost(){
-    if(this.host){
-      let host = this.getPlayer(this.host.id);
-      if(host && host.isOnline){
-        return; // Nothing to do, host is online
-      }
+    if(this.host && this.host.isOnline){
+      return; // Nothing to do, host is online
     }
 
     let nextOnline = this.players.find(player => player.isOnline);
     if(nextOnline){
       this.host = nextOnline;
       this.roomUpdated("hostChanged");
-
       this.directMessageCallback(this.host.id, "roomDirectEvent", {event:"youAreTheHost"});
+      return;
     }
     this.host = null; // no online players - game has no host, so next joining the game will be host
   }
