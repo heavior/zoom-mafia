@@ -18,17 +18,19 @@ export class ChatService {
               private route: ActivatedRoute,
               private router: Router) {
     this.socket = io(this.url);
-    this.data.roomId = this.router.url.replace('/', '');
+    // @ts-ignore
+    this.data.roomId = this.route.queryParams.value.id || '';
     this.init();
   }
 
   private init() {
     this.socket.on('roomEvent', (data) => {
+      console.log(data);
       switch(data.event) {
         case 'created':
         case 'joined':
           this.data.roomId = data.id;
-          this.roomLink = `${this.document.location.origin}/${data.id}`;
+          this.roomLink = `${this.document.location.origin}?id=${data.id}`;
           return this.router.navigate(['room']);
         case 'start':
         case 'discussion':
@@ -52,6 +54,10 @@ export class ChatService {
     this.socket.emit('roomCommand', data);
   }
 
+  next() {
+    this.socket.emit('gameCommand', {action: 'next'});
+  }
+
   receiveMessages() {
     return new Observable((observer) => {
       this.socket.on('message', (data) => {
@@ -69,6 +75,10 @@ export class ChatService {
 
   startGame() {
     this.socket.emit('roomCommand', { action: 'startGame'});
+  }
+
+  vote() {
+    this.socket.emit('gameCommand', {action: 'vote'});
   }
 
   get roomId() {

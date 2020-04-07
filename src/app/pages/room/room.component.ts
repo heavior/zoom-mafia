@@ -20,6 +20,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messages = [];
     this.gameSubject = this.chatService.gameState.subscribe((state) => {
+      console.log(state);
       this.state = state;
     });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
@@ -28,7 +29,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.roomLink = this.chatService.roomLink;
   }
 
-  next() {}
+  next() {
+    this.chatService.next();
+  }
 
   sendMessage() {
     this.chatService.sendMessage(this.newMessage);
@@ -37,6 +40,10 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   startGame() {
     this.chatService.startGame();
+  }
+
+  vote() {
+    this.chatService.vote();
   }
 
   ngOnDestroy(): void {
