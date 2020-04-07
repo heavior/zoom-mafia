@@ -40,6 +40,8 @@ IDEA: Later - maybe there is a time coordination for the room later
  */
 const mafia = require('./mafia');
 
+const HOST_RECONNECT_TIMEOUT = 30*1000; // How much time do we give host to reconnect
+
 class Room {
 
   constructor(videoLink, roomId, roomEventCallback, gameEventCallback){
@@ -48,6 +50,7 @@ class Room {
     this.videoLink = videoLink;
     this.id = roomId;
     this.players = [];
+    this.hostId = null;
     this.roomEventCallback = roomEventCallback;
     this.gameEventCallback = gameEventCallback;
 
@@ -56,7 +59,11 @@ class Room {
 
   roomUpdated(event){
     let playerPublicInfo = this.players.map(player=>{ return {name: player.name, isOnline: player.isOnline}});
-    this.roomEventCallback({event:event, players:playerPublicInfo}, this.id);
+    this.roomEventCallback({
+      event: event,
+      host: this.host && this.host.name,
+      players: playerPublicInfo
+    }, this.id);
   }
 
   gameUpdated(event, data){
@@ -67,11 +74,12 @@ class Room {
     if(!playerId){ // For now use name as guest authenticator
       playerId = playerName;
     }
+    if(!this.hostId){ // Assign first host, but we don't notify anyone, because this is the only player
+      this.hostId = playerId;
+    }
 
     // Check for rejoin
-    let existingPlayer = this.players.find(function(element){
-      return element.id === playerId;
-    });
+    let existingPlayer = this.getPlayer(playerId);
     if(existingPlayer){
       existingPlayer.isOnline = true;
       return;
@@ -86,28 +94,58 @@ class Room {
     return newPlayer;
   }
 
-  disconnect(playerId){
-    // Connection with player lost
-    let player = this.players.find(function(element){
+  findNewHost(){
+    if(this.host){
+      let host = this.getPlayer(this.host.id);
+      if(host && host.isOnline){
+        return; // Nothing to do, host is online
+      }
+    }
+
+    let nextOnline = this.players.find(player => player.isOnline);
+    if(nextOnline){
+      this.host = nextOnline;
+      this.roomUpdated("hostChanged");
+    }
+    this.host = null; // no online players - game has no host, so next joining the game will be host
+  }
+  getPlayer(playerId){
+    return this.players.find(function(element){
       return element.id === playerId;
     });
+  }
+  getPlayerIndex(playerId){
+    return this.players.findIndex(function(element){
+      return element.id === playerId;
+    });
+  }
+  disconnect(playerId){
+    // Connection with player lost
+    let player = this.getPlayer();
     if(!player){
       return; //Maybe the player was kicked out
     }
     player.isOnline = false;
     this.roomUpdated("playerDisconnect");
+
+    if(this.host && this.host.id === playerId){
+      setTimeout(() => this.findNewHost(), HOST_RECONNECT_TIMEOUT); // Start timer to find new host
+    }
   }
 
   leave(playerId){
     // Guest left the room, or was kicked out - remove them from the list of players
-    let playerIndex = this.players.findIndex(function(element){
-      return element.id === playerId;
-    });
+    let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex>0){
       this.players.list.splice(playerIndex, 1);
     }
     this.game.kick(playerId);
     this.roomUpdated("playerLeft");
+
+    if(this.host && playerId === this.host.id){ // Host left the game
+      this.host = null;
+      this.findNewHost();
+    }
   }
 
   startGame(){
@@ -117,7 +155,7 @@ class Room {
   }
 
   gameCommand(data, playerId){
-    this.game.command(data, playerId);
+    this.game.command(data, playerId, this.host && (playerId === this.host.id));
   }
 }
 

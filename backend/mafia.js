@@ -10,9 +10,8 @@
 // Option: dead see who is who
 // Idea: we could make our tool talk to players to voice commands
 
-// TODO: First dead becomes game master
 // TODO: Cannot do autocomplete vote for now, don't know how - figure it out
-
+// TODO: Implement timer-based transition during vote
 /*
   Game protocol for the client:
   GameAction:
@@ -75,7 +74,7 @@ const CardsDeck = [
       MafiaRoles.Mafia,     // 14 players
       MafiaRoles.Civilian,  // 15 players
       MafiaRoles.Civilian,  // 16 players
-      MafiaRoles.Master,      // 17 players - too much, someone gets to be a game master
+      // MafiaRoles.Master,      // 17 players - too much, someone gets to be a game master. Master is disabled for now
 
       // Now, here I'm too lazy to think, so I just add a bunch of guests here:
       MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest, MafiaRoles.Guest,
@@ -122,7 +121,7 @@ class MafiaGame {
           name: player.name,
           number: index + 1,
           role: role,
-          isMaster: role === MafiaRoles.Master || hostId === player.id,
+          //isMaster: role === MafiaRoles.Master || hostId === player.id,
           isMafia: this._isMafiaRole(playersRoles[index]),
           isAlive: this._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
         }
@@ -181,16 +180,19 @@ class MafiaGame {
     this.startVote(); // restart the vote for the new state
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
-  command(data, playerId){
-    let playerIndex = this.players.findIndex(player=>player.id === playerId);
+  getPlayerIndex(playerId){
+    return this.players.findIndex(player=>player.id === playerId);
+  }
+  command(data, playerId, isHost){
+    let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
       return false;
     }
-    let player = this.players[playerIndex];
+    //let player = this.players[playerIndex];
 
     switch (data.action){
       case 'next': // {action: next} Next trigger in normal statemachine flow
-        if(!player.isMaster) { // Only master can advance the game to the next step
+        if(!isHost) { // Only master can advance the game to the next step
           return false;
         }
         this.next();
@@ -253,7 +255,7 @@ class MafiaGame {
   }
 
   kick(playerId){
-    let playerIndex = this.players.findIndex(player => player.id === playerId);
+    let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex >= 0){
       this._kill(playerIndex+1);
     }
