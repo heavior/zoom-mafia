@@ -28,11 +28,45 @@ const roomManager = new rooms.RoomManager();
  *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
  *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
  *
+ * for _MORE_ room events look inside room.js
+ * for game actions and events look inside mafia.js
+ *
+ *
+ * directMessages - send directly to user, always have:
+ *    ("directMessage", {event:..., data:...})
+ *    Check room and game for specific direct messages
+ *
  * userId is optional for now and assumed to be equal to userName
+ *
+ * TODO: implement some kind of more or less secure user identification (probably requires authentication)
+ * TODO: implement direct user notification by userId
  */
 
 app.use(express.static(__dirname + '/dist'));
 server.listen(process.env.PORT || 8080);
+
+function joinRoom(socket, roomId, userName, userId){
+  let room = roomManager.findRoom(roomId);
+
+  if(!room){
+    console.warn("Can't find the room " + roomId);
+    socket.emit("message", "Can't find the room " + roomId);
+    socket.disconnect();
+    return;
+  }
+
+  socket.join(roomId);
+  socket.join(roomId + "_" + userId); // This is a private channel for this user
+
+  let user = room.join(socket.handshake.query.userName, socket.handshake.query.userId);
+  socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
+
+  return {room:room, user:user};
+}
+
+function directMessage(roomId, userId, eventName, eventData){
+  io.to(roomId + "_" + userId).emit("directMessage", {event:eventName, data:eventData});
+}
 
 io.on('connection', (socket) => {
   console.log("new connection");
@@ -41,6 +75,7 @@ io.on('connection', (socket) => {
   let user;
 
   if(roomId){
+    joinRoom(socket, roomId, socket.handshake.query.userName, socket.handshake.query.userId);
     room = roomManager.findRoom(roomId);
 
     if(!room){
@@ -76,6 +111,9 @@ io.on('connection', (socket) => {
           },
           (event, roomId)=>{
             io.to(roomId).emit('gameEvent', event);
+          },
+          (userId, eventName, eventData) => {
+            directMessage(roomId, userId, eventName, eventData)
           });
         roomId = room.id;
 
@@ -93,10 +131,8 @@ io.on('connection', (socket) => {
           return; // Cannot create new room from here
         }
         roomId = data.roomId;
-        room = roomManager.findRoom(roomId);
-        socket.join(roomId);
-        user = room.join(data.userName, data.userId);
-        socket.emit("roomEvent", {event:"joined", id:roomId, userId: user.id});
+
+        joinRoom(socket, roomId, data.userName, data.userId);
         break;
       case 'startGame':
         if(!roomId){

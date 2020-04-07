@@ -30,13 +30,19 @@ IDEA: Later - maybe there is a time coordination for the room later
  * roomCommand
  *  {action:"create", userName, userId}, returns ("roomEvent", {event:"created", id:roomId, userId: user.id})
  *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
- *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
+ *  {action:"startGame"}, actually game returns the event; ("gameEvent", {event:"started", game: gameInfo})
  *
  * roomEvent
  *  playerJoined
  *  playerLeft
- *  playerDisconnect
+ *  playerConnected
+ *  playerDisconnected
+ *  hostChanged
  *
+ * direct messages:
+ *  {event:"roomDirectEvent", data:"youAreTheHost"}
+ *
+ *  For game events - look inside game file
  */
 const mafia = require('./mafia');
 
@@ -44,17 +50,19 @@ const HOST_RECONNECT_TIMEOUT = 30*1000; // How much time do we give host to reco
 
 class Room {
 
-  constructor(videoLink, roomId, roomEventCallback, gameEventCallback){
+  constructor(videoLink, roomId, roomEventCallback, gameEventCallback, directMessageCallback){
     // Creating the room. requires the host to put video conference link
     // The id should be provided by external code which ensures uniqueness.
     this.videoLink = videoLink;
     this.id = roomId;
     this.players = [];
-    this.hostId = null;
+    this.host = null;
     this.roomEventCallback = roomEventCallback;
     this.gameEventCallback = gameEventCallback;
+    this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
 
-    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data));
+    // Ok, this is a mess - some thing we relay directly inside, some not
+    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data), directMessageCallback);
   }
 
   roomUpdated(event){
@@ -74,24 +82,27 @@ class Room {
     if(!playerId){ // For now use name as guest authenticator
       playerId = playerName;
     }
-    if(!this.hostId){ // Assign first host, but we don't notify anyone, because this is the only player
-      this.hostId = playerId;
-    }
 
     // Check for rejoin
-    let existingPlayer = this.getPlayer(playerId);
-    if(existingPlayer){
-      existingPlayer.isOnline = true;
-      return;
+    let player = this.getPlayer(playerId);
+    if(player){
+      player.isOnline = true;
+      if(!this.host){
+        this.findNewHost();
+      }
+      this.roomUpdated("playerConnected");
+    }else {
+      player = {
+        name: playerName,
+        id: playerId,
+        isOnline: true
+      };
+      this.players.push(player);
+      this.roomUpdated("playerJoined");
     }
-    let newPlayer = {
-      name: playerName,
-      id: playerId,
-      isOnline: true
-    };
-    this.players.push(newPlayer);
-    this.roomUpdated("playerJoined");
-    return newPlayer;
+    this.findNewHost(); // Check if we need to assign host.
+    this.game.playerUpdate(playerId); // Send update to the connected player
+    return player;
   }
 
   findNewHost(){
@@ -106,6 +117,8 @@ class Room {
     if(nextOnline){
       this.host = nextOnline;
       this.roomUpdated("hostChanged");
+
+      this.directMessageCallback(this.host.id, "roomDirectEvent", {event:"youAreTheHost"});
     }
     this.host = null; // no online players - game has no host, so next joining the game will be host
   }
@@ -126,7 +139,7 @@ class Room {
       return; //Maybe the player was kicked out
     }
     player.isOnline = false;
-    this.roomUpdated("playerDisconnect");
+    this.roomUpdated("playerDisconnected");
 
     if(this.host && this.host.id === playerId){
       setTimeout(() => this.findNewHost(), HOST_RECONNECT_TIMEOUT); // Start timer to find new host

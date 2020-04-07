@@ -19,9 +19,13 @@
     {action:vote, vote: number} (any player)
 
   GameEvent: (always contains current game info)
-    started
     ended
     next
+
+  direct messages:
+    {event: "gameStatus", data: {game:..., you:..}} - game information, first send when game starts, then when player connects
+      'you' represents current player information and everything he is allowed to know about the game
+    {event: "gameOver", data:{you:...}}
 */
 
 const MafiaRoles = Object.freeze({
@@ -95,6 +99,7 @@ const GameStates = Object.freeze({
 
 class MafiaGame {
   constructor(gameEventCallback,
+              directMessageCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
               isMafiaVoteUnanimous = false) // Should mafia vote by unanimous (professional rules)
   {
@@ -102,13 +107,14 @@ class MafiaGame {
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
 
     this.gameEventCallback = gameEventCallback;
+    this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
     this.gameOn = false;
     this.civiliansWin = false;
     this.gameState = GameStates.Discussion;
   }
 
   /* External game interface, main game logic */
-  start(playersNames, hostId){
+  start(playersNames){
     //This method starts new game based on the array of player names
     let playersRoles = this.shuffle(playersNames.length); // Shuffle the roles
 
@@ -129,6 +135,12 @@ class MafiaGame {
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.gameEventCallback("started", this.publicInfo());
+
+    this.players.forEach(player => {
+      this._playerUpdate(player);
+    });
+
+
   }
   next(){
     // This function implements main game process:
@@ -180,9 +192,6 @@ class MafiaGame {
     this.startVote(); // restart the vote for the new state
     this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
   }
-  getPlayerIndex(playerId){
-    return this.players.findIndex(player=>player.id === playerId);
-  }
   command(data, playerId, isHost){
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
@@ -202,6 +211,19 @@ class MafiaGame {
         break;
     }
   }
+  playerUpdate(playerId){
+    // This method send actual information to the player who is reconnecting
+    let index = this.getPlayerIndex(playerId);
+    if(index < 0){
+      // Player is not in the game, send public game info
+      this.directMessageCallback(playerId, "gameStatus", {
+        "game": this.publicInfo()
+      });
+      return false; // No player
+    }
+    this._playerUpdate(this.players[index]);
+    return true;
+  }
   /* /end of External game interface */
 
   /* Role helpers */
@@ -216,9 +238,43 @@ class MafiaGame {
   }
   /* /end of Role helpers */
 
-  /* Game public info */
-  static _playerPublicInfo(player){
+  /* Game info */
+  getPlayerIndex(playerId){
+    return this.players.findIndex(player=>player.id === playerId);
+  }
 
+  _playerUpdate(player){
+    this.directMessageCallback(player.id, "gameStatus", {
+      "game": this.publicInfo(),
+      "you": this._playerPrivateInfo(player)
+    });
+  }
+
+  static _playerPrivateInfo(player, deep = true){
+    let privateInfo = {
+      number: player.number,
+      name: player.name,
+      isAlive: player.isAlive,
+      role: this._roleName(player.role)
+    };
+
+    if(!deep){
+      return privateInfo;
+    }
+    if(player.isMafia){ // Mafia knows each other
+      this.mafia = this.players
+          .filter(mafiaPlayer => mafiaPlayer.isMafia)
+          .map(mafiaPlayer => this._playerPrivateInfo(mafiaPlayer, false));
+    }
+
+    if(player.role === MafiaRoles.Master) { // Master knows everything about everyone
+      this.players = this.players
+          .map(somePlayer => this._playerPrivateInfo(somePlayer, false));
+    }
+    return privateInfo;
+  }
+
+  static _playerPublicInfo(player){
     let publicInfo = {
       number: player.number,
       name: player.name,
@@ -232,8 +288,8 @@ class MafiaGame {
       // but it is more or less clear what happens
     }
     return publicInfo;
-
   }
+
   publicInfo(){
     // Whatever is publicly available
     return {
@@ -244,7 +300,7 @@ class MafiaGame {
       players: this.players.map(player => this._playerPublicInfo(player))
     };
   }
-  /* /end of Game public info */
+  /* /end of Game info */
 
 
   static shuffle(numberOfCards){
@@ -261,7 +317,9 @@ class MafiaGame {
     }
   }
   _kill(playerNumber){
-    this.players[playerNumber-1].isAlive = false;
+    let player = this.players[playerNumber-1];
+    player.isAlive = false;
+    this.directMessageCallback(player.id, "gameOver", {"you":this._playerPrivateInfo(player)});
   }
 
   /* Vote logic */
