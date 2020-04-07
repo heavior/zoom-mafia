@@ -9,7 +9,7 @@ class RoomManager {
     this.rooms = {}; // Cache of rooms
   }
 
-  createRoom(videoLink, roomEventCallback, gameEventCallback){
+  createRoom(videoLink, roomEventCallback, gameEventCallback, directMessageCallback){
     let roomId;
     for(let i=0;i<MAX_TRIES;i++){
       roomId = shortId.generate();
@@ -24,7 +24,7 @@ class RoomManager {
     do { // Generate ids until we have a unique one
       roomId = shortId.generate();
     }while(roomId in this.rooms);
-    this.rooms[roomId] = new room.Room(videoLink, roomId, roomEventCallback, gameEventCallback);
+    this.rooms[roomId] = new room.Room(videoLink, roomId, roomEventCallback, gameEventCallback, directMessageCallback);
     return this.rooms[roomId];
   }
 
