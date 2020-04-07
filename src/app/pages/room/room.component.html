@@ -8,19 +8,22 @@
     <button class="btn btn-outline-secondary" type="button" id="roomLink" [ngxClipboard]="link">Copy</button>
   </div>
 </div>
-<div class="d-flex">
-  <button class="btn btn-outline-primary" type="button" (click)="startGame()">Start Game</button>
-  <button class="btn btn-secondary" type="button" (click)="next()">Next</button>
-  <button class="btn btn-warning" type="button" (click)="vote()">Vote</button>
+<div class="d-flex mb-3">
+  <button class="btn btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
+  <button class="btn btn-secondary mr-1" type="button" (click)="next()">Next</button>
+  <button class="btn btn-warning mr-1" type="button" (click)="vote()" [disabled]="!newMessage">Vote</button>
 </div>
 
-<div>
-  <h2>Send</h2>
-  <input [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"/>
-  <button (click)="sendMessage()">Send</button>
+<h2>Send</h2>
+<div class="input-group mb-3">
+  <input class="form-control" type="text"
+         [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
+  <div class="input-group-append">
+    <button class="btn btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
+  </div>
 </div>
 
-<div>
-  <h3>Messages</h3>
+<h3>Messages</h3>
+<div class="px-2">
   <pre *ngFor="let message of messages">{{message}}</pre>
 </div>
