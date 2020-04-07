@@ -155,6 +155,8 @@ io.on('connection', (socket) => {
       return; // No game commands without rooms!
     }
     room.gameCommand(data, user.id);
+    socket.emit("roomEvent", { event: data.action});
+    io.to(roomId).emit('serverStatus', `Game action: ${data.action}`);
   });
 
   // find shared game room object
