@@ -111,12 +111,13 @@ class MafiaGame {
     this.gameOn = false;
     this.civiliansWin = false;
     this.gameState = GameStates.Discussion;
+    this.players = [];
   }
 
   /* External game interface, main game logic */
   start(playersNames){
     //This method starts new game based on the array of player names
-    let playersRoles = this.shuffle(playersNames.length); // Shuffle the roles
+    let playersRoles = MafiaGame.shuffle(playersNames.length); // Shuffle the roles
 
     // Generate states for everyPlayer
     this.players = playersNames.map(function callback(player, index) {
@@ -128,8 +129,8 @@ class MafiaGame {
           number: index + 1,
           role: role,
           //isMaster: role === MafiaRoles.Master || hostId === player.id,
-          isMafia: this._isMafiaRole(playersRoles[index]),
-          isAlive: this._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
+          isMafia: MafiaGame._isMafiaRole(playersRoles[index]),
+          isAlive: MafiaGame._isActiveRole(playersRoles[index]) // mark guests and master as dead - to prevent from voting
         }
     });
     this.gameOn = true;
@@ -250,12 +251,12 @@ class MafiaGame {
     });
   }
 
-  static _playerPrivateInfo(player, deep = true){
+  _playerPrivateInfo(player, deep = true){
     let privateInfo = {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
-      role: this._roleName(player.role)
+      role: MafiaGame._roleName(player.role)
     };
 
     if(!deep){
@@ -279,11 +280,11 @@ class MafiaGame {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
-      role:this._roleName(player.role)
+      role:MafiaGame._roleName(player.role)
     };
 
     if(this._isActiveRole(player.role)){
-      publicInfo.role = this._roleName(MafiaRoles.Player);
+      publicInfo.role = MafiaGame._roleName(MafiaRoles.Player);
       // A bit stupid transformation,
       // but it is more or less clear what happens
     }
@@ -297,7 +298,7 @@ class MafiaGame {
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
       candidates: this.candidates,
-      players: this.players.map(player => this._playerPublicInfo(player))
+      players: this.players.map(player => MafiaGame._playerPublicInfo(player))
     };
   }
   /* /end of Game info */
