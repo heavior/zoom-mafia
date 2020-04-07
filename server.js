@@ -70,7 +70,6 @@ function joinRoom(socket, roomId, userName, userId){
 
 function directMessage(roomId, userId, eventName, eventData){
   console.debug("directMessage to " + userId + " at " + roomId +": " + JSON.stringify({event:eventName, data:eventData}, null, 2));
-  //console.debug(io.sockets.adapter.rooms);
   io.to(roomId + "_" + userId).emit("directMessage", {event:eventName, data:eventData});
 }
 
@@ -121,9 +120,13 @@ io.on('connection', (socket) => {
           });
         roomId = room.id;
         socket.emit("roomEvent", {event:"created", id:roomId, userId: data.userId});
-        joinRoom(socket, roomId, data.userName, data.userId);
-
         // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
+
+        let roomAndUser = joinRoom(socket, roomId, data.userName, data.userId);
+        if(!roomAndUser){
+          return;
+        }
+        user = roomAndUser.user;
         break;
       case 'join': // alternative join method
         if(roomId){
@@ -147,15 +150,13 @@ io.on('connection', (socket) => {
           return;
         }
         room.startGame();
-        //socket.emit("roomEvent", { event: "start"});
-        //io.to(roomId).emit('serverStatus', `Game is starting`);
         break;
     }
   });
 
   // Game commands are transparently relayed into the game itself
   socket.on('gameCommand', (data) =>{
-    console.debug("gameCommand " + data.action);
+    console.debug("gameCommand " + JSON.stringify(data, null, 2));
     if(!roomId){
       console.warn("No room to send game command to");
       socket.emit("message", "You are not in the room");
@@ -167,8 +168,6 @@ io.on('connection', (socket) => {
       return; // No game commands without rooms!
     }
     room.gameCommand(data, user.id);
-    socket.emit("roomEvent", { event: data.action});
-    io.to(roomId).emit('serverStatus', `Game action: ${data.action}`);
   });
 
   // find shared game room object
