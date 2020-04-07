@@ -14,6 +14,31 @@
   <button class="btn btn-warning mr-1" type="button" (click)="vote()" [disabled]="!newMessage">Vote</button>
 </div>
 
+<ng-container *ngIf="player">
+  <h2>Player Info</h2>
+  <div class="mb-3 card">
+    <div class="card-body">
+      <h5 class="card-title">{{player.name}}</h5>
+      <div>Number: {{player.number}}</div>
+      <div>Status: {{player.isAlive ? 'alive' : 'dead'}}</div>
+      <div>Role: {{player.role}}</div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="players">
+  <h2>Players List</h2>
+  <div class="mb-3 d-flex flex-row">
+    <div *ngFor="let player of players" class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{player.name}}</h5>
+        <div>Number: {{player.number}}</div>
+        <div>Status: {{player.isAlive ? 'alive' : 'dead'}}</div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
 <h2>Send</h2>
 <div class="input-group mb-3">
   <input class="form-control" type="text"

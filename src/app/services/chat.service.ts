@@ -12,6 +12,7 @@ export class ChatService {
   private url: string = 'http://localhost:8080';
   data: any = {};
   gameState: BehaviorSubject<string> = new BehaviorSubject('');
+  gameSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
   roomLink: string = '';
 
   constructor(@Inject(DOCUMENT) private document: Document,
@@ -19,7 +20,7 @@ export class ChatService {
               private router: Router) {
     this.socket = io(this.url);
     // @ts-ignore
-    this.data.roomId = this.route.queryParams.value.id || '';
+    this.data.roomId = this.router.url.replace('/', '');
     this.init();
   }
 
@@ -30,8 +31,8 @@ export class ChatService {
         case 'created':
         case 'joined':
           this.data.roomId = data.id;
-          this.roomLink = `${this.document.location.origin}?id=${data.id}`;
-          return this.router.navigate(['room']);
+          this.roomLink = `${this.document.location.origin}/${data.id}`;
+          return this.router.navigate([`/${data.id}`]);
         case 'start':
         case 'discussion':
         case 'night':
@@ -74,6 +75,17 @@ export class ChatService {
       });
       this.socket.on('directMessage', (message) => {
         observer.next('directMessage' + JSON.stringify(message, null, 2));
+
+        switch (message.event) {
+          case 'gameStatus':
+            const {game} = message.data;
+            if (game.gameOn) {
+              this.gameSubject.next({players: game.players, you: message.data.you});
+            }
+            break;
+          default:
+            break;
+        }
       });
     });
   }
@@ -92,6 +104,10 @@ export class ChatService {
 
   get roomId() {
     return this.data.roomId;
+  }
+
+  set roomId(roomId) {
+    this.data.roomId = roomId;
   }
 
   get userName() {

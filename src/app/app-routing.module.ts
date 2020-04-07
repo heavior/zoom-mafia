@@ -6,7 +6,8 @@ import {RoomGuard} from "./route-guards/room.guard";
 
 
 const routes: Routes = [
-  { path: 'room', component: RoomComponent, canActivate: [RoomGuard] },
+  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: ':roomId', component: RoomComponent, canActivate: [RoomGuard] },
   { path: '**', component: HomeComponent }
 ];
 

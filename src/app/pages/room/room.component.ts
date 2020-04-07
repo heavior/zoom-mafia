@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from "rxjs";
 import { ChatService } from "../../services/chat.service";
+import { filter } from "rxjs/operators";
 
 @Component({
   selector: 'app-room',
@@ -10,8 +11,10 @@ import { ChatService } from "../../services/chat.service";
 export class RoomComponent implements OnInit, OnDestroy {
   private gameSubject: Subscription;
   private receiverSubject: Subscription;
-  newMessage: string;
   messages: string[];
+  newMessage: string;
+  player: any = undefined;
+  players: any[] = undefined;
   roomLink: string;
   state: string;
 
@@ -26,6 +29,12 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
     });
+    this.chatService.gameSubject
+      .pipe(filter((data) => data !== undefined))
+      .subscribe((data: any) => {
+        this.player = data.you;
+        this.players = data.players;
+      });
     this.roomLink = this.chatService.roomLink;
   }
 
