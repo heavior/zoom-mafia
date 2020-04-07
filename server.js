@@ -39,7 +39,6 @@ const roomManager = new rooms.RoomManager();
  * userId is optional for now and assumed to be equal to userName
  *
  * TODO: implement some kind of more or less secure user identification (probably requires authentication)
- * TODO: implement direct user notification by userId
  */
 
 app.use(express.static(__dirname + '/dist'));
