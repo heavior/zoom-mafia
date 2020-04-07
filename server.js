@@ -140,6 +140,8 @@ io.on('connection', (socket) => {
           return;
         }
         room.startGame();
+        socket.emit("roomEvent", { event: "start"});
+        io.to(roomId).emit('serverStatus', `Game is starting`);
         break;
     }
   });
@@ -183,5 +185,6 @@ io.on('connection', (socket) => {
       return; // No room, so whatever
     }
     room.disconnect(user.id); //Let the room know that player left
+    socket.emit("roomEvent", {event:"disconnected", user: user.userName});
   });
 });
