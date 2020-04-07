@@ -66,6 +66,15 @@ export class ChatService {
       this.socket.on('serverStatus', (message) => {
         observer.next(`ServerStatus: ${message}`);
       });
+      this.socket.on('gameEvent', (message) => {
+        observer.next('gameEvent' + JSON.stringify(message, null, 2));
+      });
+      this.socket.on('roomEvent', (message) => {
+        observer.next('roomEvent' + JSON.stringify(message, null, 2));
+      });
+      this.socket.on('directMessage', (message) => {
+        observer.next('directMessage' + JSON.stringify(message, null, 2));
+      });
     });
   }
 
