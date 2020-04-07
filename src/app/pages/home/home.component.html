@@ -9,9 +9,11 @@
       <input id="username" class="form-control" [(ngModel)]="userName" required />
       <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
       <div class="mt-3 d-flex justify-content-center">
-        <button *ngIf="!joining else join" class="btn btn-primary" (click)="setUsername()">Set Name</button>
+        <button *ngIf="!joining else join" class="btn btn-primary"
+                (click)="setUsername()" [disabled]="!userName">Set Name</button>
         <ng-template #join>
-          <button class="btn btn-primary" (click)="setUsernameAndJoin()">Join Room</button>
+          <button class="btn btn-primary"
+                  (click)="setUsernameAndJoin()" [disabled]="!userName">Join Room</button>
         </ng-template>
       </div>
     </div>

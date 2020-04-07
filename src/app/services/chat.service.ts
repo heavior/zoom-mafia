@@ -9,7 +9,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 })
 export class ChatService {
   private socket: any;
-  private url: string = '/';
+  private url: string = 'http://localhost:8080';
   data: any = {};
   gameState: BehaviorSubject<string> = new BehaviorSubject('');
   roomLink: string = '';
@@ -86,8 +86,8 @@ export class ChatService {
     this.socket.emit('roomCommand', { action: 'startGame'});
   }
 
-  vote() {
-    this.socket.emit('gameCommand', {action: 'vote'});
+  vote(vote: number) {
+    this.socket.emit('gameCommand', {action: 'vote', 'vote': vote});
   }
 
   get roomId() {
