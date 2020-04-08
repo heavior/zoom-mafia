@@ -27,6 +27,8 @@ const roomManager = new rooms.RoomManager();
  *  {action:"create", userName, userId}, returns ("roomEvent", {event:"created", id:roomId, userId: user.id})
  *  {action:"join", userName, userId}, returns ("roomEvent", {event:"joined", id:roomId, userId: user.id})
  *  {action:"startGame"}, returns ("gameEvent", {event:"started", game: gameInfo})
+ *  {action:"kick", targetId, hard} - kick the player (only done by host), If hard is not true - only offline user can be kicked
+ *  {action:"leave"} - permanently leave the room
  *
  * roomEvent
  *   joined - you have joined the room
@@ -142,6 +144,23 @@ io.on('connection', (socket) => {
         }
         room = result.room;
         user = result.user;
+        break;
+      case 'kick':
+        if(!roomId){
+          console.warn("No room to kick people from");
+          socket.emit("message", "You are not in the room");
+          return;
+        }
+        room.kick(user.id, data.targetId, data.hard);
+
+        break;
+      case 'leave':
+        if(!roomId){
+          console.warn("No room to leave");
+          socket.emit("message", "You are not in the room");
+          return;
+        }
+        room.leave(user.id);
         break;
       case 'startGame':
         if(!roomId){

@@ -105,6 +105,30 @@ class Room {
     return player;
   }
 
+  kick(playerId, targetId, hard = false){
+    if(!this.host){
+      this.findNewHost(); // This might a trash check
+    }
+    if(!this.host){
+      return false; // Game has no host - no one can kick anyone
+    }
+
+    if(!this.host.id !== playerId){ // Not the host cannot issue this command
+      this.directMessageCallback(playerId, "roomDirectEvent", {event:"youAreNotTheHost"});
+      return false;
+    }
+
+    if(!hard){
+      let targetPlayer = this.getPlayer(targetId);
+      if(targetPlayer && targetPlayer.isOnline){
+        this.directMessageCallback(playerId, "roomDirectEvent", {event:"cantKickOnlinePLayer"});
+        return false;
+      }
+    }
+    // Force the player out
+    this.leave(targetId, !hard);
+  }
+
   findNewHost(){
     if(this.host && this.host.isOnline){
       return; // Nothing to do, host is online
@@ -146,6 +170,7 @@ class Room {
   leave(playerId){
     // Guest left the room, or was kicked out - remove them from the list of players
     let playerIndex = this.getPlayerIndex(playerId);
+
     if(playerIndex>0){
       this.players.list.splice(playerIndex, 1);
     }
