@@ -123,6 +123,7 @@ class MafiaGame {
     this.mainVoteTimeout = mainVoteTimeout;
     this.nightTimetout = nightTimetout;
     this.players = [];
+    this.detectiveKnows = [];
   }
 
   /* External game interface, main game logic */
@@ -147,6 +148,7 @@ class MafiaGame {
     });
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
+    this.detectiveKnows = [];
 
     let gameInfo = this.publicInfo();
     this.players.forEach(player => {
@@ -302,13 +304,17 @@ class MafiaGame {
       return privateInfo;
     }
     if(player.isMafia){ // Mafia knows each other
-      this.mafia = this.players
+      privateInfo.otherPlayers = this.players
           .filter(mafiaPlayer => mafiaPlayer.isMafia)
           .map(mafiaPlayer => this._playerPrivateInfo(mafiaPlayer, false));
     }
+    if(player.role === MafiaRoles.Detective){
+      privateInfo.otherPlayers = this.detectiveKnows.map(userNumber =>
+        this._playerPrivateInfo(this.players[userNumber-1],false));
+    }
 
     if(player.role === MafiaRoles.Master) { // Master knows everything about everyone
-      this.players = this.players
+      privateInfo.otherPlayers = this.players
           .map(somePlayer => this._playerPrivateInfo(somePlayer, false));
     }
     return privateInfo;
@@ -411,7 +417,17 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
+    if(!this.players[whoVotes-1]){ // Not a player
+      return null;
+    }
+    let alreadyVoted = !!this.votes[whoVotes];
     this.votes[whoVotes] = choicePlayer; // Using array to have unique vote per player
+
+    if(!alreadyVoted && this.players[whoVotes-1].role === MafiaRoles.Detective){
+      // this is a detecitve. we remember that he knows about this player now, with next game update he will get information
+      this.detectiveKnows.push(choicePlayer);
+    }
+
     if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
     }
