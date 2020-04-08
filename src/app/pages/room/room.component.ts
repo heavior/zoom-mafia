@@ -11,19 +11,21 @@ import { filter } from "rxjs/operators";
 export class RoomComponent implements OnInit, OnDestroy {
   private gameSubject: Subscription;
   private receiverSubject: Subscription;
+  game: any = undefined;
+  hasVoted: boolean = false;
   messages: string[];
   newMessage: string;
   player: any = undefined;
-  players: any[] = undefined;
+  players: any[] = [];
   roomLink: string;
   state: string;
+  videoLink: string;
 
   constructor(private chatService: ChatService) { }
 
   ngOnInit(): void {
     this.messages = [];
     this.gameSubject = this.chatService.gameState.subscribe((state) => {
-      console.log(state);
       this.state = state;
     });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
@@ -32,10 +34,17 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
+        this.game = data.game;
         this.player = data.you;
-        this.players = data.players;
+        this.players = data.game.players || [];
+        this.videoLink = data.game.videoLink || '';
+        console.log(this.game);
       });
     this.roomLink = this.chatService.roomLink;
+  }
+
+  clearChat() {
+    this.messages = [];
   }
 
   next() {
@@ -51,9 +60,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.startGame();
   }
 
-  vote() {
-    this.chatService.vote(parseInt(this.newMessage));
-    this.newMessage = '';
+  vote(playerNumber) {
+    this.hasVoted = true;
+    this.chatService.vote(parseInt(playerNumber));
   }
 
   ngOnDestroy(): void {
