@@ -388,11 +388,14 @@ class MafiaGame {
   playersVoteCounts(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
+  whoCounts(){
+    return this.players.filter(player => this.playersVoteCounts(player));
+  }
   whoShouldVote(){
     if(this.expectCivilianVoteAtNight){ // All alive players must vote
       return this.players.filter(player => player.isAlive);
     }
-    return this.players.filter(player => this.playersVoteCounts(player));
+    return this.whoCounts();
   }
 
   startVote(){
@@ -423,7 +426,7 @@ class MafiaGame {
     let unusedVotesCounter = 0;
 
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
-      unusedVotesCounter = this.whoShouldVote().find(player => !this.votes[player.number]).length;
+      unusedVotesCounter = this.whoCounts().find(player => !this.votes[player.number]).length;
     }
 
     // Count votes
