@@ -69,6 +69,8 @@ export class ChatService {
       });
       this.socket.on('gameEvent', (message) => {
         observer.next('gameEvent' + JSON.stringify(message, null, 2));
+        let game = Object.assign({}, this.gameSubject.getValue(), message);
+        this.gameSubject.next(game);
       });
       this.socket.on('roomEvent', (message) => {
         observer.next('roomEvent' + JSON.stringify(message, null, 2));

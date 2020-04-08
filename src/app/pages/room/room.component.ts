@@ -38,6 +38,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.player = data.you;
         this.players = data.game.players || [];
         this.videoLink = data.game.videoLink || '';
+        this.hasVoted = false;
         console.log(this.game);
       });
     this.roomLink = this.chatService.roomLink;
@@ -57,6 +58,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   startGame() {
+    this.hasVoted = false;
     this.chatService.startGame();
   }
 

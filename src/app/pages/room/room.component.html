@@ -42,7 +42,7 @@
     <div class="mb-3 card">
       <div class="card-body">
         <h5 class="card-title">Welcome, <b>{{player.name}}</b></h5>
-        <div>This game is <b>(On || about to start || over)</b></div>
+        <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
         <div>Your role is <b>{{player.role}}</b></div>
         <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
       </div>
@@ -50,7 +50,7 @@
   </ng-container>
 
   <div class="mb-3">
-    <div>It is <b>Day || Night</b></div>
+    <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
     <div><b>{{game.gameState}}</b></div>
     <div>Time left: <b>{{game.countdown || '0'}}</b> seconds</div>
   </div>
@@ -84,7 +84,7 @@
   </ng-container>
 </ng-container>
 
-<h2>Send</h2>
+<h2>Chat</h2>
 <div class="input-group mb-3">
   <input class="form-control" type="text"
          [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
@@ -92,8 +92,6 @@
     <button class="btn btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
   </div>
 </div>
-
-<h3>Messages</h3>
 <div class="px-2">
   <pre *ngFor="let message of messages">{{message}}</pre>
 </div>
