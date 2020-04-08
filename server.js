@@ -48,6 +48,10 @@ const roomManager = new rooms.RoomManager();
  */
 
 app.use(express.static(__dirname + '/dist'));
+app.get('/:roomId', function (req, res) {
+  res.sendFile(__dirname + '/dist/index.html');
+});
+
 server.listen(process.env.PORT || 8080);
 
 function joinRoom(socket, roomId, userName, userId){

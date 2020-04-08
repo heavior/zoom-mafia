@@ -102,9 +102,9 @@ class MafiaGame {
               directMessageCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
               isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
-              discussionTimeout = 0, // Discussion phase - no time limit
-              mainVoteTimeout = 30,  // 30 seconds to let them vote during day
-              nightTimetout = 60,      // 60 seconds night time
+              discussionTimeout = 10, // Discussion phase - no time limit
+              mainVoteTimeout = 10,  // 30 seconds to let them vote during day
+              nightTimetout = 10,      // 60 seconds night time
               expectCivilianVoteAtNight = true, // Force civilians to vote somehow to enable open-eye game
               allowAutoCompleteVote = true // Complete vote automatically when all expected players votes
               )
