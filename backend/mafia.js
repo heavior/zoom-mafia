@@ -10,10 +10,6 @@
 // Option: dead see who is who
 // Idea: we could make our tool talk to players to voice commands
 
-// TODO: Autocomplete vote when everyone voted - option
-// TODO: Make civilians vote - option
-
-
 /*
   Game protocol for the client:
   GameAction:
@@ -109,11 +105,14 @@ class MafiaGame {
               discussionTimeout = 0, // Discussion phase - no time limit
               mainVoteTimeout = 30,  // 30 seconds to let them vote during day
               nightTimetout = 60,      // 60 seconds night time
-              expectCivilianVoteAtNight = true // Force civilians to vote somehow to enable open-eye game
+              expectCivilianVoteAtNight = true, // Force civilians to vote somehow to enable open-eye game
+              allowAutoCompleteVote = true // Complete vote automatically when all expected players votes
               )
   {
     this.isVoteMandatory = isVoteMandatory;
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
+    this.expectCivilianVoteAtNight = expectCivilianVoteAtNight;
+    this.allowAutoCompleteVote = allowAutoCompleteVote;
 
     this.gameEventCallback = gameEventCallback;
     this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
@@ -124,6 +123,7 @@ class MafiaGame {
     this.mainVoteTimeout = mainVoteTimeout;
     this.nightTimetout = nightTimetout;
     this.players = [];
+
   }
 
   /* External game interface, main game logic */
@@ -385,11 +385,14 @@ class MafiaGame {
         return this.votes.filter(item => item[1] === tieCounter).map(item => item[0]);
     }
   }
-  shouldVote(player){
+  playersVoteCounts(player){
     return player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
   whoShouldVote(){
-    return this.players.filter(player => this.shouldVote(player));
+    if(this.expectCivilianVoteAtNight){ // All alive players must vote
+      return this.players.filter(player => player.isAlive);
+    }
+    return this.players.filter(player => this.playersVoteCounts(player));
   }
 
   startVote(){
@@ -402,13 +405,10 @@ class MafiaGame {
     this.candidates = this.checkCandidates();
     this.votes = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
-    this.autoCompleteVote = false; //autoCompleteVote || mafiaOnly;
+    this.autoCompleteVote = this.allowAutoCompleteVote && this.gameState !== GameStates.Discussion;
+    // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
-    if(!this.shouldVote(this.players[whoVotes-1].isAlive)){
-      return; //This vote doesn't count
-    }
-
     this.votes[whoVotes] = choicePlayer; // Using array to have unique vote per player
     if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
@@ -428,11 +428,14 @@ class MafiaGame {
 
     // Count votes
     let votedDown = {};
-    this.votes.values().forEach(vote => {
-      if(!votedDown[vote]){
-        votedDown[vote] = 0;
+    this.votes.values().forEach(author => {
+      if(!this.playersVoteCounts(this.players[author - 1])){ // Player shouldn't have voted, ignore his vote
+        return;
       }
-      votedDown[vote] ++;
+      if(!votedDown[author]){
+        votedDown[author] = 0;
+      }
+      votedDown[author] ++;
     });
 
     this.votes = votedDown.entries();
