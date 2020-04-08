@@ -123,7 +123,6 @@ class MafiaGame {
     this.mainVoteTimeout = mainVoteTimeout;
     this.nightTimetout = nightTimetout;
     this.players = [];
-
   }
 
   /* External game interface, main game logic */

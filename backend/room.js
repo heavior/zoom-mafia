@@ -70,6 +70,7 @@ class Room {
     this.roomEventCallback({
       event: event,
       host: this.host && this.host.name,
+      videoLink: this.videoLink,
       players: playerPublicInfo
     }, this.id);
   }
