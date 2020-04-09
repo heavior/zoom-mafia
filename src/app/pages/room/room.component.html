@@ -15,16 +15,17 @@
 
 <hr>
 
-<ng-container *ngIf="game">
-  <ng-container *ngIf="player">
-    <div class="card">
-      <div class="card-title">Welcome, <b>{{player.name}}</b></div>
-      <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
-      <div>Your role is <b>{{player.role}}</b></div>
-      <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
-    </div>
-  </ng-container>
+<ng-container *ngIf="player">
+  <div>
+    <div>Welcome, <b>{{player.name}}</b></div>
+    <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
+    <div>Your role is <b>{{player.role}}</b></div>
+    <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
+  </div>
+  <hr>
+</ng-container>
 
+<ng-container *ngIf="game">
   <div class="">
     <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
     <div>Phase: <b>{{game.gameState}}</b></div>
@@ -37,18 +38,18 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
+</ng-container>
 
-  <ng-container *ngIf="players.length">
-    <h2>Players in the room: </h2>
-    <div class="" *ngFor="let player of players" [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
-        <b>{{player.number}}: {{player.name}}</b>
-        <ng-container> - <b>{{player.role}}</b></ng-container>
+<ng-container *ngIf="players.length">
+  <h2>Players in the room: </h2>
+  <div class="" *ngFor="let player of players" [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
+    <b>{{player.number}}: {{player.name}}</b>
+    <ng-container> - <b>{{player.role}}</b></ng-container>
 
-        <button class="btn btn-sm btn-primary"
-                (click)="vote(player.number)"
-                [disabled]="hasVoted">Vote</button>
-    </div>
-  </ng-container>
+    <button class="btn btn-sm btn-primary"
+            (click)="vote(player.number)"
+            [disabled]="hasVoted">Vote</button>
+  </div>
 </ng-container>
 <hr>
 <b>Chat</b>

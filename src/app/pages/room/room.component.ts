@@ -13,6 +13,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   private receiverSubject: Subscription;
   game: any = undefined;
   hasVoted: boolean = false;
+  host: string = undefined;
   messages: string[];
   newMessage: string;
   player: any = undefined;
@@ -34,12 +35,13 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
+        console.log(data);
         this.game = data.game;
+        this.host = data.host;
         this.player = data.you;
-        this.players = data.game.players || [];
-        this.videoLink = data.game.videoLink || '';
+        this.players = data.players || data.game.players || [];
+        this.videoLink = data.videoLink || '';
         this.hasVoted = false;
-        console.log(this.game);
       });
     this.roomLink = this.chatService.roomLink;
   }

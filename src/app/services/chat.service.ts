@@ -33,6 +33,11 @@ export class ChatService {
           this.data.roomId = data.id;
           this.roomLink = `${this.document.location.origin}/${data.id}`;
           return this.router.navigate([`/${data.id}`]);
+        case "playerConnected":
+          let state = this.gameState.getValue();
+          delete data['event'];
+          this.gameSubject.next(Object.assign({}, state, data));
+          break;
         case 'start':
         case 'discussion':
         case 'night':
@@ -77,7 +82,6 @@ export class ChatService {
       });
       this.socket.on('directMessage', (message) => {
         observer.next('directMessage' + JSON.stringify(message, null, 2));
-
         switch (message.event) {
           case 'gameStatus':
             const {game} = message.data;
