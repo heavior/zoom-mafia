@@ -18,7 +18,7 @@
 
 
   direct messages:
-    {event: "gameStatus", data: {event:..., game:..., you:..}} - game information, first send when game starts, then when player connects
+    {event: "gameStatus", data: {event:..., game:..., players:..., you:..}} - game information, first send when game starts, then when player connects
       'you' represents current player information and everything he is allowed to know about the game
     {event: "gameOver", data:{you:...}}
 */
@@ -100,9 +100,9 @@ class MafiaGame {
               directMessageCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
               isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
-              discussionTimeout = 10, // Discussion phase - no time limit
-              mainVoteTimeout = 10,  // 30 seconds to let them vote during day
-              nightTimetout = 10,      // 60 seconds night time
+              discussionTimeout = 0, // Discussion phase - no time limit
+              mainVoteTimeout = 30,  // 30 seconds to let them vote during day
+              nightTimetout = 60,      // 60 seconds night time
               expectCivilianVoteAtNight = true, // Force civilians to vote somehow to enable open-eye game
               allowAutoCompleteVote = true // Complete vote automatically when all expected players votes
               )
@@ -143,22 +143,19 @@ class MafiaGame {
           isMafia: MafiaGame._isMafiaRole(role),
           isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
         }
-    }).filter(player=>player.role !== MafiaRoles.Guest) // Remove guests, sorry
-      .forEach((player,index)=>{player.number = index + 1}); // Assign game numbers
-
+    });
+    this.players = this.players.filter(player => player.role !== MafiaRoles.Guest); // Remove guests, sorry
+    this.players.forEach((player,index)=>{ player.number = index + 1 }); // Assign game numbers
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
+
+    console.log("start game", this);
     this.informPlayers('started');
   }
   informPlayers(event = null){
-
-    let gameInfo = this.publicInfo();
-    if(event){
-      gameInfo.event = event;
-    }
     this.players.forEach(player => {
-      this._playerUpdate(player, gameInfo);
+      this._playerUpdate(player, event);
     });
   }
   next(){
@@ -264,11 +261,13 @@ class MafiaGame {
     if(index < 0){
       // Player is not in the game, send public game info
       this.directMessageCallback(playerId, "gameStatus", {
-        "game": this.publicInfo()
+        game: this.publicInfo(),
+        players: this.players.map(player => MafiaGame._playerPublicInfo(player)),
+        reason: "rejoin"
       });
       return false; // No player
     }
-    this._playerUpdate(this.players[index]);
+    this._playerUpdate(this.players[index], "rejoin");
     return true;
   }
   /* /end of External game interface */
@@ -290,11 +289,13 @@ class MafiaGame {
     return this.players.findIndex(player=>player.id === playerId);
   }
 
-  _playerUpdate(player, publicInfo){
+  _playerUpdate(player, reason){
     // publicInfo introduced here for optimization
     this.directMessageCallback(player.id, "gameStatus", {
-      "game": publicInfo || this.publicInfo(),
-      "you": this._playerPrivateInfo(player)
+      game: this.publicInfo(),
+      players: this.players.map(otherPlayer => MafiaGame._playerPublicInfo(otherPlayer, player)),
+      you: this._playerPrivateInfo(player),
+      event: reason
     });
   }
 
@@ -305,39 +306,35 @@ class MafiaGame {
       isAlive: player.isAlive,
       role: MafiaGame._roleName(player.role)
     };
-
-    if(!deep){
-      return privateInfo;
-    }
-    if(player.isMafia){ // Mafia knows each other
-      privateInfo.otherPlayers = this.players
-          .filter(mafiaPlayer => mafiaPlayer.isMafia)
-          .map(mafiaPlayer => this._playerPrivateInfo(mafiaPlayer, false));
-    }
-    if(player.role === MafiaRoles.Detective){
-      privateInfo.otherPlayers = this.detectiveKnows.map(userNumber =>
-        this._playerPrivateInfo(this.players[userNumber-1],false));
-    }
-
-    if(player.role === MafiaRoles.Master) { // Master knows everything about everyone
-      privateInfo.otherPlayers = this.players
-          .map(somePlayer => this._playerPrivateInfo(somePlayer, false));
-    }
     return privateInfo;
   }
 
-  static _playerPublicInfo(player){
+  static _playerPublicInfo(player, requester=null){
     let publicInfo = {
       number: player.number,
       name: player.name,
-      isAlive: player.isAlive,
-      role:MafiaGame._roleName(player.role)
+      isAlive: player.isAlive
     };
 
-    if(this._isActiveRole(player.role)){
-      publicInfo.role = MafiaGame._roleName(MafiaRoles.Player);
-      // A bit stupid transformation,
-      // but it is more or less clear what happens
+    if(requester) {
+      if(player === requester){
+         // That's me, I know my role
+        publicInfo.role = MafiaGame._roleName(player.role);
+      }
+      if (this._isMafiaRole(requester.role) && this._isMafiaRole(player.role)) {
+        // mafia knows mafia
+        publicInfo.role = MafiaGame._roleName(player.role);
+      }
+      if (requester.role === MafiaRoles.Detective) {
+        // Detective knows people he checked
+        if (this.detectiveKnows.indexOf(player.number) >= 0) {
+          publicInfo.role = MafiaGame._roleName(player.role);
+        }
+      }
+      if (requester.role === MafiaRoles.Master) {
+        // Master knows everyone
+        publicInfo.role = MafiaGame._roleName(player.role);
+      }
     }
     return publicInfo;
   }
@@ -349,8 +346,7 @@ class MafiaGame {
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
       candidates: this.candidates,
-      countdown: this.timeLeft(),
-      players: this.players.map(player => MafiaGame._playerPublicInfo(player))
+      countdown: this.timeLeft()
     };
   }
   /* /end of Game info */
@@ -358,7 +354,7 @@ class MafiaGame {
 
   static shuffle(numberOfCards){
     // This method generates an array of roles based on number of players
-    let cardsToPlay = CardsDeck.slice(numberOfCards);
+    let cardsToPlay = CardsDeck.slice(0, numberOfCards);
     cardsToPlay.sort(() => Math.random() - 0.5); // Shuffle the array, solution from here: https://javascript.info/task/shuffle
     return cardsToPlay;
   }
@@ -372,7 +368,7 @@ class MafiaGame {
   _kill(playerNumber){
     let player = this.players[playerNumber-1];
     player.isAlive = false;
-    this.directMessageCallback(player.id, "gameOver", {"you":this._playerPrivateInfo(player)});
+    this._playerUpdate(player, "gameOver");
   }
 
   /* Vote logic */

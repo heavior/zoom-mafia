@@ -62,7 +62,13 @@ class Room {
     this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
 
     // Ok, this is a mess - some thing we relay directly inside, some not
-    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data), directMessageCallback);
+    this.game = new mafia.Game((event,data) => this.gameUpdated(event,data),
+      (userId, event, data) => this.directMessage(userId, event, data)
+    );
+  }
+
+  directMessage(userId, event, data){
+    this.directMessageCallback(this.id, userId, event, data);
   }
 
   roomUpdated(event){
@@ -101,6 +107,7 @@ class Room {
       this.players.push(player);
       this.roomUpdated("playerJoined");
     }
+    console.debug("join", playerName, playerId, player);
     this.findNewHost(); // Check if we need to assign host.
     this.game.playerUpdate(playerId); // Send update to the connected player
     return player;
@@ -115,14 +122,14 @@ class Room {
     }
 
     if(!this.host.id !== playerId){ // Not the host cannot issue this command
-      this.directMessageCallback(playerId, "roomDirectEvent", {event:"youAreNotTheHost"});
+      this.directMessage(playerId, "roomDirectEvent", {event:"youAreNotTheHost"});
       return false;
     }
 
     if(!hard){
       let targetPlayer = this.getPlayer(targetId);
       if(targetPlayer && targetPlayer.isOnline){
-        this.directMessageCallback(playerId, "roomDirectEvent", {event:"cantKickOnlinePLayer"});
+        this.directMessage(playerId, "roomDirectEvent", {event:"cantKickOnlinePLayer"});
         return false;
       }
     }
@@ -139,7 +146,7 @@ class Room {
     if(nextOnline){
       this.host = nextOnline;
       this.roomUpdated("hostChanged");
-      this.directMessageCallback(this.host.id, "roomDirectEvent", {event:"youAreTheHost"});
+      this.directMessage(this.host.id, "roomDirectEvent", {event:"youAreTheHost"});
       return;
     }
     this.host = null; // no online players - game has no host, so next joining the game will be host
@@ -156,7 +163,7 @@ class Room {
   }
   disconnect(playerId){
     // Connection with player lost
-    let player = this.getPlayer();
+    let player = this.getPlayer(playerId);
     if(!player){
       return; //Maybe the player was kicked out
     }

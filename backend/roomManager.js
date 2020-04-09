@@ -9,27 +9,27 @@ class RoomManager {
     this.rooms = {}; // Cache of rooms
   }
 
-  createRoom(videoLink, roomEventCallback, gameEventCallback, directMessageCallback){
-    let roomId;
-    for(let i=0;i<MAX_TRIES;i++){
-      roomId = shortId.generate();
-      if(!(roomId in this.rooms))
-        break;
+  createRoom(videoLink, forceRoomId, roomEventCallback, gameEventCallback, directMessageCallback){
+    let roomId = forceRoomId;
+    if(!roomId) {
+      for (let i = 0; i < MAX_TRIES; i++) {
+        roomId = shortId.generate();
+        if (!(roomId in this.rooms))
+          break;
+      }
     }
     if(roomId in this.rooms){
       console.error("can't generate unique roomId");
       return null; // Sorry, can't block the room any longer
     }
 
-    do { // Generate ids until we have a unique one
-      roomId = shortId.generate();
-    }while(roomId in this.rooms);
     this.rooms[roomId] = new room.Room(videoLink, roomId, roomEventCallback, gameEventCallback, directMessageCallback);
     return this.rooms[roomId];
   }
 
   findRoom(roomId){
     if(!(roomId in this.rooms)){
+      console.warn("can't find the room", roomId, this.rooms);
       return null;
     }
     return this.rooms[roomId];

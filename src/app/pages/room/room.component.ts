@@ -10,14 +10,16 @@ import { filter } from "rxjs/operators";
 })
 export class RoomComponent implements OnInit, OnDestroy {
   private gameSubject: Subscription;
+  private roomSubject: Subscription;
   private receiverSubject: Subscription;
-  game: any = undefined;
+  game: any = {};
   hasVoted: boolean = false;
   host: string = undefined;
   messages: string[];
   newMessage: string;
   player: any = undefined;
-  players: any[] = [];
+  gamePlayers: any[] = [];
+  roomPlayers: any[] = [];
   roomLink: string;
   state: string;
   videoLink: string;
@@ -27,7 +29,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messages = [];
     this.gameSubject = this.chatService.gameState.subscribe((state) => {
+      console.log("gameSubject", state);
       this.state = state;
+    });
+    this.roomSubject = this.chatService.roomSubject.subscribe((state) => {
+      console.log("roomSubject", state);
+//     this.roomState = state;
     });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
@@ -35,14 +42,22 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
-        console.log(data);
+        console.log('gameSubject', data);
         this.game = data.game;
-        this.host = data.host;
         this.player = data.you;
-        this.players = data.players || data.game.players || [];
+        this.gamePlayers = data.players || [];
+        this.hasVoted = false;
+      });
+    this.chatService.roomSubject
+      .pipe(filter((data) => data !== undefined))
+      .subscribe((data: any) => {
+        console.log('roomSubject', data);
+        this.host = data.host;
+        this.roomPlayers = data.players || [];
         this.videoLink = data.videoLink || '';
         this.hasVoted = false;
       });
+
     this.roomLink = this.chatService.roomLink;
   }
 
@@ -71,6 +86,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.gameSubject.unsubscribe();
+    this.roomSubject.unsubscribe();
     this.receiverSubject.unsubscribe();
   }
 

@@ -13,6 +13,7 @@ export class ChatService {
   data: any = {};
   gameState: BehaviorSubject<string> = new BehaviorSubject('');
   gameSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
+  roomSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
   roomLink: string = '';
 
   constructor(@Inject(DOCUMENT) private document: Document,
@@ -33,18 +34,13 @@ export class ChatService {
           this.data.roomId = data.id;
           this.roomLink = `${this.document.location.origin}/${data.id}`;
           return this.router.navigate([`/${data.id}`]);
-        case "playerConnected":
+/*        case "playerConnected":
           let state = this.gameState.getValue();
           delete data['event'];
-          this.gameSubject.next(Object.assign({}, state, data));
-          break;
-        case 'start':
-        case 'discussion':
-        case 'night':
-        case 'vote':
-          this.gameState.next(data.event);
-          break;
+          this.roomSubject.next(Object.assign({}, state, data));
+          break;  */
         default:
+          this.roomSubject.next(data);
           return;
       }
     });
@@ -72,11 +68,11 @@ export class ChatService {
       this.socket.on('serverStatus', (message) => {
         observer.next(`ServerStatus: ${message}`);
       });
-      this.socket.on('gameEvent', (message) => {
+      /*this.socket.on('gameEvent', (message) => {
         observer.next('gameEvent' + JSON.stringify(message, null, 2));
         let game = Object.assign({}, this.gameSubject.getValue(), message);
         this.gameSubject.next(game);
-      });
+      });*/
       this.socket.on('roomEvent', (message) => {
         observer.next('roomEvent' + JSON.stringify(message, null, 2));
       });
@@ -84,8 +80,7 @@ export class ChatService {
         observer.next('directMessage' + JSON.stringify(message, null, 2));
         switch (message.event) {
           case 'gameStatus':
-            const {game} = message.data;
-            this.gameSubject.next({game, you: message.data.you});
+            this.gameSubject.next(message.data);
             break;
           default:
             break;
@@ -102,8 +97,8 @@ export class ChatService {
     this.socket.emit('roomCommand', { action: 'startGame'});
   }
 
-  vote(vote: number) {
-    this.socket.emit('gameCommand', {action: 'vote', 'vote': vote});
+  vote(choice: number) {
+    this.socket.emit('gameCommand', {action: 'vote', vote: choice});
   }
 
   get roomId() {
@@ -122,6 +117,7 @@ export class ChatService {
     this.data.userId = userName;
     this.data.userName = userName;
     this.socket.emit('server', { action: 'setUserName', userName });
+    // TODO: I don't think we need this. userName should be send when creating or joining the room, and server doesn't support renaming
   }
 
   get videoLink() {

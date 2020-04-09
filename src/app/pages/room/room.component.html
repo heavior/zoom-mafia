@@ -40,17 +40,26 @@
   </div>
 </ng-container>
 
-<ng-container *ngIf="players.length">
-  <h2>Players in the room: </h2>
-  <div class="" *ngFor="let player of players" [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
+<ng-container *ngIf="gamePlayers.length">
+  <h2>Players in the game: </h2>
+  <div class="" *ngFor="let player of gamePlayers"
+       [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
     <b>{{player.number}}: {{player.name}}</b>
-    <ng-container> - <b>{{player.role}}</b></ng-container>
+    <ng-container *ngIf="player.role"> - <b>{{player.role}}</b></ng-container>
 
     <button class="btn btn-sm btn-primary"
             (click)="vote(player.number)"
             [disabled]="hasVoted">Vote</button>
   </div>
 </ng-container>
+
+<ng-container *ngIf="roomPlayers.length">
+  <h2>Players in the room: </h2>
+  <div class="" *ngFor="let player of roomPlayers" [ngClass]="{'text-secondary': !player.isOnline}">
+    {{player.name}} {{player.isOnline}}
+  </div>
+</ng-container>
+
 <hr>
 <b>Chat</b>
 <div class="input-group">

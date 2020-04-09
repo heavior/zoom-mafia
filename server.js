@@ -8,6 +8,8 @@ const io = socketIo(server);
 const rooms = require("./backend/roomManager");
 const roomManager = new rooms.RoomManager();
 
+const TRY_RECREATE_ROOMS = true; // Trying to recreate rooms with unknown id. Lets user create their custom room names
+
 /**
  * General architecture:
  * server.js handles connections and has no room or game logic
@@ -58,10 +60,36 @@ app.get('/:roomId', function (req, res) {
 
 server.listen(process.env.PORT || 8080);
 
+function createRoom(socket, userId, videoLink="", forceRoomId = null){
+     // (hostName, videoLink, hostId, roomId)
+    let room = roomManager.createRoom(videoLink, forceRoomId,
+      (event, roomId)=>{
+        console.debug("roomEvent " + JSON.stringify(event, null, 2));
+        io.to(roomId).emit('roomEvent', event);
+      },
+      (event, roomId)=>{
+        console.debug("gameEvent " + JSON.stringify(event, null, 2));
+        io.to(roomId).emit('gameEvent', event);
+      },
+      (roomId, userId, eventName, eventData) => {
+        if(!userId) {
+          console.error("sending direct message to a not joined user");
+          return;
+        }
+        directMessage(roomId, userId, eventName, eventData)
+      });
+    socket.emit("roomEvent", {event:"created", id:room.id, userId: userId});
+    return room;
+}
+
 function joinRoom(socket, roomId, userName, userId){
   console.log("joinRoom", roomId, userName, userId);
   let room = roomManager.findRoom(roomId);
 
+  if(!room && TRY_RECREATE_ROOMS) {
+    console.warn("Recreate room " + roomId);
+    room = createRoom(socket, userId, "", roomId);
+  }
   if(!room){
     console.warn("Can't find the room " + roomId);
     socket.emit("message", "Can't find the room " + roomId);
@@ -79,12 +107,12 @@ function joinRoom(socket, roomId, userName, userId){
 }
 
 function directMessage(roomId, userId, eventName, eventData){
-  console.debug("directMessage to " + userId + " at " + roomId +": " + JSON.stringify({event:eventName, data:eventData}, null, 2));
+  // console.debug("directMessage to " + userId + " at " + roomId +": " + JSON.stringify({event:eventName, data:eventData}, null, 2));
   io.to(roomId + "_" + userId).emit("directMessage", {event:eventName, data:eventData});
 }
 
 io.on('connection', (socket) => {
-  console.log("new connection");
+  console.debug("new connection");
   let roomId = socket.handshake.query.id;
   let room;
   let user;
@@ -111,25 +139,8 @@ io.on('connection', (socket) => {
           socket.emit("message", "You are already in the room " + roomId);
           return; // Cannot create new room from here
         }
-         // (hostName, videoLink, hostId, roomId)
-        room = roomManager.createRoom(data.videoLink,
-          (event, roomId)=>{
-            console.debug("roomEvent " + JSON.stringify(event, null, 2));
-            io.to(roomId).emit('roomEvent', event);
-          },
-          (event, roomId)=>{
-            console.debug("gameEvent " + JSON.stringify(event, null, 2));
-            io.to(roomId).emit('gameEvent', event);
-          },
-          (userId, eventName, eventData) => {
-            if(!userId) {
-              console.error("sending direct message to a not joined user");
-              return;
-            }
-            directMessage(roomId, userId, eventName, eventData)
-          });
+        room = createRoom(socket, data.userId, data.videoLink);
         roomId = room.id;
-        socket.emit("roomEvent", {event:"created", id:roomId, userId: data.userId});
         // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
 
         let roomAndUser = joinRoom(socket, roomId, data.userName, data.userId);
@@ -221,6 +232,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (/* reason */) => {
+    console.log('disconnect', roomId, user);
     if(!roomId || !user){
       return; // No room, so whatever
     }
