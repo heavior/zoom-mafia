@@ -123,6 +123,7 @@ class MafiaGame {
     this.players = [];
     this.detectiveKnows = [];
     this.votes = {};
+    this.candidates = [];
   }
 
   /* External game interface, main game logic */
@@ -149,6 +150,8 @@ class MafiaGame {
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
+
+    this.startVote();
 
     console.log("start game", this);
     this.informPlayers('started');
@@ -216,6 +219,7 @@ class MafiaGame {
     this.informPlayers("next");
   }
   startTimer(timeout){
+    console.debug("startTimer", timeout);
     if(this.timer){ // Stop old timer
       clearTimeout(this.timer);
       this.timer = null;
@@ -236,7 +240,9 @@ class MafiaGame {
     }
     return Math.floor((this.timerDuration + this.timerStarted - Date.now())/1000);
   }
-  command(data, playerId, isHost, playersInfo){
+  command(data, playerId, isHost){
+    console.debug("command", data, playerId, isHost);
+
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
       return false;
@@ -245,7 +251,7 @@ class MafiaGame {
 
     switch (data.action){
       case 'next': // {action: next} Next trigger in normal statemachine flow
-        if(!isHost) { // Only master can advance the game to the next step
+        if(!isHost) { // Only host can advance the game to the next step
           return false;
         }
         this.next();
@@ -262,7 +268,7 @@ class MafiaGame {
       // Player is not in the game, send public game info
       this.directMessageCallback(playerId, "gameStatus", {
         game: this.publicInfo(),
-        players: this.players.map(player => MafiaGame._playerPublicInfo(player)),
+        players: this.players.map(player => this._playerPublicInfo(player)),
         reason: "rejoin"
       });
       return false; // No player
@@ -282,6 +288,13 @@ class MafiaGame {
   static _isActiveRole(role){
     return !((role === MafiaRoles.Guest) || (role === MafiaRoles.Master));
   }
+
+  static _roleNameForDetective(role){
+    if(MafiaGame._isMafiaRole(role)){
+      return MafiaGame._roleName(MafiaRoles.Mafia);
+    }
+    return MafiaGame._roleName(MafiaRoles.Civilian);
+  }
   /* /end of Role helpers */
 
   /* Game info */
@@ -293,13 +306,13 @@ class MafiaGame {
     // publicInfo introduced here for optimization
     this.directMessageCallback(player.id, "gameStatus", {
       game: this.publicInfo(),
-      players: this.players.map(otherPlayer => MafiaGame._playerPublicInfo(otherPlayer, player)),
+      players: this.players.map(otherPlayer => this._playerPublicInfo(otherPlayer, player)),
       you: this._playerPrivateInfo(player),
       event: reason
     });
   }
 
-  _playerPrivateInfo(player, deep = true){
+  _playerPrivateInfo(player){
     let privateInfo = {
       number: player.number,
       name: player.name,
@@ -309,30 +322,32 @@ class MafiaGame {
     return privateInfo;
   }
 
-  static _playerPublicInfo(player, requester=null){
+  _playerPublicInfo(player, requester=null){
     let publicInfo = {
       number: player.number,
       name: player.name,
-      isAlive: player.isAlive
+      isAlive: player.isAlive,
+      isCandidate: this.candidates.indexOf(player.number) >= 0
     };
 
     if(requester) {
-      if(player === requester){
-         // That's me, I know my role
-        publicInfo.role = MafiaGame._roleName(player.role);
-      }
-      if (this._isMafiaRole(requester.role) && this._isMafiaRole(player.role)) {
+      if (MafiaGame._isMafiaRole(requester.role) && MafiaGame._isMafiaRole(player.role)) {
         // mafia knows mafia
         publicInfo.role = MafiaGame._roleName(player.role);
       }
       if (requester.role === MafiaRoles.Detective) {
         // Detective knows people he checked
         if (this.detectiveKnows.indexOf(player.number) >= 0) {
-          publicInfo.role = MafiaGame._roleName(player.role);
+          publicInfo.role = MafiaGame._roleNameForDetective(player.role);
         }
       }
       if (requester.role === MafiaRoles.Master) {
         // Master knows everyone
+        publicInfo.role = MafiaGame._roleName(player.role);
+      }
+
+      if(player === requester){
+         // That's me, I know my role
         publicInfo.role = MafiaGame._roleName(player.role);
       }
     }
@@ -415,10 +430,13 @@ class MafiaGame {
     this.candidates = this.checkCandidates();
     this.votes = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
-    this.autoCompleteVote = this.allowAutoCompleteVote && this.gameState !== GameStates.Discussion;
+    this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);
+
+    console.debug("startVote", this.candidates, this.mafiaVotes, this.autoCompleteVote);
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
+    console.debug("vote", whoVotes, "for", choicePlayer);
     if(!this.players[whoVotes-1]){ // Not a player
       return null;
     }
@@ -430,13 +448,15 @@ class MafiaGame {
       this.detectiveKnows.push(choicePlayer);
     }
 
+    console.debug("autocomplete? ", this.autoCompleteVote);
+    console.debug("checkAllVoted? ", this.checkAllVoted());
     if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
       this.resolveVote();
     }
   }
   checkAllVoted(){
     // For automatic vote resolve - once everyone votes
-    return !this.whoShouldVote().some(player => !this.votes[player.number]);
+    return !this.whoShouldVote().some(player => !(player.number in this.votes));
   }
   resolveVote(){
     // Didn't vote - vote goes to the first of the list

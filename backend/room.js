@@ -198,8 +198,7 @@ class Room {
   }
 
   gameCommand(data, playerId){
-    this.game.command(data, playerId, this.host && (playerId === this.host.id),
-      this.players.reduce((dict,player) => { dict[player.id] = player.isOnline; return dict; },{}));
+    this.game.command(data, playerId, this.host && (playerId === this.host.id));
   }
 }
 
