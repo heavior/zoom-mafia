@@ -6,7 +6,8 @@
 
     <div *ngIf="!ready else makeRoom" class="form-group">
       <label for="username">Username</label>
-      <input id="username" class="form-control" [(ngModel)]="userName" required />
+      <input id="username" class="form-control" [(ngModel)]="userName"
+             (keyup.enter)="userName && !joining ? setUsername() : setUsernameAndJoin()" required />
       <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
       <div class="mt-3 d-flex justify-content-center">
         <button *ngIf="!joining else join" class="btn btn-primary"
@@ -20,7 +21,7 @@
 
     <ng-template #makeRoom>
       <label for="videoLink">Video link</label>
-      <input id="videoLink" class="form-control" [(ngModel)]="videoLink"/>
+      <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="createRoom()"/>
       <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
       <div class="mt-3 d-flex justify-content-center">
         <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
