@@ -16,12 +16,9 @@
     {action:next} (host only)
     {action:vote, vote: number} (any player)
 
-  GameEvent: (always contains current game info)
-    ended
-    next
 
   direct messages:
-    {event: "gameStatus", data: {game:..., you:..}} - game information, first send when game starts, then when player connects
+    {event: "gameStatus", data: {event:..., game:..., you:..}} - game information, first send when game starts, then when player connects
       'you' represents current player information and everything he is allowed to know about the game
     {event: "gameOver", data:{you:...}}
 */
@@ -151,8 +148,14 @@ class MafiaGame {
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
+    this.informPlayers(what);
+  }
+  informPlayers(event = null){
 
     let gameInfo = this.publicInfo();
+    if(event){
+      gameInfo.event = event;
+    }
     this.players.forEach(player => {
       this._playerUpdate(player, gameInfo);
     });
@@ -212,7 +215,7 @@ class MafiaGame {
     }
     this.startVote(); // restart the vote for the new state
     this.startTimer(timeout);
-    this.gameEventCallback("next", this.publicInfo()); // inform all players about new state
+    this.informPlayers("next");
   }
   startTimer(timeout){
     if(this.timer){ // Stop old timer
@@ -495,7 +498,7 @@ class MafiaGame {
   endGame(civiliansWin){
      this.gameOn = false;
      this.civiliansWin = civiliansWin;
-     this.gameEventCallback("ended", this.publicInfo());
+     this.informPlayers("ended");
   }
   checkGameOver(){
     // Game over conditions:
