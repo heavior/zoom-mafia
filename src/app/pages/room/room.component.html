@@ -1,21 +1,13 @@
-<h1>Welcome to the lobby</h1>
-
-<div class="d-flex mb-3">
+<div class="d-flex">
   <div class="form-group w-100">
-    <h4 for="roomLink">Link to this room:</h4>
-    <div class="input-group">
-      <input class="form-control" type="text"
-             aria-label="Room Link" aria-describedby="roomLink"
-             [value]="roomLink" #link readonly>
-      <div class="input-group-append">
-        <button class="btn btn-outline-secondary" type="button" id="roomLink" [ngxClipboard]="link">Copy</button>
-      </div>
-    </div>
+    Link to this room:<br/>
+    <a href="{{roomLink}}" #link target="_blank"> {{roomLink}}</a>
+    <button class="btn btn-sm btn-outline-secondary" id="roomLink" [ngxClipboard]="link">Copy</button>
   </div>
 </div>
 
 <ng-container *ngIf="videoLink">
-  <div class="d-flex mb-3">
+  <div class="d-flex">
     <div class="form-group w-100">
       <h4 for="videoLink">Link to video call: </h4>
       <div class="input-group">
@@ -23,39 +15,36 @@
                aria-label="Room Link" aria-describedby="videoLink"
                [value]="videoLink" #vLink readonly>
         <div class="input-group-append">
-          <button class="btn btn-outline-secondary" type="button" id="videoLink" [ngxClipboard]="vLink">Copy</button>
+          <button class="btn btn-sm btn-outline-secondary" type="button" id="videoLink" [ngxClipboard]="vLink">Copy</button>
         </div>
       </div>
     </div>
   </div>
 </ng-container>
 
-<div class="d-flex mb-3">
-  <button class="btn btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
-  <button class="btn btn-secondary mr-1" type="button" (click)="next()">Next</button>
-  <button class="btn btn-danger" type="button" (click)="clearChat()">Clear</button>
+<div class="d-flex">
+  <button class="btn btn-sm btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
+  <button class="btn btn-sm btn-outline-secondary mr-1" type="button" (click)="next()">Next</button>
+  <button class="btn btn-sm outline-clear" type="button" (click)="clearChat()">Clear</button>
 </div>
 
 <ng-container *ngIf="game">
   <ng-container *ngIf="player">
-    <h2>Player Info</h2>
-    <div class="mb-3 card">
-      <div class="card-body">
-        <h5 class="card-title">Welcome, <b>{{player.name}}</b></h5>
-        <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
-        <div>Your role is <b>{{player.role}}</b></div>
-        <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
-      </div>
+    <div class="card">
+      <div class="card-title">Welcome, <b>{{player.name}}</b></div>
+      <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
+      <div>Your role is <b>{{player.role}}</b></div>
+      <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
     </div>
   </ng-container>
 
-  <div class="mb-3">
+  <div class="">
     <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
     <div><b>{{game.gameState}}</b></div>
     <div>Time left: <b>{{game.countdown || '0'}}</b> seconds</div>
   </div>
 
-  <div class="mb-3 alert alert-info alert-dismissible fade show" role="alert">
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
     <ng-container>Hint: Talk to other players and try to find mafia and prove your position to other players. Then chose who do you suspect.</ng-container>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
@@ -64,7 +53,7 @@
 
   <ng-container *ngIf="players.length">
     <h2>Players in the room: </h2>
-    <div class="mb-3">
+    <div class="">
       <table class="table">
         <tbody>
           <tr *ngFor="let player of players">
@@ -73,7 +62,7 @@
               <ng-container> - <b>{{player.role}}</b></ng-container>
             </td>
             <td>
-              <button class="btn btn-primary"
+              <button class="btn btn-sm btn-primary"
                       (click)="vote(player.number)"
                       [disabled]="hasVoted">Vote</button>
             </td>
@@ -85,11 +74,11 @@
 </ng-container>
 
 <h2>Chat</h2>
-<div class="input-group mb-3">
+<div class="input-group">
   <input class="form-control" type="text"
          [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
   <div class="input-group-append">
-    <button class="btn btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
+    <button class="btn btn-sm btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
   </div>
 </div>
 <div class="px-2">
