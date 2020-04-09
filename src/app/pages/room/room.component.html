@@ -10,8 +10,10 @@
 <div class="d-flex">
   <button class="btn btn-sm btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
   <button class="btn btn-sm btn-outline-secondary mr-1" type="button" (click)="next()">Next</button>
-  <button class="btn btn-sm outline-clear" type="button" (click)="clearChat()">Clear</button>
+  <button class="btn btn-sm btn-outline-clear" type="button" (click)="clearChat()">Clear</button>
 </div>
+
+<hr>
 
 <ng-container *ngIf="game">
   <ng-container *ngIf="player">
@@ -25,8 +27,8 @@
 
   <div class="">
     <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
-    <div><b>{{game.gameState}}</b></div>
-    <div>Time left: <b>{{game.countdown || '0'}}</b> seconds</div>
+    <div>Phase: <b>{{game.gameState}}</b></div>
+    <div *ngIf="game.countdown > 0">Time left: <b>{{game.countdown || '0'}}</b> seconds</div>
   </div>
 
   <div class="alert alert-info alert-dismissible fade show" role="alert">
@@ -57,8 +59,8 @@
     </div>
   </ng-container>
 </ng-container>
-
-<h2>Chat</h2>
+<hr>
+<b>Chat</b>
 <div class="input-group">
   <input class="form-control" type="text"
          [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
