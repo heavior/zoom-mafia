@@ -56,6 +56,7 @@ const MafiaRoleNames = (function swap(obj){
 
   6-7 players: two mafia
   8-10 players: 3 mafia
+  9 players: introduce detective
   11-13 players: 4 mafia
   14-16 players: 5 mafia
 
@@ -68,9 +69,9 @@ const CardsDeck = [
       MafiaRoles.Civilian,
       MafiaRoles.Civilian,
       MafiaRoles.Civilian,  // 6 players ends here
-      MafiaRoles.Detective, // 7 players
+      MafiaRoles.Civilian, // 7 players
       MafiaRoles.Mafia,     // 8 players
-      MafiaRoles.Civilian,  // 9 players
+      MafiaRoles.Detective,  // 9 players
       MafiaRoles.Civilian,  // 10 players
       MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
