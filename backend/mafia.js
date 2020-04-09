@@ -125,6 +125,7 @@ class MafiaGame {
     this.nightTimetout = nightTimetout;
     this.players = [];
     this.detectiveKnows = [];
+    this.votes = {};
   }
 
   /* External game interface, main game logic */
@@ -392,7 +393,7 @@ class MafiaGame {
     }
   }
   playersVoteCounts(player){
-    return player.isAlive && (!this.mafiaVotes || player.isMafia);
+    return player && player.isAlive && (!this.mafiaVotes || player.isMafia);
   }
   whoCounts(){
     return this.players.filter(player => this.playersVoteCounts(player));
@@ -442,12 +443,12 @@ class MafiaGame {
     let unusedVotesCounter = 0;
 
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
-      unusedVotesCounter = this.whoCounts().find(player => !this.votes[player.number]).length;
+      unusedVotesCounter = this.whoCounts().filter(player => !this.votes[player.number]).length;
     }
 
     // Count votes
     let votedDown = {};
-    this.votes.values().forEach(author => {
+    Object.values(this.votes).forEach(author => {
       if(!this.playersVoteCounts(this.players[author - 1])){ // Player shouldn't have voted, ignore his vote
         return;
       }
@@ -457,10 +458,10 @@ class MafiaGame {
       votedDown[author] ++;
     });
 
-    this.votes = votedDown.entries();
+    this.votes = Object.entries(votedDown);
 
     if(this.votes.length === 0){
-      if(this.isVoteMandatory && this.gameState === GameStates.MainVote){
+      if(this.isVoteMandatory && this.gameState === GameStates.MainVote && this.whoShouldVote().length){
         // No one voted - their problems, someone will die!
         this.votes.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
         return true;

@@ -9,7 +9,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 })
 export class ChatService {
   private socket: any;
-  private url: string = 'http://localhost:8080';
+  private url: string = '/';
   data: any = {};
   gameState: BehaviorSubject<string> = new BehaviorSubject('');
   gameSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
@@ -69,6 +69,8 @@ export class ChatService {
       });
       this.socket.on('gameEvent', (message) => {
         observer.next('gameEvent' + JSON.stringify(message, null, 2));
+        let game = Object.assign({}, this.gameSubject.getValue(), message);
+        this.gameSubject.next(game);
       });
       this.socket.on('roomEvent', (message) => {
         observer.next('roomEvent' + JSON.stringify(message, null, 2));
@@ -79,9 +81,7 @@ export class ChatService {
         switch (message.event) {
           case 'gameStatus':
             const {game} = message.data;
-            if (game.gameOn) {
-              this.gameSubject.next({players: game.players, you: message.data.you});
-            }
+            this.gameSubject.next({game, you: message.data.you});
             break;
           default:
             break;
