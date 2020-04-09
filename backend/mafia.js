@@ -148,7 +148,7 @@ class MafiaGame {
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
-    this.informPlayers(what);
+    this.informPlayers('started');
   }
   informPlayers(event = null){
 
