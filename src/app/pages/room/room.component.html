@@ -2,25 +2,10 @@
   <div class="form-group w-100">
     Link to this room:<br/>
     <a href="{{roomLink}}" #link target="_blank"> {{roomLink}}</a>
-    <button class="btn btn-sm btn-outline-secondary" id="roomLink" [ngxClipboard]="link">Copy</button>
+    <button class="btn btn-sm btn-outline-secondary" id="roomLink" [ngxClipboard]="link">Copy</button><br/>
+    <a *ngIf="videoLink" href="{{videoLink}}" target="_blank">Join video conference</a>
   </div>
 </div>
-
-<ng-container *ngIf="videoLink">
-  <div class="d-flex">
-    <div class="form-group w-100">
-      <h4 for="videoLink">Link to video call: </h4>
-      <div class="input-group">
-        <input class="form-control" type="text"
-               aria-label="Room Link" aria-describedby="videoLink"
-               [value]="videoLink" #vLink readonly>
-        <div class="input-group-append">
-          <button class="btn btn-sm btn-outline-secondary" type="button" id="videoLink" [ngxClipboard]="vLink">Copy</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</ng-container>
 
 <div class="d-flex">
   <button class="btn btn-sm btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
