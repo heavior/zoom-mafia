@@ -8,9 +8,9 @@
 </div>
 
 <div class="d-flex">
-  <button class="btn btn-sm btn-outline-primary mr-1" type="button" (click)="startGame()">Start Game</button>
-  <button class="btn btn-sm btn-outline-secondary mr-1" type="button" (click)="next()">Next</button>
-  <button class="btn btn-sm btn-outline-clear" type="button" (click)="clearChat()">Clear</button>
+  <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>
+  <button class="btn btn-sm btn-outline-secondary mr-1" *ngIf="game.gameOn" type="button" (click)="next()">Next</button>
+  <button class="btn btn-sm btn-outline-clear" type="button" (click)="clearChat()">Clear chat</button>
 </div>
 
 <hr>
@@ -47,7 +47,8 @@
     <b>{{player.number}}: {{player.name}}</b>
     <ng-container *ngIf="player.role"> - <b>{{player.role}}</b></ng-container>
 
-    <button class="btn btn-sm btn-primary"
+    <button *ngIf="player.isCandidate"
+        class="btn btn-sm btn-primary"
             (click)="vote(player.number)"
             [disabled]="hasVoted">Vote</button>
   </div>

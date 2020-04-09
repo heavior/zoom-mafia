@@ -61,9 +61,9 @@ const MafiaRoleNames = (function swap(obj){
  */
 const CardsDeck = [
       MafiaRoles.Mafia,
+      MafiaRoles.Civilian,
+      MafiaRoles.Civilian,
       MafiaRoles.Mafia,
-      MafiaRoles.Civilian,
-      MafiaRoles.Civilian,
       MafiaRoles.Civilian,
       MafiaRoles.Civilian,  // 6 players ends here
       MafiaRoles.Civilian, // 7 players
@@ -153,7 +153,6 @@ class MafiaGame {
 
     this.startVote();
 
-    console.log("start game", this);
     this.informPlayers('started');
   }
   informPlayers(event = null){
@@ -231,6 +230,7 @@ class MafiaGame {
     this.timerStarted = Date.now();
     this.timerDuration = timeout*1000;
     this.timer = setTimeout(()=>{
+      console.debug("time over");
       this.next(); // Always forces to the next step
     }, timeout*1000 + TIMER_LATENCY);
   }
@@ -238,7 +238,9 @@ class MafiaGame {
     if(this.timer){
       return null;
     }
-    return Math.floor((this.timerDuration + this.timerStarted - Date.now())/1000);
+
+    console.debug("timeLeft", this.timerStarted + this.timerDuration - Date.now(),  Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000));
+    return Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000);
   }
   command(data, playerId, isHost){
     console.debug("command", data, playerId, isHost);
@@ -370,7 +372,21 @@ class MafiaGame {
   static shuffle(numberOfCards){
     // This method generates an array of roles based on number of players
     let cardsToPlay = CardsDeck.slice(0, numberOfCards);
-    cardsToPlay.sort(() => Math.random() - 0.5); // Shuffle the array, solution from here: https://javascript.info/task/shuffle
+
+
+    // Shuffle the array, solutions from here: https://javascript.info/task/shuffle
+    //cardsToPlay.sort(() => Math.random() - 0.5); // Simple option, but not evenly distributed
+    for (let i = cardsToPlay.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
+
+      // swap elements array[i] and array[j]
+      // we use "destructuring assignment" syntax to achieve that
+      // you'll find more details about that syntax in later chapters
+      // same can be written as:
+      // let t = array[i]; array[i] = array[j]; array[j] = t
+      [cardsToPlay[i], cardsToPlay[j]] = [cardsToPlay[j], cardsToPlay[i]];
+    }
+
     return cardsToPlay;
   }
 
@@ -399,12 +415,12 @@ class MafiaGame {
         if(!this.votes.length){
           return this.players.filter(player => player.isAlive).map(player => player.number);
         }
-        return this.votes.map(vote => vote[0]);
+        return this.votes.map(vote => parseInt(vote[0]));
 
       case GameStates.Tie:
         // if tie happens - people vote to kill all or spare all
         let tieCounter = this.votes[0][1];
-        return this.votes.filter(item => item[1] === tieCounter).map(item => item[0]);
+        return this.votes.filter(item => item[1] === tieCounter).map(item => parseInt(item[0]));
     }
   }
   playersVoteCounts(player){
@@ -432,7 +448,7 @@ class MafiaGame {
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);
 
-    console.debug("startVote", this.candidates, this.mafiaVotes, this.autoCompleteVote);
+    console.debug("startVote", this.candidates, this.mafiaVotes, this.allowAutoCompleteVote, (this.gameState !== GameStates.Discussion), this.autoCompleteVote);
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
