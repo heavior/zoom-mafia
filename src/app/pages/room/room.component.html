@@ -40,22 +40,13 @@
 
   <ng-container *ngIf="players.length">
     <h2>Players in the room: </h2>
-    <div class="">
-      <table class="table">
-        <tbody>
-          <tr *ngFor="let player of players">
-            <td>
-              <b [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">{{player.number}}: {{player.name}}</b>
-              <ng-container> - <b>{{player.role}}</b></ng-container>
-            </td>
-            <td>
-              <button class="btn btn-sm btn-primary"
-                      (click)="vote(player.number)"
-                      [disabled]="hasVoted">Vote</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="" *ngFor="let player of players" [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
+        <b>{{player.number}}: {{player.name}}</b>
+        <ng-container> - <b>{{player.role}}</b></ng-container>
+
+        <button class="btn btn-sm btn-primary"
+                (click)="vote(player.number)"
+                [disabled]="hasVoted">Vote</button>
     </div>
   </ng-container>
 </ng-container>
