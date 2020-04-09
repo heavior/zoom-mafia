@@ -63,12 +63,12 @@ const CardsDeck = [
       MafiaRoles.Mafia,
       MafiaRoles.Civilian,
       MafiaRoles.Civilian,
-      MafiaRoles.Mafia,
       MafiaRoles.Civilian,
-      MafiaRoles.Civilian,  // 6 players ends here
-      MafiaRoles.Civilian, // 7 players
+      MafiaRoles.Mafia,
+      MafiaRoles.Civilian,  // 6 players
+      MafiaRoles.Civilian,  // 7 players
       MafiaRoles.Mafia,     // 8 players
-      MafiaRoles.Detective,  // 9 players
+      MafiaRoles.Detective, // 9 players
       MafiaRoles.Civilian,  // 10 players
       MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
@@ -171,7 +171,19 @@ class MafiaGame {
     let timeout = 0;
     switch(this.gameState){
       case GameStates.Discussion:
-        this.resolveVote(); // Count vote outcome
+        let voteResolve = this.resolveVote(); // Count vote outcome
+        if(!voteResolve){ // No candidates during main phase
+          // Edge case - no one voted at all
+          console.log("Discussion: no one voted - keep talking");
+          break; // Keep the state, restart the vote
+        }
+        if(this.votes.length === 1){
+          // Single candidate during daytime vote - run tie breaker
+          this.gameState = GameStates.Tie; // Front end must support this
+          timeout = this.mainVoteTimeout;
+          console.log("Discussion: one vote - tie breaker");
+          break;
+        }
         this.gameState = GameStates.MainVote;
         timeout = this.mainVoteTimeout;
         break;
@@ -179,7 +191,8 @@ class MafiaGame {
       case GameStates.MainVote:
         if(!this.resolveVote()){
           if(!this.votes.length){ // Edge case - no one voted at all
-            break; // Keep the state, sestart the vote
+           console.log("MainVote: no one voted - restart the vote");
+            break; // Keep the state, restart the vote
           }
           // tie breaker
           this.gameState = GameStates.Tie; // Front end must support this
@@ -235,7 +248,7 @@ class MafiaGame {
     }, timeout*1000 + TIMER_LATENCY);
   }
   timeLeft(){
-    if(this.timer){
+    if(!this.timer){
       return null;
     }
 
@@ -448,7 +461,7 @@ class MafiaGame {
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);
 
-    console.debug("startVote", this.candidates, this.mafiaVotes, this.allowAutoCompleteVote, (this.gameState !== GameStates.Discussion), this.autoCompleteVote);
+    console.debug("startVote", this.gameState, this.candidates, this.allowAutoCompleteVote, (this.gameState !== GameStates.Discussion), this.autoCompleteVote);
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
@@ -464,10 +477,8 @@ class MafiaGame {
       this.detectiveKnows.push(choicePlayer);
     }
 
-    console.debug("autocomplete? ", this.autoCompleteVote);
-    console.debug("checkAllVoted? ", this.checkAllVoted());
-    if(this.autoCompleteVote && this.checkAllVoted()){ // Important: do not resolve suspects vote
-      this.resolveVote();
+    if(this.autoCompleteVote && this.checkAllVoted()){
+      this.next();
     }
   }
   checkAllVoted(){
@@ -502,6 +513,7 @@ class MafiaGame {
         this.votes.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
         return true;
       }
+
       return false; // No one voted
     }
 

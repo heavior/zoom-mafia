@@ -191,7 +191,12 @@ class Room {
     }
   }
 
-  startGame(){
+  startGame(playerId){
+    if(this.host && playerId !== this.host.id){
+      console.warn("Only host can start the game", playerId, this.host.id);
+      this.directMessage(playerId, "roomDirectEvent", {event:"youAreNotTheHost"});
+      return;
+    }
     // Only online players join the game
     let onlinePlayers = this.players.filter(player => player.isOnline);
     this.game.start(onlinePlayers);
