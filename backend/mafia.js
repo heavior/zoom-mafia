@@ -137,14 +137,15 @@ class MafiaGame {
         return {
           id: player.id,
           name: player.name,
-          number: index + 1,
           role: role,
           //isMaster: role === MafiaRoles.Master || hostId === player.id,
           //isMaster: role === MafiaRoles.Master || hostId === player.id,
           isMafia: MafiaGame._isMafiaRole(role),
           isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
         }
-    });
+    }).filter(player=>player.role !== MafiaRoles.Guest) // Remove guests, sorry
+      .forEach((player,index)=>{player.number = index + 1}); // Assign game numbers
+
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
@@ -238,7 +239,7 @@ class MafiaGame {
     }
     return Math.floor((this.timerDuration + this.timerStarted - Date.now())/1000);
   }
-  command(data, playerId, isHost){
+  command(data, playerId, isHost, playersInfo){
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
       return false;
