@@ -22,19 +22,24 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomPlayers: any[] = [];
   roomLink: string;
   state: string;
+  userName: string;
   videoLink: string;
 
   constructor(private chatService: ChatService) { }
 
   ngOnInit(): void {
     this.messages = [];
+    this.roomLink = this.chatService.roomLink;
+    this.userName = this.chatService.userName;
+
     this.gameSubject = this.chatService.gameState.subscribe((state) => {
-      console.log("gameSubject", state);
+      console.log("gameState", state);
       this.state = state;
     });
-    this.roomSubject = this.chatService.roomSubject.subscribe((state) => {
-      console.log("roomSubject", state);
-//     this.roomState = state;
+    this.roomSubject = this.chatService.roomSubject.subscribe((data) => {
+      console.log("roomSubject", data);
+      this.roomLink = this.chatService.roomLink;
+      // this.roomState = state;
     });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
@@ -57,12 +62,18 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.videoLink = data.videoLink || '';
         this.hasVoted = false;
       });
-
-    this.roomLink = this.chatService.roomLink;
   }
 
   clearChat() {
     this.messages = [];
+  }
+
+  join() {
+    this.chatService.joinRoom({
+      roomId: this.chatService.roomId,
+      userId: this.userName,
+      userName: this.userName
+    });
   }
 
   next() {

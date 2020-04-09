@@ -33,6 +33,8 @@ export class ChatService {
         case 'joined':
           this.data.roomId = data.id;
           this.roomLink = `${this.document.location.origin}/${data.id}`;
+          Object.assign(data, this.data);
+          this.roomSubject.next(data);
           return this.router.navigate([`/${data.id}`]);
 /*        case "playerConnected":
           let state = this.gameState.getValue();
@@ -46,13 +48,15 @@ export class ChatService {
     });
   }
 
-  createRoom() {
-    const data = Object.assign({}, this.data, {action: 'create'});
+  createRoom(data) {
+    this.userName = data.userName;
+    Object.assign(data, {action: 'create'});
     this.socket.emit('roomCommand', data);
   }
 
-  joinRoom() {
-    const data = Object.assign({}, this.data, {action: 'join'});
+  joinRoom(data) {
+    this.userName = data.userName;
+    Object.assign(data, {action: 'join'});
     this.socket.emit('roomCommand', data);
   }
 
@@ -116,8 +120,6 @@ export class ChatService {
   set userName(userName) {
     this.data.userId = userName;
     this.data.userName = userName;
-    this.socket.emit('server', { action: 'setUserName', userName });
-    // TODO: I don't think we need this. userName should be send when creating or joining the room, and server doesn't support renaming
   }
 
   get videoLink() {

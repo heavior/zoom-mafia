@@ -28,21 +28,16 @@ export class HomeComponent implements OnInit {
   }
 
   createRoom() {
-    this.chatService.createRoom();
-  }
-
-  joinRoom() {
-    this.chatService.joinRoom();
+    const data = {
+      userId: this.userName,
+      userName: this.userName,
+      videoLink: this.videoLink
+    };
+    this.chatService.createRoom(data);
   }
 
   setUsername() {
     this.ready = true;
-    this.chatService.userName = this.userName;
-    this.chatService.videoLink = this.videoLink;
-  }
-  setUsernameAndJoin() {
-    this.setUsername();
-    this.joinRoom();
   }
 
 }

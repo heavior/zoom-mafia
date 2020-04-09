@@ -13,8 +13,9 @@ export class RoomGuard implements CanActivate {
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    this.chatService.roomId = next.params.roomId;
-    return this.chatService.userName ? true : this.router.navigate(['/']);
+    const roomId = next.params.roomId;
+    this.chatService.roomId = roomId;
+    return roomId !== 'undefined' ? true : this.router.navigate(['/']);
   }
 
 }
