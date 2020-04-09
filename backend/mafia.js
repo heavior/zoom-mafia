@@ -251,8 +251,6 @@ class MafiaGame {
     if(!this.timer){
       return null;
     }
-
-    console.debug("timeLeft", this.timerStarted + this.timerDuration - Date.now(),  Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000));
     return Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000);
   }
   command(data, playerId, isHost){
@@ -328,13 +326,12 @@ class MafiaGame {
   }
 
   _playerPrivateInfo(player){
-    let privateInfo = {
+    return {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
       role: MafiaGame._roleName(player.role)
     };
-    return privateInfo;
   }
 
   _playerPublicInfo(player, requester=null){
@@ -495,14 +492,17 @@ class MafiaGame {
 
     // Count votes
     let votedDown = {};
-    Object.values(this.votes).forEach(author => {
+    console.debug("checkVotes",  this.votes, )
+    Object.keys(this.votes).forEach(author => {
+      console.debug("check vote", author, this.playersVoteCounts(this.players[author - 1]), this.votes[author]);
       if(!this.playersVoteCounts(this.players[author - 1])){ // Player shouldn't have voted, ignore his vote
         return;
       }
-      if(!votedDown[author]){
-        votedDown[author] = 0;
+      let choice = this.votes[author];
+      if(!votedDown[choice]){
+        votedDown[choice] = 0;
       }
-      votedDown[author] ++;
+      votedDown[choice] ++;
     });
 
     this.votes = Object.entries(votedDown);
