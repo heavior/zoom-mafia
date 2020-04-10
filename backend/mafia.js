@@ -70,7 +70,7 @@ const CardsDeck = [
       MafiaRoles.Mafia,     // 8 players
       MafiaRoles.Detective, // 9 players
       MafiaRoles.Civilian,  // 10 players
-      MafiaRoles.Don,       // 11 players
+      MafiaRoles.Mafia,     // MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
       MafiaRoles.Civilian,  // 13 players
       MafiaRoles.Mafia,     // 14 players
@@ -91,7 +91,7 @@ const GameStates = Object.freeze({
   Discussion: 'Discussion', // Day - main conversation between players and nominating candidates
   MainVote: 'MainVote',     // Day - vote for guilty party
   Night: 'Night',           // Night - mafia votes
-  Tie: 'Tie'                // Day - a tie during vote process
+  Tiebreaker: 'Tiebreaker'                // Day - a tie during vote process
 });
 
 
@@ -179,11 +179,13 @@ class MafiaGame {
         }
         if(this.votes.length === 1){
           // Single candidate during daytime vote - run tie breaker
-          this.gameState = GameStates.Tie; // Front end must support this
+          this.gameState = GameStates.Tiebreaker; // Front end must support this
           timeout = this.mainVoteTimeout;
           console.log("Discussion: one vote - tie breaker");
           break;
         }
+
+        console.log("Discussion: switching to MainVote");
         this.gameState = GameStates.MainVote;
         timeout = this.mainVoteTimeout;
         break;
@@ -191,14 +193,18 @@ class MafiaGame {
       case GameStates.MainVote:
         if(!this.resolveVote()){
           if(!this.votes.length){ // Edge case - no one voted at all
-           console.log("MainVote: no one voted - restart the vote");
+            console.log("MainVote: no one voted - restart the vote");
             break; // Keep the state, restart the vote
           }
           // tie breaker
-          this.gameState = GameStates.Tie; // Front end must support this
+
+          console.log("MainVote: switching to Tiebreaker");
+          this.gameState = GameStates.Tiebreaker; // Front end must support this
           timeout = this.mainVoteTimeout;
+          break;
         }
 
+        console.log("MainVote: switching to Night");
         this._kill(this.votes[0][0]); // Kill a player
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
@@ -208,16 +214,20 @@ class MafiaGame {
         if(this.resolveVote()) {
           this._kill(this.votes[0][0]);
         }
+
+        console.log("MainVote: switching to Discussion");
         this.gameState = GameStates.Discussion;
         timeout = this.discussionTimeout;
         break;
 
-      case GameStates.Tie:
+      case GameStates.Tiebreaker:
         // People vote to kill both, or spare both: 0 or 1
+        // TODO: check if it works, maybe redo how it works after UI implemented
         if(this.resolveVote() && this.votes[0][0] === 0){ // Failed vote = double tie - save both
           this.candidates.forEach(candidate => this._kill(candidate));
         }
 
+        console.log("Tiebreaker: switching to Night");
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
@@ -254,7 +264,7 @@ class MafiaGame {
     return Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000);
   }
   command(data, playerId, isHost){
-    console.debug("command", data, playerId, isHost);
+    console.debug(">> command", data, playerId, isHost);
 
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
@@ -427,7 +437,7 @@ class MafiaGame {
         }
         return this.votes.map(vote => parseInt(vote[0]));
 
-      case GameStates.Tie:
+      case GameStates.Tiebreaker:
         // if tie happens - people vote to kill all or spare all
         let tieCounter = this.votes[0][1];
         return this.votes.filter(item => item[1] === tieCounter).map(item => parseInt(item[0]));
@@ -462,7 +472,6 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
-    console.debug("vote", whoVotes, "for", choicePlayer);
     if(!this.players[whoVotes-1]){ // Not a player
       return null;
     }
@@ -492,13 +501,12 @@ class MafiaGame {
 
     // Count votes
     let votedDown = {};
-    console.debug("checkVotes",  this.votes, )
     Object.keys(this.votes).forEach(author => {
-      console.debug("check vote", author, this.playersVoteCounts(this.players[author - 1]), this.votes[author]);
+
+      let choice = this.votes[author];
       if(!this.playersVoteCounts(this.players[author - 1])){ // Player shouldn't have voted, ignore his vote
         return;
       }
-      let choice = this.votes[author];
       if(!votedDown[choice]){
         votedDown[choice] = 0;
       }
@@ -513,7 +521,6 @@ class MafiaGame {
         this.votes.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
         return true;
       }
-
       return false; // No one voted
     }
 
