@@ -109,7 +109,8 @@ class Room {
     }
     console.debug("join", playerName, playerId, player);
     this.findNewHost(); // Check if we need to assign host.
-    this.game.playerUpdate(playerId); // Send update to the connected player
+
+    this.game.join(player); //this.game.playerUpdate(playerId); // Send update to the connected player
     return player;
   }
 

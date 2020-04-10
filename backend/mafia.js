@@ -132,20 +132,9 @@ class MafiaGame {
     let playersRoles = MafiaGame.shuffle(players.length); // Shuffle the roles
 
     // Generate states for everyPlayer
-    this.players = players.map((player, index) => {
-        // Return value for new_array
-        let role = playersRoles[index];
-        return {
-          id: player.id,
-          name: player.name,
-          role: role,
-          //isMaster: role === MafiaRoles.Master || hostId === player.id,
-          //isMaster: role === MafiaRoles.Master || hostId === player.id,
-          isMafia: MafiaGame._isMafiaRole(role),
-          isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
-        }
-    });
-    this.players = this.players.filter(player => player.role !== MafiaRoles.Guest); // Remove guests, sorry
+    this.players = players.map((player, index) => this._createPlayer(player,playersRoles[index],index+1));
+    this._rearangePlayers();
+    //this.players = this.players.filter(player => player.role !== MafiaRoles.Guest);
     this.players.forEach((player,index)=>{ player.number = index + 1 }); // Assign game numbers
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
@@ -154,6 +143,39 @@ class MafiaGame {
     this.startVote();
 
     this.informPlayers('started');
+  }
+  _createPlayer(player, role = MafiaRoles.Guest, number = null){
+    return {
+        id: player.id,
+        name: player.name,
+        role: role,
+        number: number || this.players.length,
+        //isMaster: role === MafiaRoles.Master || hostId === player.id,
+        //isMaster: role === MafiaRoles.Master || hostId === player.id,
+        isMafia: MafiaGame._isMafiaRole(role),
+        isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
+      }
+  }
+  _rearangePlayers(){
+    this.players.sort((a,b) => {
+      let activeA = MafiaGame._isActiveRole(a.role);
+      let activeB = MafiaGame._isActiveRole(a.role);
+      if(activeA === activeB){
+        // Sort by name is the role is active
+        var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+        var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        // names must be equal
+        return 0;
+      }
+      return activeA?-1:1; // Active go on top
+    });
+
   }
   informPlayers(event = null){
     this.players.forEach(player => {
@@ -299,6 +321,18 @@ class MafiaGame {
     this._playerUpdate(this.players[index], "rejoin");
     return true;
   }
+
+  join(roomPlayer){
+    let player = this.getPlayer(roomPlayer.id);
+    if(!player){
+      // Join as guest
+      player = this._createPlayer(roomPlayer);
+      this.players.push(player);
+      this._rearangePlayers();
+    }
+
+    this._playerUpdate(player, "join");
+  }
   /* /end of External game interface */
 
   /* Role helpers */
@@ -323,6 +357,10 @@ class MafiaGame {
   /* Game info */
   getPlayerIndex(playerId){
     return this.players.findIndex(player=>player.id === playerId);
+  }
+
+  getPlayer(playerId){
+    return this.players.find(player=>player.id === playerId);
   }
 
   _playerUpdate(player, reason){
