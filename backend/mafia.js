@@ -158,12 +158,19 @@ class MafiaGame {
   }
   _rearangePlayers(){
     this.players.sort((a,b) => {
+      // Master is always on top
+      if(a.role === MafiaRoles.Master){
+        return -1;
+      }
+      if(b.role === MafiaRoles.Master){
+        return -1;
+      }
       let activeA = MafiaGame._isActiveRole(a.role);
       let activeB = MafiaGame._isActiveRole(a.role);
       if(activeA === activeB){
         // Sort by name is the role is active
-        var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-        var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+        let nameA = a.name.toUpperCase(); // ignore upper and lowercase
+        let nameB = b.name.toUpperCase(); // ignore upper and lowercase
         if (nameA < nameB) {
           return -1;
         }
