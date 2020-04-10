@@ -306,21 +306,6 @@ class MafiaGame {
         break;
     }
   }
-  playerUpdate(playerId){
-    // This method send actual information to the player who is reconnecting
-    let index = this.getPlayerIndex(playerId);
-    if(index < 0){
-      // Player is not in the game, send public game info
-      this.directMessageCallback(playerId, "gameStatus", {
-        game: this.publicInfo(),
-        players: this.players.map(player => this._playerPublicInfo(player)),
-        reason: "rejoin"
-      });
-      return false; // No player
-    }
-    this._playerUpdate(this.players[index], "rejoin");
-    return true;
-  }
 
   join(roomPlayer){
     let player = this.getPlayer(roomPlayer.id);
