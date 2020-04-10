@@ -41,7 +41,7 @@
 
   <ng-container *ngIf="game">
     <div class="">
-      <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
+      <div>It is <b>{{game.gameState === 'Night' ? 'Night' : 'Day'}}</b></div>
       <div>Phase: <b>{{game.gameState}}</b></div>
       <div *ngIf="countdown">Time left: <b>{{countdown}}</b> seconds</div>
     </div>
@@ -54,24 +54,67 @@
     </div>
   </ng-container>
 
-  <ng-container *ngIf="gamePlayers.length">
-    <h2>Players in the game: </h2>
-    <div class="" *ngFor="let player of gamePlayers"
-         [style.textDecorationLine]="player.isAlive ? '' : 'line-through'">
-      <b>{{player.number}}: {{player.name}}</b>
-      <ng-container *ngIf="player.role"> - <b>{{player.role}}</b></ng-container>
+  <ng-container *ngIf="players.length">
 
-      <button *ngIf="player.isCandidate"
-              class="btn btn-sm btn-primary"
-              (click)="vote(player.number)"
-              [disabled]="hasVoted">Vote</button>
+
+    <ng-container *ngIf="game.gameState === 'Night' && player.role === 'Civilian'">
+      Once you are ready:
+      <button class="btn btn-sm btn-primary"
+              (click)="vote(0)"
+              [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
+      <hr>
+    </ng-container>
+
+    <ng-container *ngIf="game.gameState === 'Tiebreaker'">
+      How do you find <span
+          *ngFor="let vPlayer of candidates(); let isLast=last"
+          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          >{{vPlayer.name}}{{isLast ? '' : ', '}}</span>?<br>
+      <button class="btn btn-sm"
+              (click)="vote(-1)"
+              [ngClass]="{'btn-primary':votedFor === null || votedFor, 'btn-secondary': votedFor === 0}"
+              [disabled]="votedFor !== null">guilty</button>
+      <button class="btn btn-sm"
+              (click)="vote(0)"
+              [ngClass]="{'btn-primary':!votedFor, 'btn-secondary': votedFor}"
+              [disabled]="votedFor !== null">not guilty</button>
+      <hr>
+    </ng-container>
+    <b>Players: </b>
+    <div class="" *ngFor="let gPlayer of gamePlayers"
+         [ngClass]="{'text-muted': !gPlayer.isOnline}"
+         title="{{gPlayer.isOnline?'':'Offline'}}"
+         [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
+    >
+      {{gPlayer.number}}: {{gPlayer.name}}
+      <ng-container *ngIf="player === gPlayer">(you)</ng-container>
+      <span *ngIf="gPlayer.role"
+            [ngClass]="{'text-danger':mafiaRole(gPlayer.role), 'text-success': civilianRole(gPlayer.role)}"> - {{gPlayer.role}}</span>
+      &nbsp;
+      <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
+              class="btn btn-sm"
+              (click)="vote(gPlayer.number)"
+              [ngClass]="{'btn-primary':!votedFor || votedFor === gPlayer.number, 'btn-secondary': votedFor && votedFor !== gPlayer.number}"
+              [disabled]="votedFor">{{voteButtonCaption()}}</button>
+
+      <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>
+
+      <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
+        (<span
+          *ngFor="let vPlayer of gPlayer.votedBy; let isLast=last"
+          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          >{{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+      </ng-container>
     </div>
   </ng-container>
 
-  <ng-container *ngIf="roomPlayers.length">
-    <h2>Players in the room: </h2>
-    <div class="" *ngFor="let player of roomPlayers" [ngClass]="{'text-secondary': !player.isOnline}">
-      {{player.name}} {{player.isOnline}}
+  <ng-container *ngIf="guests.length">
+    <b>Guests:</b>
+    <div class="" *ngFor="let player of guests"
+         [ngClass]="{'text-muted': !player.isOnline}"
+         title="{{player.isOnline?'':'Offline'}}"
+    >
+      {{player.name}}
     </div>
   </ng-container>
 
