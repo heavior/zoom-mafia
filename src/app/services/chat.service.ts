@@ -2,7 +2,7 @@ import {Inject, Injectable} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import {ActivatedRoute, Router} from "@angular/router";
 import * as io from 'socket.io-client';
-import {BehaviorSubject, Observable} from "rxjs";
+import {BehaviorSubject, fromEvent, Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,6 @@ export class ChatService {
               private router: Router) {
     this.socket = io(this.url);
     // @ts-ignore
-    this.data.roomId = this.router.url.replace('/', '');
     this.init();
   }
 
@@ -31,7 +30,7 @@ export class ChatService {
       switch(data.event) {
         case 'created':
         case 'joined':
-          this.data.roomId = data.id;
+          this.roomId = data.id;
           this.roomLink = `${this.document.location.origin}/${data.id}`;
           Object.assign(data, this.data);
           this.roomSubject.next(data);
@@ -45,6 +44,23 @@ export class ChatService {
           this.roomSubject.next(data);
           return;
       }
+    });
+
+    setTimeout(() => {
+      this.roomId = this.router.url.replace('/', '');
+      const oldRoomId = localStorage.getItem('roomId');
+      const userName = localStorage.getItem('userName');
+      if (userName && oldRoomId === this.roomId) {
+        this.userName = userName;
+        this.joinRoom({...this.data})
+      } else {
+        localStorage.clear();
+      }
+    });
+
+    fromEvent(window, 'beforeunload').subscribe(() => {
+      localStorage.setItem('roomId', this.roomId);
+      localStorage.setItem('userName', this.userName);
     });
   }
 
