@@ -9,7 +9,7 @@ class MafiaBot {
     this.name = "Bot " + i;
 
     this.isOnline= true;
-    this.socket = io(server, {
+    this.socket = io.connect(server, {
       forceNew: true,
       autoConnect: false,
       query: {

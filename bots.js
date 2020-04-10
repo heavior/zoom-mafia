@@ -6,8 +6,7 @@ const { Bot } = require("./backend/mafiaBot");
 
 const DEFAULT_BOTS_NUMBER = 10;
 const DEFAULT_ROOM = 'bots';
-const DEFAULT_SERVER = 'ws://127.0.0.1:8080';
-
+const DEFAULT_SERVER = 'http://localhost:8080';
 const program = new Command();
 program.version('0.0.1');
 
@@ -29,15 +28,3 @@ for(let i=0;i<botsNumber;i++){
   let bot = new Bot(server, roomId, i);
   bots.push(bot);
 }
-
-let isAlive = false;
-
-do{
-
-  for(let i=0;i<bots.length;i++){
-    isAlive = isAlive || bots[i].isAlive();
-  }
-} while(isAlive);
-
-
-console.log("bots are dead");
