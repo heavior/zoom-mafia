@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from "rxjs";
+import {Subscription, timer} from "rxjs";
 import { ChatService } from "../../services/chat.service";
-import { filter } from "rxjs/operators";
+import {filter, takeWhile} from "rxjs/operators";
 
 @Component({
   selector: 'app-room',
@@ -9,9 +9,11 @@ import { filter } from "rxjs/operators";
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, OnDestroy {
+  private countdownSubject: Subscription;
   private gameSubject: Subscription;
   private roomSubject: Subscription;
   private receiverSubject: Subscription;
+  countdown: number = 0;
   game: any = {};
   hasVoted: boolean = false;
   host: string = undefined;
@@ -52,6 +54,16 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.player = data.you;
         this.gamePlayers = data.players || [];
         this.hasVoted = false;
+        if (this.countdownSubject) {
+          this.countdownSubject.unsubscribe();
+        }
+        let countdown = data.game.countdown || 0;
+        this.countdownSubject = timer(1000, 1000)
+          .pipe(takeWhile(() => countdown > 0))
+          .subscribe(() => {
+            --countdown;
+            this.countdown = countdown;
+          });
       });
     this.chatService.roomSubject
       .pipe(filter((data) => data !== undefined))
@@ -96,6 +108,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.countdownSubject) {
+      this.countdownSubject.unsubscribe();
+    }
     this.gameSubject.unsubscribe();
     this.roomSubject.unsubscribe();
     this.receiverSubject.unsubscribe();

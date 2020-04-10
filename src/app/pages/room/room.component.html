@@ -43,7 +43,7 @@
     <div class="">
       <div>It is <b>{{game.gameState == 'Night' ? 'Night' : 'Day'}}</b></div>
       <div>Phase: <b>{{game.gameState}}</b></div>
-      <div *ngIf="game.countdown > 0">Time left: <b>{{game.countdown || '0'}}</b> seconds</div>
+      <div *ngIf="countdown">Time left: <b>{{countdown}}</b> seconds</div>
     </div>
 
     <div class="alert alert-info alert-dismissible fade show" role="alert">
