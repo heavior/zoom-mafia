@@ -133,7 +133,7 @@ class MafiaGame {
 
     // Generate states for everyPlayer
     this.players = players.map((player, index) => this._createPlayer(player,playersRoles[index],index+1));
-    this._rearangePlayers();
+    this._rearrangePlayers();
     //this.players = this.players.filter(player => player.role !== MafiaRoles.Guest);
     this.players.forEach((player,index)=>{ player.number = index + 1 }); // Assign game numbers
     this.gameOn = true;
@@ -156,7 +156,7 @@ class MafiaGame {
         isAlive: MafiaGame._isActiveRole(role) // mark guests and master as dead - to prevent from voting
       }
   }
-  _rearangePlayers(){
+  _rearrangePlayers(){
     this.players.sort((a,b) => {
       // Master is always on top
       if(a.role === MafiaRoles.Master){
@@ -320,7 +320,7 @@ class MafiaGame {
       // Join as guest
       player = this._createPlayer(roomPlayer);
       this.players.push(player);
-      this._rearangePlayers();
+      this._rearrangePlayers();
     }
 
     this._playerUpdate(player, "join");
@@ -373,36 +373,57 @@ class MafiaGame {
       role: MafiaGame._roleName(player.role)
     };
   }
+  _openVote(){
+    return this.gameState !== GameStates.Night;
+  }
 
+  _playerVotedBy(player, requester){
+    if(!this._openVote()){
+      return null;
+    }
+    // Filter players who voted for me
+    return Object.entries(this.votes) // Dict to array to iterate easier
+               .filter(element => parseInt(element[1]) === player.number) // Filter votes for this player
+               .map(element => {
+                 let player = this.players[element[0]-1]
+                 return {
+                   name: player.name,
+                   number: player.number,
+                   role: this._playerRoleForAnothePlayer(player, requester)
+                 }
+               }); // Map to player names
+  }
+
+  _playerRoleForAnothePlayer(player, requester){
+    if(!requester) {
+      return null;
+    }
+    if(player === requester){
+       // That's me, I know my role
+      return MafiaGame._roleName(player.role);
+    }
+
+    if (requester.isMafia && player.isMafia) {
+      // mafia knows mafia
+      return MafiaGame._roleName(player.role);
+    }
+    if ((requester.role === MafiaRoles.Detective)
+      && (this.detectiveKnows.indexOf(player.number) >= 0)) {
+      // Detective knows people they checked
+      return MafiaGame._roleNameForDetective(player.role);
+    }
+    return null;
+  }
   _playerPublicInfo(player, requester=null){
     let publicInfo = {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
-      isCandidate: this.candidates.indexOf(player.number) >= 0
+      isCandidate: this.candidates.indexOf(player.number) >= 0,
+      votedBy: this._playerVotedBy(player)
     };
 
-    if(requester) {
-      if (MafiaGame._isMafiaRole(requester.role) && MafiaGame._isMafiaRole(player.role)) {
-        // mafia knows mafia
-        publicInfo.role = MafiaGame._roleName(player.role);
-      }
-      if (requester.role === MafiaRoles.Detective) {
-        // Detective knows people he checked
-        if (this.detectiveKnows.indexOf(player.number) >= 0) {
-          publicInfo.role = MafiaGame._roleNameForDetective(player.role);
-        }
-      }
-      if (requester.role === MafiaRoles.Master) {
-        // Master knows everyone
-        publicInfo.role = MafiaGame._roleName(player.role);
-      }
-
-      if(player === requester){
-         // That's me, I know my role
-        publicInfo.role = MafiaGame._roleName(player.role);
-      }
-    }
+    publicInfo.role = this._playerRoleForAnothePlayer(player, requester);
     return publicInfo;
   }
 
@@ -515,6 +536,10 @@ class MafiaGame {
 
     if(this.autoCompleteVote && this.checkAllVoted()){
       this.next();
+    }
+
+    if(this._openVote()){
+      this.informPlayers("vote");
     }
   }
   checkAllVoted(){
