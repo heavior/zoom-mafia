@@ -73,7 +73,7 @@
       <button class="btn btn-sm"
               (click)="vote(-1)"
               [ngClass]="{'btn-primary':votedFor === null || votedFor, 'btn-secondary': votedFor === 0}"
-              [disabled]="votedFor !== null">guilty</button>
+              [disabled]="votedFor !== null">guilty</button> &nbsp;
       <button class="btn btn-sm"
               (click)="vote(0)"
               [ngClass]="{'btn-primary':!votedFor, 'btn-secondary': votedFor}"
