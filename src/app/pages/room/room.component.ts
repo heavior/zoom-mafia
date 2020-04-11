@@ -121,6 +121,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
   voteButtonCaption(){
     // TODO: make into variable and calculate once per phase
+    if(!this.player.isAlive){ // Dead don't vote
+      return null;
+    }
     switch (this.game.gameState){
       case 'Discussion':
         return 'suspect';

@@ -24,7 +24,6 @@
   <div class="d-flex">
     <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>
     <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="game.gameOn" type="button" (click)="next()">Next</button>
-    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="clearChat()">Clear chat</button>
   </div>
 
   <hr>
@@ -120,6 +119,7 @@
 
   <hr>
   <b>Chat</b>
+  <button class="btn btn-sm btn-outline-secondary" type="button" (click)="clearChat()">Clear chat</button>
   <div class="input-group">
     <input class="form-control" type="text"
            [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>

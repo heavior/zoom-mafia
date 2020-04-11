@@ -381,11 +381,12 @@ class MafiaGame {
     if(!this._openVote()){
       return null;
     }
+
     // Filter players who voted for me
-    return Object.entries(this.votes) // Dict to array to iterate easier
+    return (Array.isArray(this.votes)? this.votes: Object.entries(this.votes)) // Dict to array to iterate easier
                .filter(element => parseInt(element[1]) === player.number) // Filter votes for this player
                .map(element => {
-                 let player = this.players[element[0]-1]
+                 let player = this.players[element[0]-1];
                  return {
                    name: player.name,
                    number: player.number,
@@ -395,6 +396,9 @@ class MafiaGame {
   }
 
   _playerRoleForAnothePlayer(player, requester){
+    if(!this.gameOn){ // Game over - open all cards
+      return MafiaGame._roleName(player.role)
+    }
     if(!requester) {
       return null;
     }

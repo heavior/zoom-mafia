@@ -1,9 +1,20 @@
 
 const io = require('socket.io-client');
 
+const VoteStrategies = Object.freeze({
+  None: 'None',
+  Random: 'Random',
+  First: 'First',
+  Last: 'Last'
+});
+
 class MafiaBot {
-  constructor(server, roomId, i){
+  constructor(server, roomId, i,
+              config = {}){
     console.log("init bot");
+    this.voteStrategy = config.voteStrategy|| VoteStrategies.Random;
+    this.selfPreservation  = config.selfPreservation|| true;
+
     this.roomId = roomId;
     this.id = "Bot " + i;
     this.name = "Bot " + i;
@@ -12,6 +23,7 @@ class MafiaBot {
     this.socket = io.connect(server, {
       forceNew: true,
       autoConnect: false,
+      reconnection: false,
       query: {
       // Pass parameters to join the room automatically
         id: roomId,
@@ -32,7 +44,16 @@ class MafiaBot {
       console.log(">> gameEvent", data);
     });
     this.socket.on("directMessage", data =>{
-      console.log(">> gameEvent", data);
+      console.log(">> directMessage", data);
+
+      console.log("event?", data.event, data.data.event);
+      switch(data.data.event){
+        case 'started':
+        case 'next':
+        case 'join':
+          this.next(data.data);
+          break;
+      }
     });
 
 
@@ -41,8 +62,6 @@ class MafiaBot {
     this.socket.on("error", data => this.log("error", data));
     this.socket.on("connect_error", data => this.log("connect_error", data));
     this.socket.on("connect_timeout", data => this.log("connect_timeout", data));
-    this.socket.on("pong", data => this.log("pong", data));
-    this.socket.on("ping", data => this.log("ping", data));
 
 
     // Vote randomly
@@ -66,8 +85,51 @@ class MafiaBot {
     return this.isOnline;
   }
 
+  next(data){
+    // Doing a next step
+    this.game = data.game;
+    this.me = data.you;
+    this.players = data.players;
+
+    this.vote();
+
+  }
+
+  vote(){
+
+    let candidate = null;
+    // Vote according to the strategy
+    let candidates = [];
+    if(this.game.gameState === 'Tiebreaker'){
+      candidates = [{number:-1},{number:0}];
+    }else{
+      candidates = this.players.filter(player=> player.isCandidate
+        && (!this.selfPreservation || player.number !== this.me.number));
+    }
+    if(!candidates.length){
+      return;
+    }
+
+    switch(this.voteStrategy){
+      case VoteStrategies.None:
+        return;
+      case VoteStrategies.Random:
+        candidate = candidates[Math.floor(Math.random() * candidates.length)].number;
+        break;
+      case VoteStrategies.First:
+        candidate = candidates[0].number;
+        return;
+      case VoteStrategies.Last:
+        candidate = candidates[candidates.length - 1].number;
+        return;
+    }
+
+    this.socket.emit("gameCommand", {action:'vote', vote: candidate});
+  }
+
 }
 
 
 
 exports.Bot = MafiaBot;
+exports.VoteStrategies = VoteStrategies;
