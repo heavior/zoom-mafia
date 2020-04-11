@@ -73,7 +73,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (data.event !== 'vote'){
+        if (data.event !== 'vote' && data.event !== 'joined'){
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
           this.wakeUpReady = false;
@@ -121,7 +121,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
   voteButtonCaption(){
     // TODO: make into variable and calculate once per phase
-    if(!this.player.isAlive){ // Dead don't vote
+    if (!this.player.isAlive || !this.game.gameOn){ // Dead don't vote
       return null;
     }
     switch (this.game.gameState){

@@ -68,7 +68,7 @@
       How do you find <span
           *ngFor="let vPlayer of candidates(); let isLast=last"
           [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
-          >{{vPlayer.name}}{{isLast ? '' : ', '}}</span>?<br>
+          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>?<br>
       <button class="btn btn-sm"
               (click)="vote(-1)"
               [ngClass]="{'btn-primary':votedFor === null || votedFor, 'btn-secondary': votedFor === 0}"
@@ -86,7 +86,7 @@
          [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
     >
       {{gPlayer.number}}: {{gPlayer.name}}
-      <ng-container *ngIf="player === gPlayer">(you)</ng-container>
+      <ng-container *ngIf="player.number === gPlayer.number">(you)</ng-container>
       <span *ngIf="gPlayer.role"
             [ngClass]="{'text-danger':mafiaRole(gPlayer.role), 'text-success': civilianRole(gPlayer.role)}"> - {{gPlayer.role}}</span>
       &nbsp;
@@ -102,7 +102,7 @@
         (<span
           *ngFor="let vPlayer of gPlayer.votedBy; let isLast=last"
           [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
-          >{{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
       </ng-container>
     </div>
   </ng-container>
