@@ -151,7 +151,7 @@ class MafiaGame {
         id: player.id,
         name: player.name,
         role: role,
-        number: number || this.players.length,
+        number: number || this.players.length + 1,
         //isMaster: role === MafiaRoles.Master || hostId === player.id,
         //isMaster: role === MafiaRoles.Master || hostId === player.id,
         isMafia: MafiaGame._isMafiaRole(role),
@@ -551,7 +551,7 @@ class MafiaGame {
       if(this.gameState !== GameStates.Night){
         return;
       }
-      if(player.role !== GameStates.Civilian){
+      if(player.role !== MafiaRoles.Civilian){
         return; // Night vote, 0 is allowed for civilians
       }
     }
