@@ -80,7 +80,7 @@
       <hr>
     </ng-container>
     <b>Players: </b>
-    <div class="" *ngFor="let gPlayer of gamePlayers"
+    <div class="" *ngFor="let gPlayer of players"
          [ngClass]="{'text-muted': !gPlayer.isOnline}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
          [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"

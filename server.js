@@ -182,11 +182,12 @@ io.on('connection', (socket) => {
         room.leave(user.id);
         break;
       case 'startGame':
-        if(!roomId){
+        if(!roomId) {
           console.warn("No room to start game in");
           socket.emit("message", "You are not in the room");
           return;
         }
+        console.warn(user.id + " >> startGame");
         room.startGame(user.id);
         break;
     }
@@ -194,7 +195,7 @@ io.on('connection', (socket) => {
 
   // Game commands are transparently relayed into the game itself
   socket.on('gameCommand', (data) =>{
-    console.debug(user.name + " >> gameCommand: " + JSON.stringify(data));
+    // console.debug(user.name + " >> gameCommand: " + JSON.stringify(data));
     if(!roomId){
       console.warn("No room to send game command to");
       socket.emit("message", "You are not in the room");

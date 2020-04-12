@@ -61,7 +61,6 @@ class MafiaBot {
         case 'next':
         case 'join':
         case 'ended':
-          console.log(">> directMessage", data.event);
           this.next(data.data);
           break;
       }
@@ -73,10 +72,6 @@ class MafiaBot {
     this.socket.on("error", data => this.log("error", data));
     this.socket.on("connect_error", data => this.log("connect_error", data));
     this.socket.on("connect_timeout", data => this.log("connect_timeout", data));
-
-
-    // Vote randomly
-
 
     this.socket.on("disconnect", data =>{
       console.log("disconnect", data);
@@ -102,13 +97,16 @@ class MafiaBot {
     this.players = data.players;
 
 
-    console.log("next:", this.game, this.me);
-    this.vote();
+    console.log(this.name + " >> next:", this.game.gameOn, this.game.gameState);
+    if(this.me.isAlive) {
+      this.vote();
+    }
     if(!this.iAmHost){
       return;
     }
 
     if(!this.game.gameOn){
+      console.log(this.name, "<< startGame");
       this.socket.emit("roomCommand", {action:'startGame'});
     }
     else if(this.game.gameState === 'Discussion'){
@@ -119,7 +117,7 @@ class MafiaBot {
           // State changes somehoe
           return;
         }
-        console.log(this.name, "jump to next state");
+        console.log(this.name, "<< jump to next state");
         this.socket.emit("gameCommand", {action:'next'});
       }, this.gameControlTimelout * 1000)
     }
@@ -158,7 +156,7 @@ class MafiaBot {
         candidate = candidates[candidates.length - 1].number;
         return;
     }
-    console.log(this.me.name, "state:", this.game.gameState, "vote:", candidate);
+    console.log(this.me.name, "<< vote:", candidate , "state:", this.game.gameState);
     this.socket.emit("gameCommand", {action:'vote', vote: candidate});
   }
 

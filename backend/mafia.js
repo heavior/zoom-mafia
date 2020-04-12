@@ -539,6 +539,7 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
+    console.log("vote", whoVotes, "for", choicePlayer);
     let player = this.players[whoVotes-1];
     if(!player || !player.isAlive){ // Not a player, or dead
       return;
@@ -573,6 +574,8 @@ class MafiaGame {
     }
   }
   checkAllVoted(){
+    //console.debug("checkAllVoted", this.whoShouldVote(), this.votesRegistry);
+    console.log("checkAllVoted: not voted", this.whoShouldVote().filter(player => !(player.number in this.votesRegistry)).map(player=>player.number +": "+player.name));
     // For automatic vote resolve - once everyone votesCounters
     return !this.whoShouldVote().some(player => !(player.number in this.votesRegistry));
   }
@@ -644,10 +647,11 @@ class MafiaGame {
 
 
   endGame(civiliansWin){
-     this.gameOn = false;
-     this.civiliansWin = civiliansWin;
-     this.votesCounters = {};
-     this.informPlayers("ended");
+    console.log("endGame", civiliansWin);
+    this.gameOn = false;
+    this.civiliansWin = civiliansWin;
+    this.votesCounters = {};
+    this.informPlayers("ended");
   }
   checkGameOver(){
     // Game over conditions:
