@@ -102,7 +102,8 @@ class Room {
       player = {
         name: playerName,
         id: playerId,
-        isOnline: true
+        isOnline: true,
+        autoJoin: true
       };
       this.players.push(player);
       this.roomUpdated("playerJoined");
@@ -112,6 +113,15 @@ class Room {
 
     this.game.join(player); //this.game.playerUpdate(playerId); // Send update to the connected player
     return player;
+  }
+  userSettings(playerId, settings){
+    let player = this.getPlayer(playerId);
+    if(!player){
+      this.directMessage(playerId, "roomDirectEvent", {event:"youAreNotInTheRoom"});
+    }
+    if('autoJoin' in settings) {
+      player.autoJoin = settings.autoJoin;
+    }
   }
 
   kick(playerId, targetId, hard = false){
@@ -199,7 +209,7 @@ class Room {
       return;
     }
     // Only online players join the game
-    let onlinePlayers = this.players.filter(player => player.isOnline);
+    let onlinePlayers = this.players.filter(player => player.isOnline && player.autoJoin);
     this.game.start(onlinePlayers);
   }
 

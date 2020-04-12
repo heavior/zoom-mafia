@@ -250,7 +250,7 @@ class MafiaGame {
         // People vote to kill both, or spare both: 0 or 1
         // TODO: check if it works, maybe redo how it works after UI implemented
         let tieBreakerResolved = this.resolveVote();
-        console.warn("Tiebreaker resolve", tieBreakerResolved, this.votesCounters, this.candidates);
+        console.debug("Tiebreaker resolve", tieBreakerResolved, this.votesCounters, this.candidates);
         if((!tieBreakerResolved && this.killDoubleTie) // Double tie with strict rules - kill all
           ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
           this.candidates.forEach(candidate => this._kill(candidate));
@@ -409,6 +409,10 @@ class MafiaGame {
        // That's me, I know my role
       return player.role;
     }
+    if(!MafiaGame._isActiveRole(player.role)){
+      // Everyone knows guests and masters
+      return player.role;
+    }
 
     if (requester.isMafia && player.isMafia) {
       // mafia knows mafia
@@ -555,8 +559,14 @@ class MafiaGame {
       return;
     }
 
+    if(choicePlayer < -1){
+      return; // Ignore this vote - basic validation
+    }
+    if(this.gameState === GameStates.Tiebreaker && choicePlayer < 1){
+      return; // This is not a valid Tiebreaker vote, ignore
+    }
     if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker){
-      return; // Ignore this vote
+      return; // This is a Tiebreaker vote, but the state is wrong
     }
     if(choicePlayer === 0 && this.gameState !== GameStates.Tiebreaker){
       if(this.gameState !== GameStates.Night){

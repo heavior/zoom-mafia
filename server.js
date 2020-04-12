@@ -164,6 +164,14 @@ io.on('connection', (socket) => {
         room = result.room;
         user = result.user;
         break;
+      case 'userSettings':
+        if(!roomId){
+          console.warn("No room to kick people from");
+          socket.emit("message", "You are not in the room");
+          return;
+        }
+        room.userSettings(user.id, data.settings);
+        break;
       case 'kick':
         if(!roomId){
           console.warn("No room to kick people from");
@@ -171,7 +179,6 @@ io.on('connection', (socket) => {
           return;
         }
         room.kick(user.id, data.targetId, data.hard);
-
         break;
       case 'leave':
         if(!roomId){
