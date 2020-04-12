@@ -26,26 +26,18 @@
 const TIMER_LATENCY = 1000; // One second we add to every timer to cover latency issues. Basically timer should end strictly after user sees 0 on his screen
 
 const MafiaRoles = Object.freeze({
-  Player: -1, // hardcoded
-  Guest: 0, // No role, just sitting there
-  Master: 1,
-  Civilian: 2,
-  Detective: 3,
-  Mafia: 4,
-  Don: 5,
-  Doctor: 6, // Later
-  Maniac: 7, // Later
-  Executioner: 8 // Later
+  Player: 'Player', // hardcoded
+  Guest: 'Guest', // No role, just sitting there
+  Master: 'Master',
+  Civilian: 'Civilian',
+  Detective: 'Detective',
+  Mafia: 'Mafia',
+  Don: 'Don',
+  Doctor: 'Doctor', // Later
+  Maniac: 'Maniac', // Later
+  Executioner: 'Executioner' // Later
 });
 
-// Inverted object to map names vs numbers
-const MafiaRoleNames = (function swap(obj){
-  let ret = {};
-  for(let key in obj){
-    ret[obj[key]] = key;
-  }
-  return ret;
-})(MafiaRoles);
 
 /*
  mafia should have 1/3 or less of players
@@ -168,7 +160,7 @@ class MafiaGame {
         return -1;
       }
       let activeA = MafiaGame._isActiveRole(a.role);
-      let activeB = MafiaGame._isActiveRole(a.role);
+      let activeB = MafiaGame._isActiveRole(b.role);
       if(activeA === activeB){
         // Sort by name is the role is active
         let nameA = a.name.toUpperCase(); // ignore upper and lowercase
@@ -184,7 +176,7 @@ class MafiaGame {
       }
       return activeA?-1:1; // Active go on top
     });
-
+    console.warn("_rearrangePlayers", this.players.map(player => player.number + ": " + player.name));
   }
   informPlayers(event = null){
     this.players.forEach(player => {
@@ -331,9 +323,6 @@ class MafiaGame {
   /* /end of External game interface */
 
   /* Role helpers */
-  static _roleName(role){
-    return MafiaRoleNames[role];
-  }
   static _isMafiaRole(role){
     return (role === MafiaRoles.Mafia) || (role === MafiaRoles.Don);
   }
@@ -343,9 +332,9 @@ class MafiaGame {
 
   static _roleNameForDetective(role){
     if(MafiaGame._isMafiaRole(role)){
-      return MafiaGame._roleName(MafiaRoles.Mafia);
+      return MafiaRoles.Mafia;
     }
-    return MafiaGame._roleName(MafiaRoles.Civilian);
+    return MafiaRoles.Civilian;
   }
   /* /end of Role helpers */
 
@@ -373,7 +362,7 @@ class MafiaGame {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
-      role: MafiaGame._roleName(player.role)
+      role: player.role
     };
   }
   _openVote(){
@@ -400,19 +389,19 @@ class MafiaGame {
 
   _playerRoleForAnothePlayer(player, requester){
     if(!this.gameOn){ // Game over - open all cards
-      return MafiaGame._roleName(player.role)
+      return player.role;
     }
     if(!requester) {
       return null;
     }
     if(player === requester){
        // That's me, I know my role
-      return MafiaGame._roleName(player.role);
+      return player.role;
     }
 
     if (requester.isMafia && player.isMafia) {
       // mafia knows mafia
-      return MafiaGame._roleName(player.role);
+      return player.role;
     }
     if ((requester.role === MafiaRoles.Detective)
       && (this.detectiveKnows.indexOf(player.number) >= 0)) {
