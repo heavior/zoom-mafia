@@ -7,18 +7,22 @@ const VoteStrategies = Object.freeze({
   First: 'First',
   Last: 'Last'
 });
+const DefaultConfig = Object.freeze({
+    voteStrategy: VoteStrategies.Random,
+    selfPreservation: true,   // Do not vote for yourself during normal votes
+    forceTie: true,           // Force vote to kill for Ties
+    skipStateTimeout: 1,      // timeout for skipping states
+    discussionTimeout: 1,     // timeout for discussion phase (if not skipping Discussion)
+    silentHost: false,        // Do not log messages if host
+    silent: true,             // Do not log messages if not host
+    skipStates: ['Discussion', 'Night', 'MainVote'] // Host should quickly skip certain states
+});
 
 class MafiaBot {
-  constructor(server, roomId, i,
-              config = {}){
-    this.log("init bot");
-    this.voteStrategy = config.voteStrategy || VoteStrategies.Random;
-    this.selfPreservation  = config.selfPreservation || true;
-    this.forceTie = config.forceTie || true;
-    this.gameControlTimelout = config.gameControlTimelout || 1;
-    this.silentHost = config.silentHost || false;
-    this.silent = config.silent || true;
+  constructor(server, roomId, i, config = {}){
 
+    this.config = Object.assign({}, DefaultConfig, config);
+    this.log("init bot", this.config);
 
     this.roomId = roomId;
     this.id = "Bot " + i;
@@ -48,9 +52,9 @@ class MafiaBot {
         //I am host,
 
         setTimeout(()=>{
-          this.log(this.name, "try to start game");
+          this.log("try to start game");
           this.socket.emit("roomCommand", {action:'startGame'});
-        }, this.gameControlTimelout * 1000)
+        }, this.config.skipStateTimeout * 1000)
       }
     });
 
@@ -86,10 +90,10 @@ class MafiaBot {
   }
   log(event, data){
 
-    if(!this.iAmHost && this.silent || this.iAmHost && this.silentHost){
+    if(!this.iAmHost && this.config.silent || this.iAmHost && this.config.silentHost){
       return;
     }
-    console.log.apply(console, arguments);
+    console.log.apply(console, [this.name].concat([...arguments]));
   }
   isAlive(){
     return this.isOnline;
@@ -102,7 +106,7 @@ class MafiaBot {
     this.players = data.players;
 
 
-    this.log(this.name + " >> next:", this.game.gameOn, this.game.gameState);
+    this.log(">> next:", this.game.gameOn, this.game.gameState);
     if(this.me.isAlive) {
       this.vote();
     }
@@ -111,22 +115,30 @@ class MafiaBot {
     }
 
     if(!this.game.gameOn){
-      this.log(this.name, "<< startGame");
+      this.log("<< startGame");
       this.socket.emit("roomCommand", {action:'startGame'});
-    }
-    else if(this.game.gameState === 'Discussion'){
-      //I am host,
-
-      setTimeout(()=>{
-        if(this.game.gameState !== 'Discussion'){
-          // State changes somehoe
-          return;
-        }
-        this.log(this.name, "<< jump to next state");
-        this.socket.emit("gameCommand", {action:'next'});
-      }, this.gameControlTimelout * 1000)
+      return;
     }
 
+    if(this.skipping){
+      clearTimeout(this.skipping);
+      this.skipping = null;
+    }
+    if(this.config.skipStates.indexOf(this.game.gameState)>=0) {
+      this.log("skipping state", this.game.gameState, this.config.skipStates, this.config.skipStateTimeout * 1000);
+      this.skipping = setTimeout(()=> this.skipState(), this.config.skipStateTimeout * 1000);
+      return;
+    }
+    if(this.game.gameState === 'Discussion'){
+      this.skipping = setTimeout(()=> this.skipState(), this.config.discussionTimeout * 1000);
+    }
+  }
+  skipState(){
+     if(this.config.skipStates.indexOf(this.game.gameState)>=0
+      || this.game.gameState === 'Discussion'){
+         this.log("<< next");
+         this.socket.emit("gameCommand", {action:'next'});
+      }
   }
 
   vote(){
@@ -137,18 +149,18 @@ class MafiaBot {
     if(this.game.gameState === 'Tiebreaker'){
       this.log("tie breaker");
       candidates = [{number:-1},{number:0}];
-      if(this.forceTie) {
+      if(this.config.forceTie) {
         candidates = [{number:-1}];
       }
     }else{
       candidates = this.players.filter(player=> player.isCandidate
-        && (!this.selfPreservation || player.number !== this.me.number));
+        && (!this.config.selfPreservation || player.number !== this.me.number));
     }
     if(!candidates.length){
       return;
     }
 
-    switch(this.voteStrategy){
+    switch(this.config.voteStrategy){
       case VoteStrategies.None:
         return;
       case VoteStrategies.Random:
@@ -161,7 +173,7 @@ class MafiaBot {
         candidate = candidates[candidates.length - 1].number;
         return;
     }
-    this.log(this.me.name, "<< vote:", candidate , "state:", this.game.gameState);
+    this.log("<< vote:", candidate , "state:", this.game.gameState);
     this.socket.emit("gameCommand", {action:'vote', vote: candidate});
   }
 
