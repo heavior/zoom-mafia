@@ -118,6 +118,7 @@ class MafiaGame {
     this.players = [];
     this.detectiveKnows = [];
     this.votesRegistry = {}; // Here we register votesCounters
+    this.lastVotesRegistry = {};
     this.votesCounters = []; // Here we count them
     this.candidates = [];
   }
@@ -354,7 +355,7 @@ class MafiaGame {
   _playerUpdate(player, reason){
     // publicInfo introduced here for optimization
     this.directMessageCallback(player.id, "gameStatus", {
-      game: this.publicInfo(),
+      game: this.publicInfo(player),
       players: this.players.map(otherPlayer => this._playerPublicInfo(otherPlayer, player)),
       you: this._playerPrivateInfo(player),
       event: reason
@@ -373,14 +374,20 @@ class MafiaGame {
     return this.gameState !== GameStates.Night;
   }
 
-  _playerVotedBy(player, requester){
+  _playerVotedBy(playerNumber, requester){
     if(!this._openVote()){
       return null;
     }
 
+    let registry = this.votesRegistry;
+    if(this.gameState === GameStates.Tiebreaker && playerNumber > 0){
+      // In Tiebreaker we show older votes for players
+      registry = this.lastVotesRegistry;
+    }
+
     // Filter players who voted for me
-    return Object.entries(this.votesRegistry) // Dict to array to iterate easier
-               .filter(element => parseInt(element[1]) === player.number) // Filter votesCounters for this player
+    return Object.entries(registry) // Dict to array to iterate easier
+               .filter(element => parseInt(element[1]) === playerNumber) // Filter votesCounters for this player
                .map(element => {
                  let player = this.players[element[0]-1];
                  return {
@@ -420,7 +427,7 @@ class MafiaGame {
       name: player.name,
       isAlive: player.isAlive,
       isCandidate: this.candidates.indexOf(player.number) >= 0,
-      votedBy: this._playerVotedBy(player)
+      votedBy: this._playerVotedBy(player.number)
     };
 
     if(this.gameState === GameStates.Discussion && player === requester){
@@ -431,14 +438,20 @@ class MafiaGame {
     return publicInfo;
   }
 
-  publicInfo(){
+  publicInfo(requester){
     // Whatever is publicly available
+    let tiebreakerVoted = {};
+    if(this.gameState === GameStates.Tiebreaker){
+      tiebreakerVoted[0] = this._playerVotedBy(0, requester);
+      tiebreakerVoted[-1] = this._playerVotedBy(-1, requester);
+    }
     return {
       gameOn: this.gameOn,
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
       dayNumber: this.dayNumber,
       // candidates: this.candidates,
+      tiebreakerVoted: tiebreakerVoted,
       countdown: this.timeLeft()
     };
   }
@@ -524,6 +537,7 @@ class MafiaGame {
      */
     this.candidates = this.checkCandidates();
     this.votesCounters = [];
+    this.lastVotesRegistry = this.votesRegistry; // Save for later
     this.votesRegistry = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);

@@ -8,13 +8,17 @@ const VoteStrategies = Object.freeze({
   Last: 'Last'
 });
 const DefaultConfig = Object.freeze({
+  reconnect: false, // Automatically reconnect when server restarts
   voteStrategy: VoteStrategies.Random,
   selfPreservation: true,   // Do not vote for yourself during normal votes
-  tiebreakerVote: -1,           // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
-  skipStateTimeout: 1,      // timeout for skipping states
+  tiebreakerVote: null,     // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
+  silent: true,             // Do not log messages if not host
+
+  // If bot is host:
+  startGameDelay: 10,        // timeout for starting new game
+  skipStateTimeout: 0.5,      // timeout for skipping states
   discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  silent: true,             // Do not log messages if not host
   skipStates: ['Discussion', 'Night', 'MainVote'] // Host should quickly skip certain states
 });
 
@@ -31,7 +35,7 @@ class MafiaBot {
     this.socket = io.connect(server, {
       forceNew: true,
       autoConnect: false,
-      reconnection: false,
+      reconnection: this.config.reconnect,
       query: {
       // Pass parameters to join the room automatically
         id: roomId,
@@ -46,11 +50,7 @@ class MafiaBot {
       this.iAmHost = (data.host === this.name);
       if(this.iAmHost && !this.game){
         //I am host,
-
-        setTimeout(()=>{
-          this.log("try to start game");
-          this.socket.emit("roomCommand", {action:'startGame'});
-        }, this.config.skipStateTimeout * 1000)
+        this.startGame();
       }
     });
 
@@ -84,6 +84,12 @@ class MafiaBot {
     this.socket.connect(data => this.log("connected", data));
 
   }
+  startGame(){
+    setTimeout(()=>{
+      this.log("try to start game");
+      this.socket.emit("roomCommand", {action:'startGame'});
+    }, this.config.startGameDelay * 1000)
+  }
   log(event, data){
 
     if(!this.iAmHost && this.config.silent || this.iAmHost && this.config.silentHost){
@@ -111,8 +117,7 @@ class MafiaBot {
     }
 
     if(!this.game.gameOn){
-      this.log("<< startGame");
-      this.socket.emit("roomCommand", {action:'startGame'});
+      this.startGame();
       return;
     }
 

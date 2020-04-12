@@ -78,10 +78,27 @@
               (click)="vote(-1)"
               [ngClass]="{'btn-primary':votedFor === null || votedFor, 'btn-secondary': votedFor === 0}"
               [disabled]="votedFor !== null">guilty</button> &nbsp;
+      <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[-1].length">
+        (<span
+          *ngFor="let vPlayer of game.tiebreakerVoted[-1]; let isLast=last"
+          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+      </ng-container>
+      <br>
+
+
       <button class="btn btn-sm"
               (click)="vote(0)"
               [ngClass]="{'btn-primary':!votedFor, 'btn-secondary': votedFor}"
               [disabled]="votedFor !== null">not guilty</button>
+      <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[0].length">
+        (<span
+          *ngFor="let vPlayer of game.tiebreakerVoted[0]; let isLast=last"
+          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+      </ng-container>
+
+
       <hr>
     </ng-container>
     <b>Players: </b>
