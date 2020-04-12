@@ -10,7 +10,7 @@ const VoteStrategies = Object.freeze({
 const DefaultConfig = Object.freeze({
   voteStrategy: VoteStrategies.Random,
   selfPreservation: true,   // Do not vote for yourself during normal votes
-  forceTie: true,           // Force vote to kill for Ties
+  tiebreakerVote: -1,           // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
   skipStateTimeout: 1,      // timeout for skipping states
   discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
@@ -145,8 +145,8 @@ class MafiaBot {
     if(this.game.gameState === 'Tiebreaker'){
       this.log("tie breaker");
       candidates = [{number:-1},{number:0}];
-      if(this.config.forceTie) {
-        candidates = [{number:-1}];
+      if(this.config.tiebreakerVote !== null) {
+        candidates = [{number:this.config.tiebreakerVote}];
       }
     }else{
       candidates = this.players.filter(player=> player.isCandidate
