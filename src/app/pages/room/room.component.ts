@@ -29,7 +29,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomLink: string;
   state: string;
   userName: string;
-  videoLink: string;
+  videoLink: string = '';
   isMafia: boolean;
   dayTime: string;
   endGameMessage: string;
@@ -119,9 +119,9 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.roomLink = this.chatService.roomLink;
 
         this.host = data.host;
-        this.roomPlayers = data.players || [];
+        this.roomPlayers = data.players || this.roomPlayers;
         this.updateLists();
-        this.videoLink = data.videoLink || '';
+        this.videoLink = data.videoLink || this.videoLink;
         this.votedFor = null;
       });
   }
