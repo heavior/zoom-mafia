@@ -11,11 +11,13 @@ const VoteStrategies = Object.freeze({
 class MafiaBot {
   constructor(server, roomId, i,
               config = {}){
-    console.log("init bot");
+    this.log("init bot");
     this.voteStrategy = config.voteStrategy || VoteStrategies.Random;
     this.selfPreservation  = config.selfPreservation || true;
     this.forceTie = config.forceTie || true;
     this.gameControlTimelout = config.gameControlTimelout || 1;
+    this.silentHost = config.silentHost || false;
+    this.silent = config.silent || true;
 
 
     this.roomId = roomId;
@@ -36,24 +38,24 @@ class MafiaBot {
     }); // Open connection
 
 
-    //console.log("init bot", this.socket);
+    //this.log("init bot", this.socket);
 
     // Log all messages
     this.socket.on("roomEvent", data =>{
-      console.log(">> roomEvent", data);
+      this.log(">> roomEvent", data);
       this.iAmHost = (data.host === this.name);
       if(this.iAmHost && !this.game){
         //I am host,
 
         setTimeout(()=>{
-          console.log(this.name, "try to start game");
+          this.log(this.name, "try to start game");
           this.socket.emit("roomCommand", {action:'startGame'});
         }, this.gameControlTimelout * 1000)
       }
     });
 
     this.socket.on("gameEvent", data =>{
-      console.log(">> gameEvent", data);
+      this.log(">> gameEvent", data);
     });
     this.socket.on("directMessage", data =>{
       switch(data.data.event){
@@ -74,17 +76,20 @@ class MafiaBot {
     this.socket.on("connect_timeout", data => this.log("connect_timeout", data));
 
     this.socket.on("disconnect", data =>{
-      console.log("disconnect", data);
+      this.log("disconnect", data);
       this.isOnline = false;
     });
 
-    console.log("connecting");
+    this.log("connecting");
     this.socket.connect(data => this.log("connected", data));
 
   }
-
   log(event, data){
-      console.log(event, data);
+
+    if(!this.iAmHost && this.silent || this.iAmHost && this.silentHost){
+      return;
+    }
+    console.log.apply(console, arguments);
   }
   isAlive(){
     return this.isOnline;
@@ -97,7 +102,7 @@ class MafiaBot {
     this.players = data.players;
 
 
-    console.log(this.name + " >> next:", this.game.gameOn, this.game.gameState);
+    this.log(this.name + " >> next:", this.game.gameOn, this.game.gameState);
     if(this.me.isAlive) {
       this.vote();
     }
@@ -106,7 +111,7 @@ class MafiaBot {
     }
 
     if(!this.game.gameOn){
-      console.log(this.name, "<< startGame");
+      this.log(this.name, "<< startGame");
       this.socket.emit("roomCommand", {action:'startGame'});
     }
     else if(this.game.gameState === 'Discussion'){
@@ -117,7 +122,7 @@ class MafiaBot {
           // State changes somehoe
           return;
         }
-        console.log(this.name, "<< jump to next state");
+        this.log(this.name, "<< jump to next state");
         this.socket.emit("gameCommand", {action:'next'});
       }, this.gameControlTimelout * 1000)
     }
@@ -130,7 +135,7 @@ class MafiaBot {
     // Vote according to the strategy
     let candidates = [];
     if(this.game.gameState === 'Tiebreaker'){
-      console.log("tie breaker");
+      this.log("tie breaker");
       candidates = [{number:-1},{number:0}];
       if(this.forceTie) {
         candidates = [{number:-1}];
@@ -156,7 +161,7 @@ class MafiaBot {
         candidate = candidates[candidates.length - 1].number;
         return;
     }
-    console.log(this.me.name, "<< vote:", candidate , "state:", this.game.gameState);
+    this.log(this.me.name, "<< vote:", candidate , "state:", this.game.gameState);
     this.socket.emit("gameCommand", {action:'vote', vote: candidate});
   }
 
