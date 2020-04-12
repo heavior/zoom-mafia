@@ -47,17 +47,21 @@
 
   <ng-container *ngIf="game">
     <div class="">
-      <div>It is <b [class]="dayTime === 'Night' ? 'night' : ''">{{dayTime}}</b>&nbsp;<b>#{{game.dayNumber}} {{game.gameState}}</b></div>
-      <div><b>{{phaseMessage}}</b></div>
+      <div>It is <b [class]="dayTime === 'Night' ? 'night' : ''">{{dayTime}} #{{game.dayNumber}} <ng-container *ngIf="dayTime !== 'Night'">({{game.gameState}})</ng-container></b></div>
+      <div><b>{{phaseCaption()}}</b></div>
       <div *ngIf="countdown">Time left: <b>{{countdown}}</b> seconds</div>
     </div>
-
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-      <ng-container>Hint: Talk to other players and try to find mafia and prove your position to other players. Then chose who do you suspect.</ng-container>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
+    <br>
+    <ng-container *ngIf="showHint else hideHint">
+      <div>
+        <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;
+        <a (click)="showHint = false;" href>[&times;]</a>
+      </div>
+    </ng-container>
+    <ng-template #hideHint>
+      <div><a (click)="showHint = true; false" href>[ show hint >> ]</a></div>
+    </ng-template>
+    <br>
   </ng-container>
 
   <ng-container *ngIf="players.length">

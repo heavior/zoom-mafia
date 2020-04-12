@@ -33,10 +33,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   isMafia: boolean;
   dayTime: string;
   endGameMessage: string;
-  phaseMessage: string;
   winner: string;
-  hint: string;
-  showHint: boolean;
+  showHint: boolean = true;
 
   constructor(private chatService: ChatService) { }
 
@@ -94,18 +92,6 @@ export class RoomComponent implements OnInit, OnDestroy {
             clearTimeout(this.wakeUpTimer);
             this.wakeUpTimer = null;
           }
-        }
-
-        switch (game.gameState) {
-          case 'Discussion':
-            this.phaseMessage = 'Discuss your suspicions';
-            break;
-          case 'Night':
-            this.phaseMessage = this.isMafia ? 'Choose who to kill' : 'Wait for the day';
-            break;
-          case 'MainVote':
-          default:
-            this.phaseMessage = game.gameState;
         }
         this.dayTime = game.gameState === 'Night' ? 'Night' : 'Day';
         this.state = game.dayNumber > 0 ? game.gameOn ? 'on' : 'over' : 'about to start';
@@ -183,6 +169,32 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
     }
     return null; // Don't show button in any other scenario
+  }
+  phaseCaption() {
+    switch (this.game.gameState) {
+      case 'Discussion':
+        return 'Discuss your suspicions';
+      case 'MainVote':
+        return 'Who do you think is guilty?';
+      case 'Night':
+        return this.isMafia ? 'Choose who to kill' : 'Wait for the day';
+      case 'Tiebreaker':
+        return 'What is your verdict?';
+      default:
+        return this.game.gameState;
+    }
+  }
+  hintCaption() {
+    let hint = ''
+    switch (this.game.gameState) {
+      case 'Discussion':
+      case 'MainVote':
+      case 'Night':
+      case 'Tiebreaker':
+      default:
+        hint = 'Talk to other players and try to find mafia and prove your position to other players. Then chose who do you suspect.';
+    }
+    return `Hint: ${hint}`;
   }
   clearChat() {
     this.messages = [];
