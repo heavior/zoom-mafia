@@ -488,6 +488,7 @@ class MafiaGame {
     if(playerIndex >= 0){
       this._kill(playerIndex+1);
     }
+    this.informPlayers("playerLeft");
   }
   _kill(playerNumber){
     let player = this.players[playerNumber-1];

@@ -127,6 +127,8 @@ class Room {
   }
 
   kick(playerId, targetId, hard = false){
+    console.log("kick", playerId, targetId, hard );
+
     if(!this.host){
       this.findNewHost(); // This might a trash check
     }
@@ -134,7 +136,8 @@ class Room {
       return false; // Game has no host - no one can kick anyone
     }
 
-    if(!this.host.id !== playerId){ // Not the host cannot issue this command
+
+    if(this.host.id !== playerId){ // Not the host cannot issue this command
       this.directMessage(playerId, "roomDirectEvent", {event:"youAreNotTheHost"});
       return false;
     }
@@ -193,7 +196,7 @@ class Room {
     let playerIndex = this.getPlayerIndex(playerId);
 
     if(playerIndex>0){
-      this.players.list.splice(playerIndex, 1);
+      this.players.splice(playerIndex, 1);
     }
     this.game.kick(playerId);
     this.roomUpdated("playerLeft");

@@ -178,6 +178,7 @@ io.on('connection', (socket) => {
           socket.emit("message", "You are not in the room");
           return;
         }
+        console.warn("trying to kick", data);
         room.kick(user.id, data.targetId, data.hard);
         break;
       case 'leave':

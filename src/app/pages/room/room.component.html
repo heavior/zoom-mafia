@@ -134,7 +134,7 @@
               (click)="vote(gPlayer.number)"
               [ngClass]="{'btn-primary':!votedFor || votedFor === gPlayer.number, 'btn-secondary': votedFor && votedFor !== gPlayer.number}"
               [disabled]="votedFor">{{voteButtonCaption()}}</button>
-      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline"
+      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
          class="btn btn-sm btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
       <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>

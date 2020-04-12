@@ -78,7 +78,7 @@ export class ChatService {
   }
 
   kickPlayer(playerId: string) {
-    this.socket.emit({action: 'kick', 'targetId': playerId});
+    this.socket.emit('roomCommand', {action: 'kick', targetId: playerId});
   }
 
   next() {
