@@ -76,6 +76,10 @@ export class ChatService {
     this.socket.emit('roomCommand', data);
   }
 
+  kickPlayer(playerNumber: number) {
+    this.socket.emit({action: 'kick', playerNumber});
+  }
+
   next() {
     this.socket.emit('gameCommand', {action: 'next'});
   }

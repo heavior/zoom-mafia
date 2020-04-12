@@ -21,19 +21,14 @@
     </div>
   </div>
 
-  <div class="d-flex">
-    <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>
-    <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="game.gameOn" type="button" (click)="next()">Next</button>
-  </div>
-
   <hr>
 
   <ng-container *ngIf="player">
     <div>
       <div>Welcome, <b>{{player.name}}</b></div>
       <div>This game is <b>{{state}}</b></div>
-      <div>Your role is <b [class]="isMafia ? 'text-danger' : 'text-success'">{{player.role}}</b></div>
       <ng-container *ngIf="game.gameOn">
+        <div>Your role is <b [class]="{'text-danger': mafiaRole(player.role), 'text-success': civilianRole(player.role)}">{{player.role}}</b></div>
         <div>Your number is <b>{{player.number}}</b></div>
         <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
       </ng-container>
@@ -61,8 +56,22 @@
     <ng-template #hideHint>
       <div><a (click)="showHint = true; false" href>[ show hint >> ]</a></div>
     </ng-template>
-    <br>
   </ng-container>
+  <ng-container *ngIf="isHost else notHost">
+    <hr>
+    <div><b>You are the host!</b></div>
+    <ng-container *ngIf="game.gameOn else hostStartGame">
+      <ng-container *ngIf="game.gameState === 'Discussion'">
+        <div><b>Wait till the players discuss and nominate suspects.</b></div>
+        <div><a href (click)="next(); false" class="bg-info text-white">[Start voting]</a></div>
+      </ng-container>
+    </ng-container>
+    <ng-template #hostStartGame>
+      <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>
+    </ng-template>
+    <hr>
+  </ng-container>
+  <ng-template #notHost><br></ng-template>
 
   <ng-container *ngIf="players.length">
     <ng-container *ngIf="game.gameState === 'Night' && player.role === 'Civilian'">
@@ -125,6 +134,8 @@
               (click)="vote(gPlayer.number)"
               [ngClass]="{'btn-primary':!votedFor || votedFor === gPlayer.number, 'btn-secondary': votedFor && votedFor !== gPlayer.number}"
               [disabled]="votedFor">{{voteButtonCaption()}}</button>
+      <a *ngIf="isHost && player.number !== gPlayer.number"
+         class="bg-warning text-white ml-1" href (click)="kick(player.number); false">[Kick]</a>
 
       <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>
 
@@ -149,16 +160,20 @@
   </ng-container>
 
   <hr>
-  <b>Chat</b>
-  <button class="btn btn-sm btn-outline-secondary ml-1" type="button" (click)="clearChat()">Clear chat</button>
-  <div class="input-group">
-    <input class="form-control" type="text"
-           [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
-    <div class="input-group-append">
-      <button class="btn btn-sm btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
+  <ng-container>
+    <div class="mb-1">
+      <b>Chat</b>
+      <button class="btn btn-sm btn-outline-secondary ml-1" type="button" (click)="clearChat()">Clear chat</button>
     </div>
-  </div>
-  <div class="px-2">
+    <div class="input-group">
+      <input class="form-control" type="text"
+             [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
+      <div class="input-group-append">
+        <button class="btn btn-sm btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
+      </div>
+    </div>
+    <div class="px-2">
     <pre *ngFor="let message of messages">{{message}}</pre>
   </div>
+  </ng-container>
 </ng-template>

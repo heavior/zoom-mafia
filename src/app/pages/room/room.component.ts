@@ -16,7 +16,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   countdown = 0;
   game: any = {};
   votedFor: number = null;
-  host: string = undefined;
+  isHost: boolean = false;
   messages: string[];
   newMessage: string;
   wakeUpReady: boolean;
@@ -119,8 +119,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       .subscribe((data: any) => {
         console.log('>> roomSubject', data);
         this.roomLink = this.chatService.roomLink;
-
-        this.host = data.host;
+        this.isHost = this.player && this.player.userId === data.host;
         this.roomPlayers = data.players || this.roomPlayers;
         this.updateLists();
         this.videoLink = data.videoLink || this.videoLink;
@@ -187,7 +186,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
   hintCaption() {
-    let hint = ''
+    let hint = '';
     switch (this.game.gameState) {
       case 'Discussion':
       case 'MainVote':
@@ -208,6 +207,10 @@ export class RoomComponent implements OnInit, OnDestroy {
       userId: this.userName,
       userName: this.userName
     });
+  }
+
+  kick(playerNumber: number) {
+    this.chatService.kickPlayer(playerNumber);
   }
 
   next() {
