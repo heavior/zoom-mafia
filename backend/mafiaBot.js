@@ -12,8 +12,11 @@ class MafiaBot {
   constructor(server, roomId, i,
               config = {}){
     console.log("init bot");
-    this.voteStrategy = config.voteStrategy|| VoteStrategies.Random;
-    this.selfPreservation  = config.selfPreservation|| true;
+    this.voteStrategy = config.voteStrategy || VoteStrategies.Random;
+    this.selfPreservation  = config.selfPreservation || true;
+    this.forceTie = config.forceTie || true;
+    this.gameControlTimelout = config.gameControlTimelout || 1;
+
 
     this.roomId = roomId;
     this.id = "Bot " + i;
@@ -38,19 +41,27 @@ class MafiaBot {
     // Log all messages
     this.socket.on("roomEvent", data =>{
       console.log(">> roomEvent", data);
+      this.iAmHost = (data.host === this.name);
+      if(this.iAmHost && !this.game){
+        //I am host,
+
+        setTimeout(()=>{
+          console.log(this.name, "try to start game");
+          this.socket.emit("roomCommand", {action:'startGame'});
+        }, this.gameControlTimelout * 1000)
+      }
     });
 
     this.socket.on("gameEvent", data =>{
       console.log(">> gameEvent", data);
     });
     this.socket.on("directMessage", data =>{
-      console.log(">> directMessage", data);
-
-      console.log("event?", data.event, data.data.event);
       switch(data.data.event){
         case 'started':
         case 'next':
         case 'join':
+        case 'ended':
+          console.log(">> directMessage", data.event);
           this.next(data.data);
           break;
       }
@@ -72,10 +83,9 @@ class MafiaBot {
       this.isOnline = false;
     });
 
-    console.log("trying to connect");
-    this.socket.connect(data => this.log("ping", data));
+    console.log("connecting");
+    this.socket.connect(data => this.log("connected", data));
 
-    console.log("kinda done");
   }
 
   log(event, data){
@@ -91,7 +101,28 @@ class MafiaBot {
     this.me = data.you;
     this.players = data.players;
 
+
+    console.log("next:", this.game, this.me);
     this.vote();
+    if(!this.iAmHost){
+      return;
+    }
+
+    if(!this.game.gameOn){
+      this.socket.emit("roomCommand", {action:'startGame'});
+    }
+    else if(this.game.gameState === 'Discussion'){
+      //I am host,
+
+      setTimeout(()=>{
+        if(this.game.gameState !== 'Discussion'){
+          // State changes somehoe
+          return;
+        }
+        console.log(this.name, "jump to next state");
+        this.socket.emit("gameCommand", {action:'next'});
+      }, this.gameControlTimelout * 1000)
+    }
 
   }
 
@@ -101,7 +132,11 @@ class MafiaBot {
     // Vote according to the strategy
     let candidates = [];
     if(this.game.gameState === 'Tiebreaker'){
+      console.log("tie breaker");
       candidates = [{number:-1},{number:0}];
+      if(this.forceTie) {
+        candidates = [{number:-1}];
+      }
     }else{
       candidates = this.players.filter(player=> player.isCandidate
         && (!this.selfPreservation || player.number !== this.me.number));
@@ -123,7 +158,7 @@ class MafiaBot {
         candidate = candidates[candidates.length - 1].number;
         return;
     }
-
+    console.log(this.me.name, "state:", this.game.gameState, "vote:", candidate);
     this.socket.emit("gameCommand", {action:'vote', vote: candidate});
   }
 

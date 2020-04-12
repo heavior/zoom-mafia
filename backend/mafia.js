@@ -107,6 +107,7 @@ class MafiaGame {
               allowAutoCompleteVote = true // Complete vote automatically when all expected players votes
               )
   {
+    this.dayNumber = 0;
     this.isVoteMandatory = isVoteMandatory;
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
     this.expectCivilianVoteAtNight = expectCivilianVoteAtNight;
@@ -122,7 +123,8 @@ class MafiaGame {
     this.nightTimetout = nightTimetout;
     this.players = [];
     this.detectiveKnows = [];
-    this.votes = {};
+    this.votesRegistry = {}; // Here we register votesCounters
+    this.votesCounters = []; // Here we count them
     this.candidates = [];
   }
 
@@ -139,7 +141,7 @@ class MafiaGame {
     this.gameOn = true;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
-
+    this.dayNumber = 1;
     this.startVote();
 
     this.informPlayers('started');
@@ -201,12 +203,12 @@ class MafiaGame {
     switch(this.gameState){
       case GameStates.Discussion:
         let voteResolve = this.resolveVote(); // Count vote outcome
-        if(!voteResolve){ // No candidates during main phase
+        if(!this.votesCounters.length){ // No candidates during main phase
           // Edge case - no one voted at all
-          console.log("Discussion: no one voted - keep talking");
+          console.error("Discussion: no one voted - keep talking");
           break; // Keep the state, restart the vote
         }
-        if(this.votes.length === 1){
+        if(this.votesCounters.length === 1){
           // Single candidate during daytime vote - run tie breaker
           this.gameState = GameStates.Tiebreaker; // Front end must support this
           timeout = this.mainVoteTimeout;
@@ -221,7 +223,7 @@ class MafiaGame {
 
       case GameStates.MainVote:
         if(!this.resolveVote()){
-          if(!this.votes.length){ // Edge case - no one voted at all
+          if(!this.votesCounters.length){ // Edge case - no one voted at all
             console.log("MainVote: no one voted - restart the vote");
             break; // Keep the state, restart the vote
           }
@@ -234,17 +236,18 @@ class MafiaGame {
         }
 
         console.log("MainVote: switching to Night");
-        this._kill(this.votes[0][0]); // Kill a player
+        this._kill(this.votesCounters[0][0]); // Kill a player
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
 
       case GameStates.Night:
         if(this.resolveVote()) {
-          this._kill(this.votes[0][0]);
+          this._kill(this.votesCounters[0][0]);
         }
 
         console.log("MainVote: switching to Discussion");
+        this.dayNumber ++;
         this.gameState = GameStates.Discussion;
         timeout = this.discussionTimeout;
         break;
@@ -252,7 +255,7 @@ class MafiaGame {
       case GameStates.Tiebreaker:
         // People vote to kill both, or spare both: 0 or 1
         // TODO: check if it works, maybe redo how it works after UI implemented
-        if(this.resolveVote() && this.votes[0][0] === 0){ // Failed vote = double tie - save both
+        if(this.resolveVote() && this.votesCounters[0][0] === 0){ // Failed vote = double tie - save both
           this.candidates.forEach(candidate => this._kill(candidate));
         }
 
@@ -293,7 +296,7 @@ class MafiaGame {
     return Math.floor((this.timerStarted + this.timerDuration - Date.now())/1000);
   }
   command(data, playerId, isHost){
-    console.debug(">> command", data, playerId, isHost);
+    //console.debug(">> command", data, playerId, isHost);
 
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex < 0){
@@ -323,7 +326,7 @@ class MafiaGame {
       this._rearrangePlayers();
     }
 
-    this._playerUpdate(player, "join");
+    this.informPlayers("joined");
   }
   /* /end of External game interface */
 
@@ -383,8 +386,8 @@ class MafiaGame {
     }
 
     // Filter players who voted for me
-    return (Array.isArray(this.votes)? this.votes: Object.entries(this.votes)) // Dict to array to iterate easier
-               .filter(element => parseInt(element[1]) === player.number) // Filter votes for this player
+    return Object.entries(this.votesRegistry) // Dict to array to iterate easier
+               .filter(element => parseInt(element[1]) === player.number) // Filter votesCounters for this player
                .map(element => {
                  let player = this.players[element[0]-1];
                  return {
@@ -427,6 +430,10 @@ class MafiaGame {
       votedBy: this._playerVotedBy(player)
     };
 
+    if(this.gameState === GameStates.Discussion && player === requester){
+      // During daytime players cannot nominate themselves - prevent game bombing
+      publicInfo.isCandidate = false;
+    }
     publicInfo.role = this._playerRoleForAnothePlayer(player, requester);
     return publicInfo;
   }
@@ -437,7 +444,8 @@ class MafiaGame {
       gameOn: this.gameOn,
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
-      candidates: this.candidates,
+      dayNumber: this.dayNumber,
+      // candidates: this.candidates,
       countdown: this.timeLeft()
     };
   }
@@ -474,6 +482,7 @@ class MafiaGame {
   _kill(playerNumber){
     let player = this.players[playerNumber-1];
     player.isAlive = false;
+    console.log("kill", playerNumber + ": " + player.name);
     this._playerUpdate(player, "gameOver");
   }
 
@@ -483,19 +492,21 @@ class MafiaGame {
     // Calculate vote candidates based on for the state
     switch(gameState){
       case GameStates.Discussion:
+        return this.players.filter(player => player.isAlive).map(player => player.number);
+
       case GameStates.Night: // Note: mafia can vote to kill one of their own
         return this.players.filter(player => player.isAlive).map(player => player.number);
 
       case GameStates.MainVote:
-        if(!this.votes.length){
+        if(!this.votesCounters.length){
           return this.players.filter(player => player.isAlive).map(player => player.number);
         }
-        return this.votes.map(vote => parseInt(vote[0]));
+        return this.votesCounters.map(vote => parseInt(vote[0]));
 
       case GameStates.Tiebreaker:
         // if tie happens - people vote to kill all or spare all
-        let tieCounter = this.votes[0][1];
-        return this.votes.filter(item => item[1] === tieCounter).map(item => parseInt(item[0]));
+        let tieCounter = this.votesCounters[0][1];
+        return this.votesCounters.filter(item => item[1] === tieCounter).map(item => parseInt(item[0]));
     }
   }
   playersVoteCounts(player){
@@ -519,7 +530,8 @@ class MafiaGame {
     4) Nighttime - mafia only - who to eliminate
      */
     this.candidates = this.checkCandidates();
-    this.votes = {};
+    this.votesCounters = [];
+    this.votesRegistry = {};
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);
 
@@ -527,11 +539,11 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
-    if(!this.players[whoVotes-1]){ // Not a player
+    if(!this.players[whoVotes-1] || !this.players[whoVotes-1].isAlive){ // Not a player, or dead
       return null;
     }
-    let alreadyVoted = !!this.votes[whoVotes];
-    this.votes[whoVotes] = choicePlayer; // Using array to have unique vote per player
+    let alreadyVoted = !!this.votesRegistry[whoVotes];
+    this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
 
     if(!alreadyVoted && this.players[whoVotes-1].role === MafiaRoles.Detective){
       // this is a detecitve. we remember that he knows about this player now, with next game update he will get information
@@ -547,22 +559,21 @@ class MafiaGame {
     }
   }
   checkAllVoted(){
-    // For automatic vote resolve - once everyone votes
-    return !this.whoShouldVote().some(player => !(player.number in this.votes));
+    // For automatic vote resolve - once everyone votesCounters
+    return !this.whoShouldVote().some(player => !(player.number in this.votesRegistry));
   }
   resolveVote(){
     // Didn't vote - vote goes to the first of the list
     let unusedVotesCounter = 0;
 
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
-      unusedVotesCounter = this.whoCounts().filter(player => !this.votes[player.number]).length;
+      unusedVotesCounter = this.whoCounts().filter(player => !(player.number in this.votesRegistry));
     }
 
-    // Count votes
+    // Count votesCounters
     let votedDown = {};
-    Object.keys(this.votes).forEach(author => {
-
-      let choice = this.votes[author];
+    Object.keys(this.votesRegistry).forEach(author => {
+      let choice = this.votesRegistry[author];
       if(!this.playersVoteCounts(this.players[author - 1])){ // Player shouldn't have voted, ignore his vote
         return;
       }
@@ -572,33 +583,45 @@ class MafiaGame {
       votedDown[choice] ++;
     });
 
-    this.votes = Object.entries(votedDown);
+    this.votesCounters = Object.entries(votedDown);
 
-    if(this.votes.length === 0){
+    if(this.votesCounters.length === 0){
       if(this.isVoteMandatory && this.gameState === GameStates.MainVote && this.whoShouldVote().length){
         // No one voted - their problems, someone will die!
-        this.votes.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
+        this.votesCounters.push([this.whoShouldVote()[0].number, unusedVotesCounter]);
         return true;
       }
       return false; // No one voted
     }
 
     if(this.mafiaVotes && this.isMafiaVoteUnanimous){
-      if(unusedVotesCounter > 0 || this.votes.length > 1){
+      if(unusedVotesCounter > 0 || this.votesCounters.length > 1){
         return false;
       }
     }
 
     if(this.isVoteMandatory && !this.mafiaVotes){
       // Add all unused votes to the smallest player number
-      this.votes.sort(element => element[0]);
-      this.votes[0][1] += unusedVotesCounter;
+      this.votesCounters.sort((a, b) => {
+        if (a[0] === b[0])
+          return 0;
+        if (a[0] < b[0])
+          return -1;
+        return 1;
+      });
+      this.votesCounters[0][1] += unusedVotesCounter;
     }
 
-    this.votes.sort(element => -element[1]); // Sort by votes in reverse order
+    this.votesCounters.sort((a, b) => {
+      if (a[1] === b[1])
+        return 0;
+      if (a[1] > b[1])
+        return -1;
+      return 1;
+    }); // Sort by votesCounters in reverse order
 
     // noinspection RedundantIfStatementJS
-    if(this.votes.length > 1 && this.votes[0][1] === this.votes[1][1]){
+    if(this.votesCounters.length > 1 && this.votesCounters[0][1] === this.votesCounters[1][1]){
       return false;      // It is a tie
     }
     return true;
@@ -609,6 +632,7 @@ class MafiaGame {
   endGame(civiliansWin){
      this.gameOn = false;
      this.civiliansWin = civiliansWin;
+     this.votesCounters = {};
      this.informPlayers("ended");
   }
   checkGameOver(){

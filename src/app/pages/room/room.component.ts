@@ -63,9 +63,12 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
         let countdown = data.game.countdown || 0;
         if (countdown) {
+          let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
+          console.log('wake up in', wakeUpTime);
           this.wakeUpTimer = setTimeout(() => {
+            console.log('ready to wake up');
             this.wakeUpReady = true;
-          }, countdown * Math.random() * 0.5);
+          }, wakeUpTime * 1000);
         }
         this.countdownSubject = timer(1000, 1000)
           .pipe(takeWhile(() => countdown > 0))
