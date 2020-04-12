@@ -122,6 +122,8 @@ class Room {
     if('autoJoin' in settings) {
       player.autoJoin = settings.autoJoin;
     }
+
+    this.directMessage(playerId, "roomDirectEvent", {event:"settingsChanged", settings:{autoJoin: player.autoJoin}});
   }
 
   kick(playerId, targetId, hard = false){
