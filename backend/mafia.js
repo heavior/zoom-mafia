@@ -176,7 +176,6 @@ class MafiaGame {
       }
       return activeA?-1:1; // Active go on top
     });
-    console.warn("_rearrangePlayers", this.players.map(player => player.number + ": " + player.name));
   }
   informPlayers(event = null){
     this.players.forEach(player => {
