@@ -86,7 +86,7 @@
          [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
     >
       {{gPlayer.number}}: {{gPlayer.name}}
-      <ng-container *ngIf="player.number === gPlayer.number">(you)</ng-container>
+      <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
       <span *ngIf="gPlayer.role"
             [ngClass]="{'text-danger':mafiaRole(gPlayer.role), 'text-success': civilianRole(gPlayer.role)}"> - {{gPlayer.role}}</span>
       &nbsp;
@@ -109,11 +109,12 @@
 
   <ng-container *ngIf="guests.length">
     <b>Guests:</b>
-    <div class="" *ngFor="let player of guests"
-         [ngClass]="{'text-muted': !player.isOnline}"
-         title="{{player.isOnline?'':'Offline'}}"
+    <div class="" *ngFor="let gPlayer of guests"
+         [ngClass]="{'text-muted': !gPlayer.isOnline}"
+         title="{{gPlayer.isOnline?'':'Offline'}}"
     >
-      {{player.name}}
+      {{gPlayer.name}}
+      <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
     </div>
   </ng-container>
 
