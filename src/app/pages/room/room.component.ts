@@ -57,6 +57,8 @@ export class RoomComponent implements OnInit, OnDestroy {
         const {event, game, players, you} = data;
         this.game = game;
         this.player = you;
+        console.log("gamePlayers", players, this.gamePlayers);
+
         this.gamePlayers = players || this.gamePlayers;
         this.isMafia = this.mafiaRole(this.player.role);
         this.updateLists();
@@ -138,8 +140,8 @@ export class RoomComponent implements OnInit, OnDestroy {
       player.isOnline = roomPlayer.isOnline;
     });
     // Split the list
-    this.players = this.gamePlayers.filter(player => this.game.gameOn && player.role !== 'Guest');
-    this.guests = this.gamePlayers.filter(player => !this.game.gameOn || player.role === 'Guest');
+    this.players = this.gamePlayers.filter(player => player.role !== 'Guest');
+    this.guests = this.gamePlayers.filter(player => player.role === 'Guest');
   }
   civilianRole(role){
     return role === 'Civilian' || role === 'Detective';

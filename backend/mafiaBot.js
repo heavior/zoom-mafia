@@ -17,9 +17,9 @@ const DefaultConfig = Object.freeze({
   // If bot is host:
   startGameDelay: 30,        // timeout for starting new game
   skipStateTimeout: 0.5,      // timeout for skipping states
-  discussionTimeout: 0.5,    // timeout for discussion phase (if not skipping Discussion)
+  discussionTimeout: 30,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  skipStates: [] //'Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+  skipStates: ['Discussion', 'Night'] //'Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
 });
 
 class MafiaBot {
