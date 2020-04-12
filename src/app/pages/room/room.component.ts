@@ -70,10 +70,11 @@ export class RoomComponent implements OnInit, OnDestroy {
         let countdown = game.countdown || 0;
         if (countdown) {
           let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
-          console.log('wake up in', wakeUpTime);
+          console.log('wake up in', wakeUpTime * 1000);
           clearTimeout(this.wakeUpTimer);
           this.wakeUpTimer = setTimeout(() => {
             console.log('ready to wake up');
+            this.votedFor = null;
             this.wakeUpReady = true;
           }, wakeUpTime * 1000);
           this.countdown = 0;
@@ -84,7 +85,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (event !== 'vote' && event !== 'joined'){
+        if (event !== 'vote' && event !== 'joined' && game.gameState !== 'Night') {
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
           this.wakeUpReady = false;
