@@ -13,6 +13,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   private gameSubject: Subscription;
   private roomSubject: Subscription;
   private receiverSubject: Subscription;
+  private settingsSubject: Subscription;
   countdown = 0;
   game: any = {};
   votedFor: number = null;
@@ -34,6 +35,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   endGameMessage: string;
   winner: string;
   showHint: boolean = true;
+  autoJoin: boolean = true;
 
   constructor(private chatService: ChatService) { }
 
@@ -42,14 +44,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.roomLink = this.chatService.roomLink;
     this.userName = this.chatService.userName;
 
-    this.gameSubject = this.chatService.gameState.subscribe((state) => {
-      console.log('>> gameState', state);
-      this.state = state;
-    });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
     });
-    this.chatService.gameSubject
+    this.gameSubject = this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
         console.log('gameSubject', data);
@@ -68,7 +66,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.countdownSubject.unsubscribe();
         }
         let countdown = game.countdown || 0;
-        if (countdown) {
+        if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
           let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
           console.log('wake up in', wakeUpTime * 1000);
           clearTimeout(this.wakeUpTimer);
@@ -78,6 +76,9 @@ export class RoomComponent implements OnInit, OnDestroy {
             this.wakeUpReady = true;
           }, wakeUpTime * 1000);
           this.countdown = 0;
+        } else {
+          this.votedFor = null;
+          this.wakeUpReady = true;
         }
         this.countdownSubject = timer(1000, 1000)
           .pipe(takeWhile(() => countdown > 0))
@@ -85,7 +86,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (event !== 'vote' && event !== 'joined' && game.gameState !== 'Night') {
+        if (event !== 'vote' && event !== 'joined' && !this.wakeUpTimer) {
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
           this.wakeUpReady = false;
@@ -113,7 +114,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           }
         }
       });
-    this.chatService.roomSubject
+    this.roomSubject = this.chatService.roomSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
         console.log('>> roomSubject', data);
@@ -123,6 +124,11 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.updateLists();
         this.videoLink = data.videoLink || this.videoLink;
         this.votedFor = null;
+      });
+    this.settingsSubject = this.chatService.settingsSubject
+      .pipe(filter((data) => data !== undefined))
+      .subscribe((data) => {
+        this.autoJoin = data.settings.autoJoin;
       });
   }
 
@@ -208,6 +214,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
+  toggleJoinGame() {
+    this.chatService.joinGame(!this.autoJoin);
+  }
+
   kick(playerId: string) {
     this.chatService.kickPlayer(playerId);
   }
@@ -238,6 +248,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.gameSubject.unsubscribe();
     this.roomSubject.unsubscribe();
     this.receiverSubject.unsubscribe();
+    this.settingsSubject.unsubscribe();
   }
 
 }

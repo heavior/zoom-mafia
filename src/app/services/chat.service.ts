@@ -11,10 +11,10 @@ export class ChatService {
   private socket: any;
   private url: string = '/';
   data: any = {};
-  gameState: BehaviorSubject<string> = new BehaviorSubject('');
   gameSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
   roomSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
   roomLink: string = '';
+  settingsSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
 
   constructor(@Inject(DOCUMENT) private document: Document,
               private route: ActivatedRoute,
@@ -35,11 +35,6 @@ export class ChatService {
           Object.assign(this.data, data);
           this.roomSubject.next(this.data);
           return this.router.navigate([`/${data.id}`]);
-/*        case "playerConnected":
-          let state = this.gameState.getValue();
-          delete data['event'];
-          this.roomSubject.next(Object.assign({}, state, data));
-          break;  */
         default:
           Object.assign(this.data, data);
           this.roomSubject.next(this.data)
@@ -69,6 +64,10 @@ export class ChatService {
     this.userName = data.userName;
     Object.assign(data, {action: 'create'});
     this.socket.emit('roomCommand', data);
+  }
+
+  joinGame(autoJoin: boolean) {
+    this.socket.emit('roomCommand', {action: 'userSettings', settings: {autoJoin}});
   }
 
   joinRoom(data) {
@@ -107,6 +106,8 @@ export class ChatService {
           case 'gameStatus':
             this.gameSubject.next(message.data);
             break;
+          case 'roomDirectEvent':
+            this.settingsSubject.next(message.settings);
           default:
             break;
         }
