@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "ng": "ng",
+    "serve": "ng serve",
     "start": "node server.js",
+    "bots": "node bots.js",
     "build": "ng build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "ng lint",

@@ -30,6 +30,13 @@ export class RoomComponent implements OnInit, OnDestroy {
   state: string;
   userName: string;
   videoLink: string;
+  isMafia: boolean;
+  dayTime: string;
+  endGameMessage: string;
+  phaseMessage: string;
+  winner: string;
+  hint: string;
+  showHint: boolean;
 
   constructor(private chatService: ChatService) { }
 
@@ -42,11 +49,6 @@ export class RoomComponent implements OnInit, OnDestroy {
       console.log('>> gameState', state);
       this.state = state;
     });
-    this.roomSubject = this.chatService.roomSubject.subscribe((data) => {
-      console.log('>> roomSubject', data);
-      this.roomLink = this.chatService.roomLink;
-      // this.roomState = state;
-    });
     this.receiverSubject = this.chatService.receiveMessages().subscribe((message: string) => {
       this.messages.push(message);
     });
@@ -54,21 +56,29 @@ export class RoomComponent implements OnInit, OnDestroy {
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
         console.log('gameSubject', data);
-        this.game = data.game;
-        this.player = data.you;
-        this.gamePlayers = data.players || [];
+        const {event, game, players, you} = data;
+        this.game = game;
+        this.player = you;
+        this.gamePlayers = players || [];
+        this.isMafia = this.mafiaRole(this.player.role);
         this.updateLists();
+
+        if (!game.gameOn) {
+          this.countdown = 0;
+        }
         if (this.countdownSubject) {
           this.countdownSubject.unsubscribe();
         }
-        let countdown = data.game.countdown || 0;
+        let countdown = game.countdown || 0;
         if (countdown) {
           let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
           console.log('wake up in', wakeUpTime);
+          clearTimeout(this.wakeUpTimer);
           this.wakeUpTimer = setTimeout(() => {
             console.log('ready to wake up');
             this.wakeUpReady = true;
           }, wakeUpTime * 1000);
+          this.countdown = 0;
         }
         this.countdownSubject = timer(1000, 1000)
           .pipe(takeWhile(() => countdown > 0))
@@ -76,7 +86,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (data.event !== 'vote' && data.event !== 'joined'){
+        if (event !== 'vote' && event !== 'joined'){
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
           this.wakeUpReady = false;
@@ -85,11 +95,43 @@ export class RoomComponent implements OnInit, OnDestroy {
             this.wakeUpTimer = null;
           }
         }
+
+        switch (game.gameState) {
+          case 'Discussion':
+            this.phaseMessage = 'Discuss your suspicions';
+            break;
+          case 'Night':
+            this.phaseMessage = this.isMafia ? 'Choose who to kill' : 'Wait for the day';
+            break;
+          case 'MainVote':
+          default:
+            this.phaseMessage = game.gameState;
+        }
+        this.dayTime = game.gameState === 'Night' ? 'Night' : 'Day';
+        this.state = game.dayNumber > 0 ? game.gameOn ? 'on' : 'over' : 'about to start';
+        if (event === 'started') {
+          this.winner = '';
+          this.endGameMessage = '';
+        }
+        if (event === 'ended') {
+          this.winner = game.civiliansWin ? '=== Civilians win ===' : '=== Mafia wins===';
+          switch(this.player.role) {
+            case 'Guest':
+              break;
+            case 'Mafia':
+              this.endGameMessage = !game.civiliansWin ? 'That\'s your team, congratulations!!!' : 'Sorry :(';
+              break;
+            default:
+              this.endGameMessage = game.civiliansWin ? 'That\'s your team, congratulations!!!' : 'Sorry :(';
+          }
+        }
       });
     this.chatService.roomSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
-        console.log('roomSubject', data);
+        console.log('>> roomSubject', data);
+        this.roomLink = this.chatService.roomLink;
+
         this.host = data.host;
         this.roomPlayers = data.players || [];
         this.updateLists();
@@ -110,8 +152,8 @@ export class RoomComponent implements OnInit, OnDestroy {
       player.isOnline = roomPlayer.isOnline;
     });
     // Split the list
-    this.players = this.gamePlayers.filter(player => player.role !== 'Guest');
-    this.guests = this.gamePlayers.filter(player => player.role === 'Guest');
+    this.players = this.gamePlayers.filter(player => this.game.gameOn && player.role !== 'Guest');
+    this.guests = this.gamePlayers.filter(player => !this.game.gameOn || player.role === 'Guest');
   }
   civilianRole(role){
     return role === 'Civilian' || role === 'Detective';

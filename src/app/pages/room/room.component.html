@@ -16,7 +16,7 @@
     <div class="form-group w-100">
       Link to this room:<br/>
       <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
-      <button class="btn btn-sm btn-outline-secondary" id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button><br/>
+      <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button><br/>
       <a *ngIf="videoLink" href="{{videoLink}}" target="_blank">Join video conference</a>
     </div>
   </div>
@@ -31,17 +31,24 @@
   <ng-container *ngIf="player">
     <div>
       <div>Welcome, <b>{{player.name}}</b></div>
-      <div>This game is <b>{{game.gameOn ? 'On' : 'Over'}}</b></div>
-      <div>Your role is <b>{{player.role}}</b></div>
-      <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
+      <div>This game is <b>{{state}}</b></div>
+      <ng-container *ngIf="game.gameOn">
+        <div>Your role is <b [class]="isMafia ? 'text-danger' : 'text-success'">{{player.role}}</b></div>
+        <div>Your number is <b>{{player.number}}</b></div>
+        <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
+      </ng-container>
+      <ng-container *ngIf="!game.gameOn && winner">
+        <div class="text-danger"><b>{{winner}}</b></div>
+        <div *ngIf="endGameMessage">{{endGameMessage}}</div>
+      </ng-container>
     </div>
     <hr>
   </ng-container>
 
   <ng-container *ngIf="game">
     <div class="">
-      <div>It is <b>{{game.gameState === 'Night' ? 'Night' : 'Day'}}</b></div>
-      <div>Phase: <b>{{game.gameState}}</b></div>
+      <div>It is <b [class]="dayTime === 'Night' ? 'night' : ''">{{dayTime}}</b>&nbsp;<b>#{{game.dayNumber}} {{game.gameState}}</b></div>
+      <div><b>{{phaseMessage}}</b></div>
       <div *ngIf="countdown">Time left: <b>{{countdown}}</b> seconds</div>
     </div>
 
@@ -54,9 +61,7 @@
   </ng-container>
 
   <ng-container *ngIf="players.length">
-
-
-    <ng-container *ngIf="game.gameState === 'Night' && player.role === 'Civilian'">
+    <ng-container *ngIf="game.gameState === 'Night' && isMafia">
       Once you are ready:
       <button class="btn btn-sm btn-primary"
               (click)="vote(0)"
@@ -120,7 +125,7 @@
 
   <hr>
   <b>Chat</b>
-  <button class="btn btn-sm btn-outline-secondary" type="button" (click)="clearChat()">Clear chat</button>
+  <button class="btn btn-sm btn-outline-secondary ml-1" type="button" (click)="clearChat()">Clear chat</button>
   <div class="input-group">
     <input class="form-control" type="text"
            [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
