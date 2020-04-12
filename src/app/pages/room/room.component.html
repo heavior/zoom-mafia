@@ -63,7 +63,7 @@
     <ng-container *ngIf="game.gameOn else hostStartGame">
       <ng-container *ngIf="game.gameState === 'Discussion'">
         <div><b>Wait till the players discuss and nominate suspects.</b></div>
-        <div><a href (click)="next(); false" class="bg-info text-white">[Start voting]</a></div>
+        <div><button (click)="next()" class="btn btn-sm btn-outline-primary">Start voting</button></div>
       </ng-container>
     </ng-container>
     <ng-template #hostStartGame>
@@ -134,8 +134,8 @@
               (click)="vote(gPlayer.number)"
               [ngClass]="{'btn-primary':!votedFor || votedFor === gPlayer.number, 'btn-secondary': votedFor && votedFor !== gPlayer.number}"
               [disabled]="votedFor">{{voteButtonCaption()}}</button>
-      <a *ngIf="isHost && player.number !== gPlayer.number"
-         class="bg-warning text-white ml-1" href (click)="kick(player.number); false">[Kick]</a>
+      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline"
+         class="btn btn-sm btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
       <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>
 

@@ -30,7 +30,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   state: string;
   userName: string;
   videoLink: string = '';
-  isMafia: boolean;
   dayTime: string;
   endGameMessage: string;
   winner: string;
@@ -60,7 +59,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         console.log("gamePlayers", players, this.gamePlayers);
 
         this.gamePlayers = players || this.gamePlayers;
-        this.isMafia = this.mafiaRole(this.player.role);
         this.updateLists();
 
         if (!game.gameOn) {
@@ -119,7 +117,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       .subscribe((data: any) => {
         console.log('>> roomSubject', data);
         this.roomLink = this.chatService.roomLink;
-        this.isHost = this.player && this.player.userId === data.host;
+        this.isHost = this.player && [this.player.name, this.player.userId].some((field) => field === data.host);
         this.roomPlayers = data.players || this.roomPlayers;
         this.updateLists();
         this.videoLink = data.videoLink || this.videoLink;
@@ -178,7 +176,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       case 'MainVote':
         return 'Who do you think is guilty?';
       case 'Night':
-        return this.isMafia ? 'Choose who to kill' : 'Wait for the day';
+        return this.mafiaRole(this.player.role) ? 'Choose who to kill' : 'Wait for the day';
       case 'Tiebreaker':
         return 'What is your verdict?';
       default:
@@ -209,8 +207,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  kick(playerNumber: number) {
-    this.chatService.kickPlayer(playerNumber);
+  kick(playerId: string) {
+    this.chatService.kickPlayer(playerId);
   }
 
   next() {

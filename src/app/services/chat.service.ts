@@ -32,8 +32,8 @@ export class ChatService {
         case 'joined':
           this.roomId = data.id;
           this.roomLink = `${this.document.location.origin}/${data.id}`;
-          Object.assign(data, this.data);
-          this.roomSubject.next(data);
+          Object.assign(this.data, data);
+          this.roomSubject.next(this.data);
           return this.router.navigate([`/${data.id}`]);
 /*        case "playerConnected":
           let state = this.gameState.getValue();
@@ -41,7 +41,8 @@ export class ChatService {
           this.roomSubject.next(Object.assign({}, state, data));
           break;  */
         default:
-          this.roomSubject.next(data);
+          Object.assign(this.data, data);
+          this.roomSubject.next(this.data)
           return;
       }
     });
@@ -76,8 +77,8 @@ export class ChatService {
     this.socket.emit('roomCommand', data);
   }
 
-  kickPlayer(playerNumber: number) {
-    this.socket.emit({action: 'kick', playerNumber});
+  kickPlayer(playerId: string) {
+    this.socket.emit({action: 'kick', 'targetId': playerId});
   }
 
   next() {
