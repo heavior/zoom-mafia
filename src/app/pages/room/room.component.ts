@@ -191,12 +191,22 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
   hintCaption() {
+    const isGuest = this.player.role === 'Guest';
     let hint = '';
-    switch (this.game.gameState) {
+    const gameState = isGuest ? this.game.gameState : '';
+    switch (gameState) {
       case 'Discussion':
+        hint = 'Players are discussing who are the suspects';
+        break;
       case 'MainVote':
+        hint = 'Players are voting on who is guilty';
+        break;
       case 'Night':
+        hint = 'Players are doing actions depending on their roles.';
+        break;
       case 'Tiebreaker':
+        hint = 'Players are voting on a tiebreaker';
+        break;
       default:
         hint = 'Talk to other players and try to find mafia and prove your position to other players. Then chose who do you suspect.';
     }
