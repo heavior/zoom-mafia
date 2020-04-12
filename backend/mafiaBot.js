@@ -8,25 +8,24 @@ const VoteStrategies = Object.freeze({
   Last: 'Last'
 });
 const DefaultConfig = Object.freeze({
-    voteStrategy: VoteStrategies.Random,
-    selfPreservation: true,   // Do not vote for yourself during normal votes
-    forceTie: true,           // Force vote to kill for Ties
-    skipStateTimeout: 1,      // timeout for skipping states
-    discussionTimeout: 1,     // timeout for discussion phase (if not skipping Discussion)
-    silentHost: false,        // Do not log messages if host
-    silent: true,             // Do not log messages if not host
-    skipStates: ['Discussion', 'Night', 'MainVote'] // Host should quickly skip certain states
+  voteStrategy: VoteStrategies.Random,
+  selfPreservation: true,   // Do not vote for yourself during normal votes
+  forceTie: true,           // Force vote to kill for Ties
+  skipStateTimeout: 1,      // timeout for skipping states
+  discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
+  silentHost: false,        // Do not log messages if host
+  silent: true,             // Do not log messages if not host
+  skipStates: ['Discussion', 'Night', 'MainVote'] // Host should quickly skip certain states
 });
 
 class MafiaBot {
   constructor(server, roomId, i, config = {}){
-
     this.config = Object.assign({}, DefaultConfig, config);
-    this.log("init bot", this.config);
-
     this.roomId = roomId;
     this.id = "Bot " + i;
     this.name = "Bot " + i;
+
+    this.log("init bot", this.config);
 
     this.isOnline= true;
     this.socket = io.connect(server, {
@@ -40,9 +39,6 @@ class MafiaBot {
         userId: this.id
       }
     }); // Open connection
-
-
-    //this.log("init bot", this.socket);
 
     // Log all messages
     this.socket.on("roomEvent", data =>{

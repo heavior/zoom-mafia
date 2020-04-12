@@ -92,6 +92,7 @@ class MafiaGame {
               directMessageCallback,
               isVoteMandatory = true, // Is everyone must vote (unresolved votes go for the first player on the voting list)
               isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
+              killDoubleTie = false,
               discussionTimeout = 0, // Discussion phase - no time limit
               mainVoteTimeout = 30,  // 30 seconds to let them vote during day
               nightTimetout = 60,      // 60 seconds night time
@@ -104,6 +105,7 @@ class MafiaGame {
     this.isMafiaVoteUnanimous = isMafiaVoteUnanimous;
     this.expectCivilianVoteAtNight = expectCivilianVoteAtNight;
     this.allowAutoCompleteVote = allowAutoCompleteVote;
+    this.killDoubleTie = killDoubleTie;
 
     this.gameEventCallback = gameEventCallback;
     this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
@@ -246,7 +248,10 @@ class MafiaGame {
       case GameStates.Tiebreaker:
         // People vote to kill both, or spare both: 0 or 1
         // TODO: check if it works, maybe redo how it works after UI implemented
-        if(this.resolveVote() && this.votesCounters[0][0] === 0){ // Failed vote = double tie - save both
+        let tieBreakerResolved = this.resolveVote();
+        console.warn("Tiebreaker resolve", tieBreakerResolved, this.votesCounters, this.candidates);
+        if((!tieBreakerResolved && this.killDoubleTie) // Double tie with strict rules - kill all
+          ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
           this.candidates.forEach(candidate => this._kill(candidate));
         }
 
@@ -527,6 +532,9 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
+    if(!this.gameOn){ // Game not started
+      return;
+    }
     console.log("vote", whoVotes, "for", choicePlayer);
     let player = this.players[whoVotes-1];
     if(!player || !player.isAlive){ // Not a player, or dead
