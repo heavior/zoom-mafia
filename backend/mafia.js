@@ -539,9 +539,23 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
-    if(!this.players[whoVotes-1] || !this.players[whoVotes-1].isAlive){ // Not a player, or dead
-      return null;
+    let player = this.players[whoVotes-1];
+    if(!player || !player.isAlive){ // Not a player, or dead
+      return;
     }
+
+    if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker){
+      return; // Ignore this vote
+    }
+    if(choicePlayer === 0 && this.gameState !== GameStates.Tiebreaker){
+      if(this.gameState !== GameStates.Night){
+        return;
+      }
+      if(player.role !== GameStates.Civilian){
+        return; // Night vote, 0 is allowed for civilians
+      }
+    }
+
     let alreadyVoted = !!this.votesRegistry[whoVotes];
     this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
 

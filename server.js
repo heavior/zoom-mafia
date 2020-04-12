@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
   // roomCommands interact with roomManager and room
   // TODO: move them inside the room and manager for unification
   socket.on('roomCommand', (data) =>{
-    console.debug(">> roomCommand " + JSON.stringify(data));
+    console.debug((user?user.name:'') + " >> roomCommand " + JSON.stringify(data));
 
     switch(data.action) {
       case 'create':
@@ -194,7 +194,7 @@ io.on('connection', (socket) => {
 
   // Game commands are transparently relayed into the game itself
   socket.on('gameCommand', (data) =>{
-    console.debug(">> gameCommand " + JSON.stringify(data));
+    console.debug(user.name + " >> gameCommand: " + JSON.stringify(data));
     if(!roomId){
       console.warn("No room to send game command to");
       socket.emit("message", "You are not in the room");
