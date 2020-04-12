@@ -57,7 +57,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         const {event, game, players, you} = data;
         this.game = game;
         this.player = you;
-        this.gamePlayers = players || [];
+        this.gamePlayers = players || this.gamePlayers;
         this.isMafia = this.mafiaRole(this.player.role);
         this.updateLists();
 

@@ -562,7 +562,8 @@ class MafiaGame {
     if(choicePlayer < -1){
       return; // Ignore this vote - basic validation
     }
-    if(this.gameState === GameStates.Tiebreaker && choicePlayer < 1){
+    if(this.gameState === GameStates.Tiebreaker && choicePlayer > 0){
+      console.warn("This is not a valid Tiebreaker vote", this.gameState, choicePlayer);
       return; // This is not a valid Tiebreaker vote, ignore
     }
     if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker){
@@ -594,8 +595,7 @@ class MafiaGame {
     }
   }
   checkAllVoted(){
-    //console.debug("checkAllVoted", this.whoShouldVote(), this.votesRegistry);
-    console.log("checkAllVoted: not voted", this.whoShouldVote().filter(player => !(player.number in this.votesRegistry)).map(player=>player.number +": "+player.name));
+    // console.log("checkAllVoted: not voted", this.whoShouldVote().filter(player => !(player.number in this.votesRegistry)).map(player=>player.number +": "+player.name));
     // For automatic vote resolve - once everyone votesCounters
     return !this.whoShouldVote().some(player => !(player.number in this.votesRegistry));
   }

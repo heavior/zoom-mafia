@@ -32,8 +32,8 @@
     <div>
       <div>Welcome, <b>{{player.name}}</b></div>
       <div>This game is <b>{{state}}</b></div>
+      <div>Your role is <b [class]="isMafia ? 'text-danger' : 'text-success'">{{player.role}}</b></div>
       <ng-container *ngIf="game.gameOn">
-        <div>Your role is <b [class]="isMafia ? 'text-danger' : 'text-success'">{{player.role}}</b></div>
         <div>Your number is <b>{{player.number}}</b></div>
         <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
       </ng-container>
@@ -65,7 +65,7 @@
   </ng-container>
 
   <ng-container *ngIf="players.length">
-    <ng-container *ngIf="game.gameState === 'Night' && isMafia">
+    <ng-container *ngIf="game.gameState === 'Night' && !isMafia">
       Once you are ready:
       <button class="btn btn-sm btn-primary"
               (click)="vote(0)"
@@ -108,6 +108,7 @@
 
       <hr>
     </ng-container>
+
     <b>Players: </b>
     <div class="" *ngFor="let gPlayer of players"
          [ngClass]="{'text-muted': !gPlayer.isOnline}"
