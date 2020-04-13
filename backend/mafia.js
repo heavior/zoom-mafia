@@ -462,7 +462,7 @@ class MafiaGame {
       name: player.name,
       isAlive: player.isAlive,
       isCandidate: this.candidates.indexOf(player.number) >= 0,
-      votedBy: this._playerVotedBy(player.number)
+      votedBy: this._playerVotedBy(player.number, requester)
     };
 
     if(this.gameState === GameStates.Discussion && player === requester){
