@@ -4,25 +4,23 @@
     <h5 class="card-title text-center">About</h5>
     <p class="card-text">Basic info blurb</p>
 
-    <div *ngIf="!ready else makeRoom" class="form-group">
+    <div class="form-group">
       <label for="username">Username</label>
       <input id="username" class="form-control"
              [(ngModel)]="userName" autoFocus
-             (keyup.enter)="userName && setUsername()" required />
+             (keyup.enter)="userName && createRoom()" required />
       <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
       <div class="mt-3 d-flex justify-content-center">
-        <button class="btn btn-primary"
-                (click)="setUsername()" [disabled]="!userName">Set Name</button>
-      </div>
     </div>
 
-    <ng-template #makeRoom>
-      <label for="videoLink">Video link</label>
-      <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="createRoom()" autoFocus/>
+    <div class="form-group">
+      <label for="videoLink">Video link <span class="text-muted">(Optional)</span></label>
+      <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="createRoom()"/>
       <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
-      <div class="mt-3 d-flex justify-content-center">
-        <button class="btn btn-primary" (click)="createRoom()">Create Room</button>
-      </div>
-    </ng-template>
+    </div>
+
+    <div class="mt-3 d-flex justify-content-center">
+      <button class="btn btn-primary" (click)="createRoom()" [disabled]="!userName">Create Room</button>
+    </div>
   </div>
 </div>

@@ -9,19 +9,10 @@ import {BehaviorSubject} from "rxjs";
 })
 export class HomeComponent implements OnInit {
   joining: boolean = false;
-  needsUsernameSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
   userName: string;
   videoLink: string = '';
 
   constructor(private chatService: ChatService) { }
-
-  get ready() {
-    return this.needsUsernameSubject.getValue();
-  }
-
-  set ready(value) {
-    this.needsUsernameSubject.next(value);
-  }
 
   ngOnInit(): void {
     this.joining = !!this.chatService.roomId;
@@ -34,10 +25,6 @@ export class HomeComponent implements OnInit {
       videoLink: this.videoLink
     };
     this.chatService.createRoom(data);
-  }
-
-  setUsername() {
-    this.ready = true;
   }
 
 }
