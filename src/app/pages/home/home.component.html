@@ -1,22 +1,19 @@
 <div class="card">
   <div class="card-header">Welcome To Mafia</div>
   <div class="card-body">
-    <h5 class="card-title text-center">About</h5>
-    <p class="card-text">Basic info blurb</p>
-
+    <h5 class="card-title text-center">Create new room to play Mafia</h5>
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="username">Your name in video conference</label>
       <input id="username" class="form-control"
              [(ngModel)]="userName" autoFocus
              (keyup.enter)="userName && createRoom()" required />
-      <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
+      <small id="usernameHelp" class="form-text text-muted">Name must be unique within the room</small>
       <div class="mt-3 d-flex justify-content-center">
     </div>
 
     <div class="form-group">
-      <label for="videoLink">Video link <span class="text-muted">(Optional)</span></label>
+      <label for="videoLink">Video conference link <span class="text-muted">(optional)</span></label>
       <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="createRoom()"/>
-      <small id="videoLinkHelp" class="form-text text-muted">Enter the videoLink</small>
     </div>
 
     <div class="mt-3 d-flex justify-content-center">

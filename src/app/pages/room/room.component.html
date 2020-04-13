@@ -1,17 +1,23 @@
 <ng-container *ngIf="!roomLink else showGame">
-  <div class="form-group">
-    <label for="username">Username</label>
-    <input id="username" class="form-control"
-           [(ngModel)]="userName" autoFocus
-           (keyup.enter)="userName && join()" required />
-    <small id="usernameHelp" class="form-text text-muted">Enter your username</small>
-    <div class="mt-3 d-flex justify-content-center">
-      <button class="btn btn-primary" (click)="join()" [disabled]="!userName">Join Room</button>
-    </div>
-    <div class="mt-3 d-flex justify-content-center">
-      <a href="https://forms.gle/XUJNsjMnfct3eUbN9" target="_blank">Contact us</a>
+<div class="card">
+  <div class="card-header">Welcome To Mafia</div>
+  <div class="card-body">
+    <h5 class="card-title text-center">Join the room to play Mafia</h5>
+    <div class="form-group">
+      <label for="username">Your name in video conference</label>
+      <input id="username" class="form-control"
+             [(ngModel)]="userName" autoFocus
+             (keyup.enter)="userName && join()" required />
+      <small id="usernameHelp" class="form-text text-muted">Name must be unique within the room</small>
+      <div class="mt-3 d-flex justify-content-center">
+        <button class="btn btn-primary" (click)="join()" [disabled]="!userName">Join Room</button>
+      </div>
+      <div class="mt-3 d-flex justify-content-center">
+        <a href="https://forms.gle/XUJNsjMnfct3eUbN9" target="_blank">Contact us</a>
+      </div>
     </div>
   </div>
+</div>
 </ng-container>
 
 <ng-template #showGame>
