@@ -216,6 +216,9 @@ class Room {
     // Only online players join the game
     let onlinePlayers = this.players.filter(player => player.isOnline && player.autoJoin);
     this.game.start(onlinePlayers);
+
+    this.players.filter(player => player.isOnline && !player.autoJoin).forEach(player => this.game.join(player));
+    // Add guests to the game
   }
 
   gameCommand(data, playerId){
