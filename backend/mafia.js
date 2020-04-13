@@ -231,7 +231,11 @@ class MafiaGame {
         }
 
         console.log("MainVote: switching to Night");
-        this._kill(this.votesCounters[0][0], "guilty"); // Kill a player
+        let accusedNumber = this.votesCounters[0][0];
+        this._kill(accusedNumber, "guilty"); // Kill a player
+        this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
+                                            .filter(element => element[1] === accusedNumber)
+                                            .map(element => element[0]));
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
@@ -258,8 +262,14 @@ class MafiaGame {
         if((!tieBreakerResolved && this.killDoubleTie) // Double tie with strict rules - kill all
           ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
           this.candidates.forEach(candidate => this._kill(candidate, "guilty"));
+          this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
+                                              .filter(element => element[1] === -1)
+                                              .map(element => element[0]));
         }else{
           this.candidates.forEach(candidate => this.addNews("acquitted", candidate));
+          this.addNewsVoted("acquitted", Object.entries(this.votesRegistry)
+                                                .filter(element => element[1] === 0)
+                                                .map(element => element[0]));
         }
 
         console.log("Tiebreaker: switching to Night");
@@ -463,7 +473,8 @@ class MafiaGame {
       news: this.news.map(news => Object.assign({}, news,
         {
           players: news.players.map(playerNumber => this._playerPublicInfo(this.players[playerNumber-1], requester)),
-          me: news.players.indexOf(requester.number) >= 0
+          votedBy: news.votedBy ? news.votedBy.map(playerNumber => this._playerPublicInfo(this.players[playerNumber-1], requester)) : null,
+          personal: news.players.indexOf(requester.number) >= 0
         })
       ),
       tiebreakerVoted: tiebreakerVoted,
@@ -475,7 +486,7 @@ class MafiaGame {
     this.news = this.news.filter(news => news.dayNumber < this.dayNumber-1); // Remove news older that one day
   }
   addNews(event, playerNumber, data){
-    let sameEvent = this.news.find(news => news.event === sameEvent);
+    let sameEvent = this.news.find(news => news.event === event);
     if(sameEvent){
       sameEvent.players.push(playerNumber);
       return;
@@ -486,6 +497,14 @@ class MafiaGame {
       gameState: this.gameState,
       players: [playerNumber]
     },data));
+  }
+
+  addNewsVoted(event, votes){
+    let findEvent = this.news.find(news => news.event === event);
+    if(!findEvent){
+      console.error("adding voted before event registered");
+    }
+    findEvent.votedBy = votes;
   }
   /* /end of Game info */
 
