@@ -1,0 +1,15 @@
+<ng-container *ngIf="!news.length else showNews">
+  <div>No News</div>
+</ng-container>
+<ng-template #showNews>
+  <div *ngFor="let item of news">
+    <div>
+      <span [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}</span>
+    </div>
+    <div>{{calcMessage(item)}}</div>
+    <ng-container *ngIf="item.votedBy && item.votedBy.length">
+      <div>{{votedBy(item.votedBy)}}</div>
+    </ng-container>
+    <br>
+  </div>
+</ng-template>

@@ -76,6 +76,7 @@
     </ng-template>
     <hr>
   </ng-container>
+
   <ng-container *ngIf="isHost else notHost">
     <div><b>You are the host!</b></div>
     <ng-container *ngIf="game.gameOn else hostStartGame">
@@ -90,6 +91,12 @@
     <hr>
   </ng-container>
   <ng-template #notHost><br></ng-template>
+
+  <ng-container>
+    <div>Recent news</div>
+    <app-news [currentDay]="game.dayNumber" [news]="game.news" [player]="player"></app-news>
+    <hr>
+  </ng-container>
 
   <ng-container *ngIf="players.length">
     <ng-container *ngIf="game.gameState === 'Night' && player.role === 'Civilian'">

@@ -9,13 +9,15 @@ import { FormsModule } from "@angular/forms";
 import { ClipboardModule } from 'ngx-clipboard';
 import { RoomComponent } from './pages/room/room.component';
 import { AutoFocusDirective } from './directives/auto-focus.directive';
+import { NewsComponent } from './components/news/news.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     RoomComponent,
-    AutoFocusDirective
+    AutoFocusDirective,
+    NewsComponent
   ],
   imports: [
     BrowserModule,
