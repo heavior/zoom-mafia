@@ -259,7 +259,7 @@ class MafiaGame {
           ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
           this.candidates.forEach(candidate => this._kill(candidate, "guilty"));
         }else{
-          this.candidates.forEach(candidate => this.addNews("pardoned", candidate));
+          this.candidates.forEach(candidate => this.addNews("acquitted", candidate));
         }
 
         console.log("Tiebreaker: switching to Night");
