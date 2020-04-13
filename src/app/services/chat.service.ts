@@ -56,7 +56,9 @@ export class ChatService {
 
     fromEvent(window, 'beforeunload').subscribe(() => {
       localStorage.setItem('roomId', this.roomId);
-      localStorage.setItem('userName', this.userName);
+      if (this.userName) {
+        localStorage.setItem('userName', this.userName);
+      }
     });
   }
 

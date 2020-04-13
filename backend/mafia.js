@@ -249,8 +249,8 @@ class MafiaGame {
         let accusedNumber = this.votesCounters[0][0];
         this._kill(accusedNumber, "guilty"); // Kill a player
         this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
-                                            .filter(element => element[1] === accusedNumber)
-                                            .map(element => element[0]));
+                                            .filter(element => parseInt(element[1]) === parseInt(accusedNumber))
+                                            .map(element => parseInt(element[0])));
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
@@ -278,13 +278,13 @@ class MafiaGame {
           ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
           this.candidates.forEach(candidate => this._kill(candidate, "guilty"));
           this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
-                                              .filter(element => element[1] === -1)
-                                              .map(element => element[0]));
+                                              .filter(element => parseInt(element[1]) === -1)
+                                              .map(element => parseInt(element[0])));
         }else{
           this.candidates.forEach(candidate => this.addNews("acquitted", candidate));
           this.addNewsVoted("acquitted", Object.entries(this.votesRegistry)
-                                                .filter(element => element[1] === 0)
-                                                .map(element => element[0]));
+                                                .filter(element => parseInt(element[1]) === 0)
+                                                .map(element => parseInt(element[0])));
         }
 
         console.log("Tiebreaker: switching to Night");
@@ -522,6 +522,7 @@ class MafiaGame {
       console.error("adding voted before event registered");
     }
     findEvent.votedBy = votes;
+    console.warn("addNewsVoted", event, votes, findEvent);
   }
   /* /end of Game info */
 
