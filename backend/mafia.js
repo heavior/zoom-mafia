@@ -140,7 +140,20 @@ class MafiaGame {
     this.dayNumber = 1;
     this.startVote();
 
+    this.addNews("started", null, {
+      roles: this._countRoles()
+    });
     this.informPlayers('started');
+  }
+  _countRoles(){
+    let result = {};
+    this.players.forEach(player => {
+      if(!(player.role in result)){
+        result[player.role] = 0;
+      }
+      result[player.role] ++;
+    });
+    return result;
   }
   _createPlayer(player, role = MafiaRoles.Guest, number = null){
     return {
@@ -485,18 +498,20 @@ class MafiaGame {
   clearOldNews(){
     this.news = this.news.filter(news => news.dayNumber < this.dayNumber-1); // Remove news older that one day
   }
-  addNews(event, playerNumber, data){
+  addNews(event, playerNumber=null, data){
     let sameEvent = this.news.find(news => news.event === event);
     if(sameEvent){
-      sameEvent.players.push(playerNumber);
+      if(playerNumber) {
+        sameEvent.players.push(playerNumber);
+      }
       return;
     }
     this.news.push(Object.assign({
       event:event,
       dayNumber: this.dayNumber,
       gameState: this.gameState,
-      players: [playerNumber]
-    },data));
+      players: playerNumber? [playerNumber]:[]
+    }, data));
   }
 
   addNewsVoted(event, votes){
@@ -721,6 +736,7 @@ class MafiaGame {
     this.gameOn = false;
     this.civiliansWin = civiliansWin;
     this.votesCounters = {};
+    this.addNews("ended", null, {players: this.players.filter(player=>player.isAlive).map(player => player.number)});
     this.informPlayers("ended");
   }
   checkGameOver(){
