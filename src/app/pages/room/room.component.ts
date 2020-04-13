@@ -177,18 +177,34 @@ export class RoomComponent implements OnInit, OnDestroy {
     return null; // Don't show button in any other scenario
   }
   phaseCaption() {
-    switch (this.game.gameState) {
-      case 'Discussion':
-        return 'Discuss your suspicions';
-      case 'MainVote':
-        return 'Who do you think is guilty?';
-      case 'Night':
-        return this.mafiaRole(this.player.role) ? 'Choose who to kill' : 'Wait for the day';
-      case 'Tiebreaker':
-        return 'What is your verdict?';
-      default:
-        return this.game.gameState;
-    }
+    const phases = {
+      Discussion: {
+        Guest: '',
+        Mafia: 'Deceive civilians',
+        Civilian: 'Discuss your suspicions',
+        Detective: 'Look out for mafia'
+      },
+      MainVote: {
+        Guest: 'The jury is out',
+        Mafia: 'Who to vote for?',
+        Civilian: 'Who is guilty?',
+        Detective: 'Choose wisely'
+      },
+      Night: {
+        Guest: 'Dark deeds',
+        Mafia: 'Choose your victim',
+        Civilian: 'Sleep well',
+        Detective: 'Who to check?'
+      },
+      Tiebreaker: {
+        Guest: 'There was a tie',
+        Mafia: 'Do you want to kill them?',
+        Civilian: 'What is your verdict?',
+        Detective: 'What is your verdict?',
+      }
+    };
+    const role = this.player.isAlive ? this.player.role : 'Guest';
+    return phases[ this.game.gameState][role] || phases[ this.game.gameState]['Guest'];
   }
   hintCaption() {
     const hints = {
