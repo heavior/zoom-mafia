@@ -19,8 +19,9 @@ const DefaultConfig = Object.freeze({
   skipStateTimeout: 0.5,      // timeout for skipping states
   discussionTimeout: 30,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  skipStates: ['Discussion', 'Night'] //'Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+  skipStates: ['Discussion', 'MainVote', 'Tiebreaker'] //'Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
 });
+// TODO: fix skit state timeout, it doesn't seem to be working
 
 class MafiaBot {
   constructor(server, roomId, i, config = {}){
@@ -135,6 +136,7 @@ class MafiaBot {
     }
   }
   skipState(){
+    console.log("skip state");
      if(this.config.skipStates.indexOf(this.game.gameState)>=0
       || this.game.gameState === 'Discussion'){
          this.log("<< next");
