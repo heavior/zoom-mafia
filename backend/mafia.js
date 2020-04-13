@@ -106,6 +106,7 @@ class MafiaGame {
     this.expectCivilianVoteAtNight = expectCivilianVoteAtNight;
     this.allowAutoCompleteVote = allowAutoCompleteVote;
     this.killDoubleTie = killDoubleTie;
+    this.news = [];
 
     this.gameEventCallback = gameEventCallback;
     this.directMessageCallback = directMessageCallback; // (playerId, eventName, eventData)
@@ -230,18 +231,21 @@ class MafiaGame {
         }
 
         console.log("MainVote: switching to Night");
-        this._kill(this.votesCounters[0][0]); // Kill a player
+        this._kill(this.votesCounters[0][0], "guilty"); // Kill a player
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
 
       case GameStates.Night:
         if(this.resolveVote()) {
-          this._kill(this.votesCounters[0][0]);
+          this._kill(this.votesCounters[0][0], "murdered");
+        }else{
+          this.addNews("missed");
         }
 
         console.log("MainVote: switching to Discussion");
         this.dayNumber ++;
+        this.clearOldNews();
         this.gameState = GameStates.Discussion;
         timeout = this.discussionTimeout;
         break;
@@ -253,7 +257,9 @@ class MafiaGame {
         console.debug("Tiebreaker resolve", tieBreakerResolved, this.votesCounters, this.candidates);
         if((!tieBreakerResolved && this.killDoubleTie) // Double tie with strict rules - kill all
           ||(tieBreakerResolved && parseInt(this.votesCounters[0][0]) === -1)){  // Succesfull resolve && vote for kill
-          this.candidates.forEach(candidate => this._kill(candidate));
+          this.candidates.forEach(candidate => this._kill(candidate, "guilty"));
+        }else{
+          this.candidates.forEach(candidate => this.addNews("pardoned", candidate));
         }
 
         console.log("Tiebreaker: switching to Night");
@@ -454,10 +460,32 @@ class MafiaGame {
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
       dayNumber: this.dayNumber,
-      // candidates: this.candidates,
+      news: this.news.map(news => Object.assign({}, news,
+        {
+          players: news.players.map(playerNumber => this._playerPublicInfo(this.players[playerNumber-1], requester)),
+          me: news.players.indexOf(requester.number) >= 0
+        })
+      ),
       tiebreakerVoted: tiebreakerVoted,
       countdown: this.timeLeft()
     };
+  }
+
+  clearOldNews(){
+    this.news = this.news.filter(news => news.dayNumber < this.dayNumber-1); // Remove news older that one day
+  }
+  addNews(event, playerNumber, data){
+    let sameEvent = this.news.find(news => news.event === sameEvent);
+    if(sameEvent){
+      sameEvent.players.push(playerNumber);
+      return;
+    }
+    this.news.push(Object.assign({
+      event:event,
+      dayNumber: this.dayNumber,
+      gameState: this.gameState,
+      players: [playerNumber]
+    },data));
   }
   /* /end of Game info */
 
@@ -486,14 +514,16 @@ class MafiaGame {
   kick(playerId){
     let playerIndex = this.getPlayerIndex(playerId);
     if(playerIndex >= 0){
-      this._kill(playerIndex+1);
+      this._kill(playerIndex+1, "left");
     }
     this.informPlayers("playerLeft");
   }
-  _kill(playerNumber){
+  _kill(playerNumber, reason){
     let player = this.players[playerNumber-1];
     player.isAlive = false;
     console.log("kill", playerNumber + ": " + player.name);
+
+    this.addNews(reason, playerNumber);
     this._playerUpdate(player, "gameOver");
   }
 
