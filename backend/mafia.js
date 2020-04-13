@@ -60,7 +60,7 @@ const CardsDeck = [
       MafiaRoles.Civilian,  // 6 players
       MafiaRoles.Civilian,  // 7 players
       MafiaRoles.Mafia,     // 8 players
-      MafiaRoles.Detective, // 9 players
+      MafiaRoles.Detective, // 9 players - introduce Detective
       MafiaRoles.Civilian,  // 10 players
       MafiaRoles.Mafia,     // MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
@@ -83,7 +83,8 @@ const GameStates = Object.freeze({
   Discussion: 'Discussion', // Day - main conversation between players and nominating candidates
   MainVote: 'MainVote',     // Day - vote for guilty party
   Night: 'Night',           // Night - mafia votes
-  Tiebreaker: 'Tiebreaker'                // Day - a tie during vote process
+  Tiebreaker: 'Tiebreaker', // Day - a tie during vote process
+  LastWord: 'LastWord'      // Day - last word for convinced people
 });
 
 
@@ -138,6 +139,7 @@ class MafiaGame {
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
     this.dayNumber = 1;
+    this.news = [];
     this.startVote();
 
     this.addNews("started", null, {
