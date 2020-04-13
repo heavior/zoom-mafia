@@ -134,7 +134,9 @@
          [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
     >
       {{gPlayer.number}}: {{gPlayer.name}}
+
       <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
+      <ng-container *ngIf="player.name === game.host">(host)</ng-container>
       <span *ngIf="gPlayer.role"
             [ngClass]="{'text-danger':mafiaRole(gPlayer.role), 'text-success': civilianRole(gPlayer.role)}"> - {{gPlayer.role}}</span>
       &nbsp;
@@ -165,6 +167,7 @@
     >
       {{gPlayer.name}}
       <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
+      <ng-container *ngIf="player.name === game.host">(host)</ng-container>
     </div>
   </ng-container>
 
