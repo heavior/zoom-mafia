@@ -191,7 +191,11 @@ class MafiaBot {
         }
 
         if(this.me.role === 'Detective'){
-          narrowCandidates = candidates.filter(player => player.role === 'Mafia');
+          if(this.game.gameState !== 'Night') { // At main votes detective votes for Mafia
+            narrowCandidates = candidates.filter(player => player.role === 'Mafia');
+          }else{ // At night detective investigates random unknown candidate
+            narrowCandidates = candidates.filter(player => !player.role);
+          }
         }
 
         if(narrowCandidates.length > 0){ // We can narrow down the list
