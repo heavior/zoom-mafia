@@ -67,15 +67,28 @@ export class RoomComponent implements OnInit, OnDestroy {
         let countdown = game.countdown || 0;
         if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
           const wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
-          console.log('wake up in', wakeUpTime * 1000);
-          clearTimeout(this.wakeUpTimer);
+          console.log('wake up in', wakeUpTime);
+          if (this.wakeUpTimer){
+            clearTimeout(this.wakeUpTimer);
+          }
           this.wakeUpReady = false;
           this.wakeUpTimer = setTimeout(() => {
             console.log('ready to wake up');
             this.votedFor = null;
             this.wakeUpReady = true;
+            this.wakeUpTimer = null;
           }, wakeUpTime * 1000);
           this.countdown = 0;
+        }else{
+          if (event !== 'vote' && event !== 'joined') {
+            // If the event was vote - do not flush some local variables
+            this.votedFor = null;
+            if (this.wakeUpTimer){
+              console.log("clear wakeUpTimer");
+              clearTimeout(this.wakeUpTimer);
+              this.wakeUpTimer = null;
+            }
+          }
         }
         this.countdownSubject = timer(1000, 1000)
           .pipe(takeWhile(() => countdown > 0))
@@ -83,14 +96,6 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (event !== 'vote' && event !== 'joined') {
-          // If the event was vote - do not flush some local variables
-          this.votedFor = null;
-          if (this.wakeUpTimer){
-            clearTimeout(this.wakeUpTimer);
-            this.wakeUpTimer = null;
-          }
-        }
         this.dayTime = game.gameState === 'Night' ? 'Night' : 'Day';
         this.state = game.dayNumber > 0 ? game.gameOn ? 'on' : 'over' : 'about to start';
         if (event === 'started') {
