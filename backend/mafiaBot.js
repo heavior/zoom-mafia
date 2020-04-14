@@ -11,6 +11,7 @@ const DefaultConfig = Object.freeze({
   reconnect: false, // Automatically reconnect when server restarts
   voteStrategy: VoteStrategies.Random,
   selfPreservation: true,   // Do not vote for yourself during normal votes
+  teamPreservation: true,   // Try not to kill teammates
   tiebreakerVote: null,     // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
   silent: true,             // Do not log messages if not host
   voteMaxDelay: 10,         // Vote delay to emulate real player (actual delay is random)
@@ -182,7 +183,23 @@ class MafiaBot {
     }else{
       candidates = this.players.filter(player=> player.isCandidate
         && (!this.config.selfPreservation || player.number !== this.me.number));
+
+      if(this.config.teamPreservation){ // Remove from the list players who are supposedly our friends
+        let narrowCandidates = [];
+        if(this.me.role === 'Mafia'){
+          narrowCandidates = candidates.filter(player => player.role !== 'Mafia');
+        }
+
+        if(this.me.role === 'Detective'){
+          narrowCandidates = candidates.filter(player => player.role === 'Mafia');
+        }
+
+        if(narrowCandidates.length > 0){ // We can narrow down the list
+          candidates = narrowCandidates;
+        }
+      }
     }
+
     if(!candidates.length){
       return;
     }
