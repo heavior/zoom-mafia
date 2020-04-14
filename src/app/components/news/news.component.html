@@ -1,16 +1,13 @@
 <ng-container *ngIf="!news.length else showNews">
-  <div>No News</div>
+  <div><b>No news today</b></div>
 </ng-container>
 <ng-template #showNews>
+  <p><b>Recent news:</b></p>
   <div *ngFor="let item of news">
-    <div>
-      <span [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}</span>
-    </div>
-    <div *ngIf="item.event === 'ended'">{{winner}} won the game.</div>
-    <div>{{calcMessage(item)}}</div>
-    <ng-container *ngIf="item.votedBy && item.votedBy.length">
-      <div>{{votedBy(item.votedBy)}}</div>
-    </ng-container>
-    <br>
+    <span class="text-underline" [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}:</span>&nbsp;
+    <b *ngIf="item.event === 'ended'">{{winner}} won the game.<br></b>
+    <span>{{calcMessage(item)}}</span>
+    <div class="font-italic text-muted" *ngIf="item.votedBy && item.votedBy.length">{{votedBy(item.votedBy)}}</div>
   </div>
 </ng-template>
+

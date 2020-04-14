@@ -23,7 +23,7 @@ export class NewsComponent implements OnInit {
       return player.name === this.player.name ? `${player.name} (you)` : player.name;
     }).join(', ');
     const toBe = players.length === 1 ? 'was' : 'were';
-    switch(event) {
+    switch (event) {
       case 'acquitted':
         message = `${playerNames} ${toBe} acquitted by the jury`;
         break;

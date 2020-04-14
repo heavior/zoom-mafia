@@ -53,6 +53,11 @@
     <hr *ngIf="player.role !== 'Guest'">
   </ng-container>
 
+  <ng-container>
+    <app-news [currentDay]="game.dayNumber" [news]="game.news" [player]="player" [civiliansWin]="game.civiliansWin"></app-news>
+    <hr>
+  </ng-container>
+
   <ng-container *ngIf="game.gameOn">
     <div>
       <div>It is <b [class]="dayTime === 'Night' ? 'night' : ''">{{dayTime}} #{{game.dayNumber}} <ng-container *ngIf="dayTime !== 'Night'">({{game.gameState}})</ng-container></b></div>
@@ -62,19 +67,17 @@
       </ng-container>
     </div>
     <br *ngIf="player.role !== 'Guest'">
-    <ng-container *ngIf="showHint else hideHint">
-      <div>
-        <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;
-        <a (click)="showHint = false;" href>[&times;]</a>
-      </div>
-    </ng-container>
+    <div class="text-muted" *ngIf="showHint else hideHint">
+      <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;
+      <a (click)="showHint = false;" href>[&times;]</a>
+    </div>
     <ng-template #hideHint>
       <div><a (click)="showHint = true; false" href>[ show hint >> ]</a></div>
     </ng-template>
     <hr>
   </ng-container>
 
-  <ng-container *ngIf="isHost else notHost">
+  <ng-container *ngIf="isHost">
     <div><b>You are the host!</b></div>
     <ng-container *ngIf="game.gameOn else hostStartGame">
       <ng-container *ngIf="game.gameState === 'Discussion'">
@@ -85,13 +88,6 @@
     <ng-template #hostStartGame>
       <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>
     </ng-template>
-    <hr>
-  </ng-container>
-  <ng-template #notHost><br></ng-template>
-
-  <ng-container>
-    <div>Recent news</div>
-    <app-news [currentDay]="game.dayNumber" [news]="game.news" [player]="player" [civiliansWin]="game.civiliansWin"></app-news>
     <hr>
   </ng-container>
 
@@ -158,6 +154,7 @@
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </ng-container>
     </div>
+    <hr>
   </ng-container>
 
   <ng-container *ngIf="guests.length">
