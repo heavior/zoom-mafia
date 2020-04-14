@@ -4,7 +4,7 @@ const { Command } = require('commander');
 
 const { Bot } = require("./backend/mafiaBot");
 
-const DEFAULT_BOTS_NUMBER = 10;
+const DEFAULT_BOTS_NUMBER = 20;
 const DEFAULT_ROOM = 'bots';
 const DEFAULT_SERVER = 'http://localhost:8080';
 const program = new Command();

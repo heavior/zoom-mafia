@@ -70,6 +70,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
           console.log('wake up in', wakeUpTime * 1000);
           clearTimeout(this.wakeUpTimer);
+          this.wakeUpReady = false;
           this.wakeUpTimer = setTimeout(() => {
             console.log('ready to wake up');
             this.votedFor = null;
