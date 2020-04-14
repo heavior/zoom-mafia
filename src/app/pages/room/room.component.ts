@@ -14,19 +14,19 @@ export class RoomComponent implements OnInit, OnDestroy {
   private roomSubject: Subscription;
   private receiverSubject: Subscription;
   private settingsSubject: Subscription;
-  countdown = 0;
-  game: any = {};
+  countdown:number = 0;
+  game: IGame = undefined;
   votedFor: number = null;
-  isHost = false;
+  isHost: boolean = false;
   messages: string[];
   newMessage: string;
   wakeUpReady: boolean;
   wakeUpTimer: any;
-  player: any = undefined;
+  player: IYou = undefined;
   gamePlayers: any[] = [];
   roomPlayers: any[] = [];
-  players: any[] = [];
-  guests: any[] = [];
+  players: IPlayer[] = [];
+  guests: IPlayer[] = [];
   roomLink: string;
   state: string;
   userName: string;
@@ -287,4 +287,39 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.settingsSubject.unsubscribe();
   }
 
+}
+
+interface IGame {
+  civiliansWin: boolean;
+  countdown: number;
+  dayNumber: number;
+  gameOn: boolean;
+  gameState: string;
+  host: string;
+  news: any;
+  tiebreakerVoted: any;
+}
+
+interface IPlayer {
+  isAlive: boolean;
+  isCandidate: boolean;
+  isOnline: boolean;
+  name: string;
+  number: number;
+  role: string;
+  votedBy: IVoter[];
+}
+
+interface IVoter {
+  name: string;
+  number: number;
+  role: string|null;
+}
+
+interface IYou{
+  isAlive: boolean;
+  name: string;
+  number: number;
+  role: string;
+  userId: string;
 }
