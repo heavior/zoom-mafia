@@ -16,6 +16,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.joining = !!this.chatService.roomId;
+    this.userName = this.chatService.userName;
   }
 
   createRoom() {

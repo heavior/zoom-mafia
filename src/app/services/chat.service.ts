@@ -42,10 +42,11 @@ export class ChatService {
       }
     });
 
-      const userName = localStorage.getItem('userName');
+    this.userName = localStorage.getItem('userName');
     setTimeout(() => {
       this.roomId = this.router.url.replace('/', '');
       const oldRoomId = localStorage.getItem('roomId');
+      const userName = localStorage.getItem('userName');
       if (userName && oldRoomId === this.roomId) {
         this.userName = userName;
         this.joinRoom({...this.data})
