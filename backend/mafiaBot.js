@@ -16,10 +16,10 @@ const DefaultConfig = Object.freeze({
 
   // If bot is host:
   startGameDelay: 30,       // timeout for starting new game
-  skipStateTimeout: 0.5,    // timeout for skipping states, use 0.5 for quick go
-  discussionTimeout: 30,    // timeout for discussion phase (if not skipping Discussion)
+  skipStateTimeout: 20,    // timeout for skipping states, use 0.5 for quick go
+  discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  skipStates: ['Discussion', /*'Night',*/ 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+  skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
 });
 // TODO: fix skit state timeout, it doesn't seem to be working
 

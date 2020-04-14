@@ -502,7 +502,7 @@ class MafiaGame {
   }
   addNews(event, playerNumber=null, data){
     console.log("addNews", event);
-    let sameEvent = this.news.find(news => news.event === event);
+    let sameEvent = this.news.find(news => news.event === event && news.dayNumber === this.dayNumber);
     if(sameEvent){
       if(playerNumber) {
         sameEvent.players.push(playerNumber);
