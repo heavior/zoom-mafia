@@ -77,9 +77,6 @@ export class RoomComponent implements OnInit, OnDestroy {
             this.wakeUpReady = true;
           }, wakeUpTime * 1000);
           this.countdown = 0;
-        } else {
-          this.votedFor = null;
-          this.wakeUpReady = true;
         }
         this.countdownSubject = timer(1000, 1000)
           .pipe(takeWhile(() => countdown > 0))
@@ -90,7 +87,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         if (event !== 'vote' && event !== 'joined' && !this.wakeUpTimer) {
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
-          this.wakeUpReady = false;
           if (this.wakeUpTimer){
             clearTimeout(this.wakeUpTimer);
             this.wakeUpTimer = null;
