@@ -17,7 +17,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   countdown = 0;
   game: any = {};
   votedFor: number = null;
-  isHost: boolean = false;
+  isHost = false;
   messages: string[];
   newMessage: string;
   wakeUpReady: boolean;
@@ -30,12 +30,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomLink: string;
   state: string;
   userName: string;
-  videoLink: string = '';
+  videoLink = '';
   dayTime: string;
   endGameMessage: string;
   winner: string;
-  showHint: boolean = true;
-  autoJoin: boolean = true;
+  showHint = true;
+  autoJoin = true;
 
   constructor(private chatService: ChatService) { }
 
@@ -54,7 +54,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         const {event, game, players, you} = data;
         this.game = game;
         this.player = you;
-        console.log("gamePlayers", players, this.gamePlayers);
 
         this.gamePlayers = players || this.gamePlayers;
         this.updateLists();
@@ -67,7 +66,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
         let countdown = game.countdown || 0;
         if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
-          let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
+          const wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
           console.log('wake up in', wakeUpTime * 1000);
           clearTimeout(this.wakeUpTimer);
           this.wakeUpReady = false;
@@ -84,7 +83,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             --countdown;
             this.countdown = countdown;
           });
-        if (event !== 'vote' && event !== 'joined' && !this.wakeUpTimer) {
+        if (event !== 'vote' && event !== 'joined') {
           // If the event was vote - do not flush some local variables
           this.votedFor = null;
           if (this.wakeUpTimer){
