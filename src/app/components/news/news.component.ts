@@ -9,29 +9,12 @@ export class NewsComponent implements OnInit {
   @Input() currentDay: number;
   @Input() news: any[];
   @Input() player: any;
+  @Input() civiliansWin: boolean;
+  winner: string;
 
   constructor() { }
 
-  ngOnInit(): void {
-  }
-
-  calcTime(item) {
-    const {dayNumber, gameState} = item;
-    const today = this.currentDay === dayNumber;
-    let timeText = '';
-    switch (gameState) {
-      case 'Discussion':
-      case 'Tiebreaker':
-      case 'MainVote':
-        timeText = today ? 'Today' : 'Yesterday';
-        break;
-      case 'Night':
-      default:
-        timeText = today ? 'This Night' : 'Last Night';
-        break;
-    }
-    return timeText;
-  }
+  ngOnInit(): void { }
 
   calcMessage(item) {
     const {event, players, roles} = item;
@@ -45,6 +28,7 @@ export class NewsComponent implements OnInit {
         message = `${playerNames} ${toBe} acquitted by the jury`;
         break;
       case 'ended':
+        this.winner = this.civiliansWin ? 'Civilians' : 'Mafia';
         message = `Last survivors ${playerNames}`;
         break;
       case 'guilty':
@@ -67,6 +51,24 @@ export class NewsComponent implements OnInit {
         return 'Unknown event';
     }
     return message;
+  }
+
+  calcTime(item) {
+    const {dayNumber, gameState} = item;
+    const today = this.currentDay === dayNumber;
+    let timeText = '';
+    switch (gameState) {
+      case 'Discussion':
+      case 'Tiebreaker':
+      case 'MainVote':
+        timeText = today ? 'Today' : 'Yesterday';
+        break;
+      case 'Night':
+      default:
+        timeText = today ? 'This Night' : 'Last Night';
+        break;
+    }
+    return timeText;
   }
 
   getRoles(roles) {

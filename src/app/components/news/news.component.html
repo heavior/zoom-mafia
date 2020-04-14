@@ -6,6 +6,7 @@
     <div>
       <span [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}</span>
     </div>
+    <div *ngIf="item.event === 'ended'">{{winner}} won the game.</div>
     <div>{{calcMessage(item)}}</div>
     <ng-container *ngIf="item.votedBy && item.votedBy.length">
       <div>{{votedBy(item.votedBy)}}</div>
