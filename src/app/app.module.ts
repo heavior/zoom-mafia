@@ -11,6 +11,7 @@ import { RoomComponent } from './pages/room/room.component';
 import { AutoFocusDirective } from './directives/auto-focus.directive';
 import { NewsComponent } from './components/news/news.component';
 import { ColorizeUserDirective } from './directives/colorize-user.directive';
+import { ColorizeUserListComponent } from './components/colorize-user-list/colorize-user-list.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ColorizeUserDirective } from './directives/colorize-user.directive';
     RoomComponent,
     AutoFocusDirective,
     NewsComponent,
-    ColorizeUserDirective
+    ColorizeUserDirective,
+    ColorizeUserListComponent
   ],
   imports: [
     BrowserModule,

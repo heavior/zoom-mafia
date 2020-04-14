@@ -1,0 +1,2 @@
+<span *ngFor="let player of players; let isLast=last" appColorizeUser
+      [player]="player">{{player.number}}: {{player.name}}{{isLast ? '' : ', '}}</span>

@@ -105,10 +105,7 @@
     </ng-container>
 
     <ng-container *ngIf="game.gameState === 'Tiebreaker'">
-      How do you find <span
-          *ngFor="let vPlayer of candidates(); let isLast=last"
-          appColorizeUser [player]="vPlayer"
-          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>?<br>
+      How do you find <colorize-user-list [players]="candidates()"></colorize-user-list>?<br>
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
               (click)="vote(-1)"
@@ -116,10 +113,7 @@
               [disabled]="votedFor !== null">guilty</button> &nbsp;
       <span *ngIf="!player.isAlive" class="badge badge-danger"> Guilty </span>
       <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[-1].length">
-        (<span
-          *ngFor="let vPlayer of game.tiebreakerVoted[-1]; let isLast=last"
-          appColorizeUser [player]="vPlayer"
-          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+        (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
       </ng-container>
       <br>
 
@@ -130,10 +124,7 @@
               [ngClass]="{'btn-primary':!votedFor, 'btn-secondary': votedFor}"
               [disabled]="votedFor !== null">not guilty</button>
       <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[0].length">
-        (<span
-          *ngFor="let vPlayer of game.tiebreakerVoted[0]; let isLast=last"
-          appColorizeUser [player]="vPlayer"
-          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+        (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
       </ng-container>
 
 
@@ -164,10 +155,7 @@
       <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>
 
       <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
-        (<span
-          *ngFor="let vPlayer of gPlayer.votedBy; let isLast=last"
-          appColorizeUser [player]="vPlayer"
-          >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
+        (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </ng-container>
     </div>
   </ng-container>
