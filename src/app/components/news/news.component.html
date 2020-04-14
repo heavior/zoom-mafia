@@ -2,7 +2,7 @@
   <div><b>No news today</b></div>
 </ng-container>
 <ng-template #showNews>
-  <p><b>Recent news:</b></p>
+  <div><b>Recent news:</b></div>
   <div *ngFor="let item of news">
     <span class="text-underline" [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}:</span>&nbsp;
     <b *ngIf="item.event === 'ended'">{{winner}} won the game.<br></b>

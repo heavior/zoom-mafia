@@ -312,7 +312,13 @@ class MafiaGame {
     }
     this.timerStarted = Date.now();
     this.timerDuration = timeout*1000;
+    this.timerState = this.gameState;
     this.timer = setTimeout(()=>{
+      this.timer = null;
+      if(this.timerState !== this.gameState){
+        console.warn("stepped changed while we are waiting");
+        return;
+      }
       console.debug("time over");
       this.next(); // Always forces to the next step
     }, timeout*1000 + TIMER_LATENCY);
