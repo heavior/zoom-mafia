@@ -4,12 +4,13 @@ const io = require('socket.io-client');
 const VoteStrategies = Object.freeze({
   None: 'None',
   Random: 'Random',
+  Smart: 'Smart',
   First: 'First',
   Last: 'Last'
 });
 const DefaultConfig = Object.freeze({
   reconnect: false, // Automatically reconnect when server restarts
-  voteStrategy: VoteStrategies.Random,
+  voteStrategy: VoteStrategies.Smart,
   selfPreservation: true,   // Do not vote for yourself during normal votes
   teamPreservation: true,   // Try not to kill teammates
   tiebreakerVote: null,     // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
@@ -22,6 +23,14 @@ const DefaultConfig = Object.freeze({
   discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
   skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+});
+
+const QuickMode = Object.freeze({
+  voteMaxDelay: 0.1,
+  startGameDelay: 0.5,
+  skipStateTimeout: 0.5,
+  discussionTimeout: 0.5,
+  voteStrategy: VoteStrategies.Random,
 });
 // TODO: fix skit state timeout, it doesn't seem to be working
 
@@ -49,7 +58,7 @@ class MafiaBot {
 
     // Log all messages
     this.socket.on("roomEvent", data =>{
-      this.log(">> roomEvent", data);
+      this.log(">> roomEvent", data.event);
       this.iAmHost = (data.host === this.name);
       if(this.iAmHost && !this.game){
         //I am host,
@@ -138,7 +147,7 @@ class MafiaBot {
   skip(delay){
     let skipState = this.game.gameState;
     let dayNumber = this.game.dayNumber;
-    console.log("skipping", skipState, "at day", dayNumber, "in", delay);
+    this.log("skipping", skipState, "at day", dayNumber, "in", delay);
     if(this.skipping){
       // Clear old timeout
       clearTimeout(this.skipping);
@@ -146,7 +155,7 @@ class MafiaBot {
     this.skipping = setTimeout(()=> {
       this.skipping = null;
       if(skipState !== this.game.gameState || dayNumber !== this.game.dayNumber){
-        console.log("day or state changed");
+        this.log("day or state changed");
         return; // state has changed since then, ignore
       }
       this.log("<< next (skip state)",  this.game.gameState);
@@ -164,7 +173,7 @@ class MafiaBot {
     this.delayingVote = setTimeout(()=> {
       this.skipping = null;
       if(voteState !== this.game.gameState || dayNumber !== this.game.dayNumber){
-        console.log("day or state changed");
+        this.log("day or state changed");
         return; // state has changed since then, ignore
       }
       this.vote();
@@ -191,10 +200,8 @@ class MafiaBot {
         }
 
         if(this.me.role === 'Detective'){
-          if(this.game.gameState !== 'Night') { // At main votes detective votes for Mafia
+          if(this.game.gameState !== 'Night') { // At main vote detective votes for Mafia
             narrowCandidates = candidates.filter(player => player.role === 'Mafia');
-          }else{ // At night detective investigates random unknown candidate
-            narrowCandidates = candidates.filter(player => !player.role);
           }
         }
 
@@ -208,9 +215,25 @@ class MafiaBot {
       return;
     }
 
+    // noinspection FallThroughInSwitchStatementJS
     switch(this.config.voteStrategy){
       case VoteStrategies.None:
         return;
+      case VoteStrategies.Smart:
+        if(this.me.role === 'Mafia' && this.game.gameState === 'Night'){
+          // At night smart mafia chooses one player unanimously
+          let indexToChoose =  (13 * this.game.dayNumber + 7) % candidates.length; // Pseudo-random generator
+          candidate = candidates[indexToChoose].number;
+          break;
+        }
+
+        if(this.me.role === 'Detective' && this.game.gameState === 'Night'){
+          // At night smart detective investigates random unknown candidate
+          let narrowCandidates = candidates.filter(player => !player.role);
+          if(narrowCandidates.length){
+            candidates = narrowCandidates;
+          }
+        }
       case VoteStrategies.Random:
         candidate = candidates[Math.floor(Math.random() * candidates.length)].number;
         break;
@@ -228,6 +251,6 @@ class MafiaBot {
 }
 
 
-
+exports.QuickMode = QuickMode;
 exports.Bot = MafiaBot;
 exports.VoteStrategies = VoteStrategies;
