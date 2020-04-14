@@ -56,7 +56,7 @@ export class NewsComponent implements OnInit {
   calcTime(item) {
     const {dayNumber, gameState} = item;
     const today = this.currentDay === dayNumber;
-    let timeText = '';
+    let timeText;
     switch (gameState) {
       case 'Discussion':
       case 'Tiebreaker':
@@ -72,8 +72,8 @@ export class NewsComponent implements OnInit {
   }
 
   getRoles(roles) {
-    return Object.entries(roles).reduce((roles, [role, count]) => {
-      roles.push(`${role} ${count}`);
+    return Object.entries(roles).reduce((roles: any, [role, count] : [string, number]) => {
+      roles.push(`${count} ${role}${count > 1 ? 's' : ''}`);
       return roles;
     }, []).join(', ');
   }
