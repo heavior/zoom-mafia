@@ -15,11 +15,11 @@ const DefaultConfig = Object.freeze({
   silent: true,             // Do not log messages if not host
 
   // If bot is host:
-  startGameDelay: 0.5,        // timeout for starting new game
-  skipStateTimeout: 0.5,      // timeout for skipping states
+  startGameDelay: 30,       // timeout for starting new game
+  skipStateTimeout: 20,    // timeout for skipping states, use 0.5 for quick go
   discussionTimeout: 30,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  skipStates: ['Discussion', 'MainVote', 'Tiebreaker'] //'Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+  skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
 });
 // TODO: fix skit state timeout, it doesn't seem to be working
 
@@ -108,7 +108,6 @@ class MafiaBot {
     this.me = data.you;
     this.players = data.players;
 
-
     this.log(">> next:", this.game.gameOn, this.game.gameState);
     if(this.me.isAlive) {
       this.vote();
@@ -127,21 +126,30 @@ class MafiaBot {
       this.skipping = null;
     }
     if(this.config.skipStates.indexOf(this.game.gameState)>=0) {
-      this.log("skipping state", this.game.gameState, this.config.skipStates, this.config.skipStateTimeout * 1000);
-      this.skipping = setTimeout(()=> this.skipState(), this.config.skipStateTimeout * 1000);
+      this.skip(this.config.skipStateTimeout);
       return;
     }
     if(this.game.gameState === 'Discussion'){
-      this.skipping = setTimeout(()=> this.skipState(), this.config.discussionTimeout * 1000);
+      this.skip(this.config.discussionTimeout);
     }
   }
-  skipState(){
-    console.log("skip state");
-     if(this.config.skipStates.indexOf(this.game.gameState)>=0
-      || this.game.gameState === 'Discussion'){
-         this.log("<< next");
-         this.socket.emit("gameCommand", {action:'next'});
+  skip(delay){
+    let skipState = this.game.gameState;
+    let dayNumber = this.game.dayNumber;
+    console.log("skipping", skipState, "at day", dayNumber, "in", delay);
+    if(this.skipping){
+      // Clear old timeout
+      clearTimeout(this.skipping);
+    }
+    this.skipping = setTimeout(()=> {
+      this.skipping = null;
+      if(skipState !== this.game.gameState || dayNumber !== this.game.dayNumber){
+        console.log("day or state changed");
+        return; // state has changed since then, ignore
       }
+      this.log("<< next (skip state)",  this.game.gameState);
+      this.socket.emit("gameCommand", {action:'next'});
+    }, delay * 1000 );
   }
 
   vote(){
