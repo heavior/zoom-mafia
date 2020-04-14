@@ -216,7 +216,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         Detective: 'Try to steer the civilians to eliminate mafia. Do not blow your cover, the vote is open'
       },
       MainVote: {
-        Guest: 'The jury is out to find the guilty',
+        Guest: 'The jury is out to reach the verdict',
         Mafia: 'Choose who to vote for, keep in mind that the vote is open',
         Civilian: 'Choose who is mafia',
         Detective: 'Choose who to vote for, keep in mind that the vote is open'
