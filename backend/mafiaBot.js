@@ -13,10 +13,11 @@ const DefaultConfig = Object.freeze({
   selfPreservation: true,   // Do not vote for yourself during normal votes
   tiebreakerVote: null,     // Force vote for Ties : -1 to kill, 0 to spare, null to randomise
   silent: true,             // Do not log messages if not host
+  voteMaxDelay: 10,         // Vote delay to emulate real player (actual delay is random)
 
   // If bot is host:
   startGameDelay: 30,       // timeout for starting new game
-  skipStateTimeout: 20,    // timeout for skipping states, use 0.5 for quick go
+  skipStateTimeout: 20,     // timeout for skipping states, use 0.5 for quick go
   discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
   skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
@@ -110,7 +111,7 @@ class MafiaBot {
 
     this.log(">> next:", this.game.gameOn, this.game.gameState);
     if(this.me.isAlive) {
-      this.vote();
+      this.delayedVote();
     }
     if(!this.iAmHost){
       return;
@@ -152,8 +153,23 @@ class MafiaBot {
     }, delay * 1000 );
   }
 
+  delayedVote(){
+    let voteState = this.game.gameState;
+    let dayNumber = this.game.dayNumber;
+    let delay = Math.round(this.config.voteMaxDelay * Math.random());
+    if(this.delayingVote){
+      clearTimeout(this.delayingVote);
+    }
+    this.delayingVote = setTimeout(()=> {
+      this.skipping = null;
+      if(voteState !== this.game.gameState || dayNumber !== this.game.dayNumber){
+        console.log("day or state changed");
+        return; // state has changed since then, ignore
+      }
+      this.vote();
+    }, delay * 1000 );
+  }
   vote(){
-
     let candidate = null;
     // Vote according to the strategy
     let candidates = [];
