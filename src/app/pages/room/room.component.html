@@ -107,7 +107,7 @@
     <ng-container *ngIf="game.gameState === 'Tiebreaker'">
       How do you find <span
           *ngFor="let vPlayer of candidates(); let isLast=last"
-          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          appColorizeUser [player]="vPlayer"
           >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>?<br>
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
@@ -118,7 +118,7 @@
       <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[-1].length">
         (<span
           *ngFor="let vPlayer of game.tiebreakerVoted[-1]; let isLast=last"
-          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          appColorizeUser [player]="vPlayer"
           >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
       </ng-container>
       <br>
@@ -132,7 +132,7 @@
       <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[0].length">
         (<span
           *ngFor="let vPlayer of game.tiebreakerVoted[0]; let isLast=last"
-          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          appColorizeUser [player]="vPlayer"
           >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
       </ng-container>
 
@@ -151,7 +151,7 @@
       <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
       <ng-container *ngIf="player.name === game.host">(host)</ng-container>
       <span *ngIf="gPlayer.role"
-            [ngClass]="{'text-danger':mafiaRole(gPlayer.role), 'text-success': civilianRole(gPlayer.role)}"> - {{gPlayer.role}}</span>
+            appColorizeUser [player]="gPlayer"> - {{gPlayer.role}}</span>
       &nbsp;
       <button *ngIf="gPlayer.isCandidate && voteButtonCaption() && gPlayer.name !== player.name"
               class="btn btn-sm"
@@ -166,7 +166,7 @@
       <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
         (<span
           *ngFor="let vPlayer of gPlayer.votedBy; let isLast=last"
-          [ngClass]="{'text-danger':mafiaRole(vPlayer.role), 'text-success': civilianRole(vPlayer.role)}"
+          appColorizeUser [player]="vPlayer"
           >{{vPlayer.number}}: {{vPlayer.name}}{{isLast ? '' : ', '}}</span>)
       </ng-container>
     </div>

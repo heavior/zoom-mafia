@@ -10,6 +10,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { RoomComponent } from './pages/room/room.component';
 import { AutoFocusDirective } from './directives/auto-focus.directive';
 import { NewsComponent } from './components/news/news.component';
+import { ColorizeUserDirective } from './directives/colorize-user.directive';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { NewsComponent } from './components/news/news.component';
     HomeComponent,
     RoomComponent,
     AutoFocusDirective,
-    NewsComponent
+    NewsComponent,
+    ColorizeUserDirective
   ],
   imports: [
     BrowserModule,
