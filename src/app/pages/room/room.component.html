@@ -18,11 +18,18 @@
 </ng-container>
 
 <ng-template #showGame>
-  Link to this room:<br/>
-  <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
-  <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button><br/>
-  <a *ngIf="videoLink" href="{{videoLink}}" target="_blank">Join video conference</a>
-
+  <div>
+    <div>Link to this room:</div>
+    <div>
+      <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
+      <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button>
+    </div>
+    <div *ngIf="videoLink" ><a href="{{videoLink}}" target="_blank">Join video conference</a></div>
+    <div class="form-check pl-1">
+      <input class="form-check-inline" id="autoJoin" type="checkbox" [(ngModel)]="autoJoin" (click)="toggleJoinGame()"/>
+      <label class="form-check-label" for="autoJoin">Automatically join next game</label>
+    </div>
+  </div>
   <hr>
 
   <ng-container *ngIf="player">
@@ -32,10 +39,7 @@
       <ng-container *ngIf="player.role === 'Guest'">
         <div>You are a guest</div>
       </ng-container>
-      <div class="form-check">
-        <input class="form-check-inline" id="autoJoin" type="checkbox" [(ngModel)]="autoJoin" (click)="toggleJoinGame()"/>
-        <label class="form-check-label" for="autoJoin">Automatically join next game</label>
-      </div>
+
       <ng-container *ngIf="game.gameOn && player.role !== 'Guest'">
         <div>Your role is <b [class]="{'text-danger': mafiaRole(player.role), 'text-success': civilianRole(player.role)}">{{player.role}}</b></div>
         <div>Your number is <b>{{player.number}}</b></div>
