@@ -18,14 +18,10 @@
 </ng-container>
 
 <ng-template #showGame>
-  <div class="d-flex">
-    <div class="form-group w-100">
-      Link to this room:<br/>
-      <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
-      <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button><br/>
-      <a *ngIf="videoLink" href="{{videoLink}}" target="_blank">Join video conference</a>
-    </div>
-  </div>
+  Link to this room:<br/>
+  <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
+  <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button><br/>
+  <a *ngIf="videoLink" href="{{videoLink}}" target="_blank">Join video conference</a>
 
   <hr>
 
