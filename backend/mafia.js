@@ -524,7 +524,7 @@ class MafiaGame {
   }
 
   addNewsVoted(event, votes){
-    let findEvent = this.news.find(news => news.event === event);
+    let findEvent = this.news.find(news => news.event === event && news.dayNumber === this.dayNumber);
     if(!findEvent){
       console.error("adding voted before event registered");
     }
