@@ -655,7 +655,7 @@ class MafiaGame {
     let alreadyVoted = !!this.votesRegistry[whoVotes];
     this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
 
-    if(!alreadyVoted && player.role === MafiaRoles.Detective){
+    if(!alreadyVoted && player.role === MafiaRoles.Detective && this.gameState === GameStates.Night){
       // this is a detecitve. we remember that he knows about this player now, with next game update he will get information
       this.detectiveKnows.push(choicePlayer);
     }
