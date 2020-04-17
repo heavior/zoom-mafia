@@ -256,6 +256,17 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.messages = [];
   }
 
+  disableButton(samePlayer) {
+    switch(this.game.gameState) {
+      case 'MainVote':
+      case 'Night':
+      case 'Tiebreaker':
+        return this.votedFor !== null;
+      default:
+        return samePlayer;
+    }
+  }
+
   join() {
     this.chatService.joinRoom({
       roomId: this.chatService.roomId,
