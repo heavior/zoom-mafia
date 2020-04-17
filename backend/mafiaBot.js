@@ -22,7 +22,7 @@ const DefaultConfig = Object.freeze({
   skipStateTimeout: 20,     // timeout for skipping states, use 0.5 for quick go
   discussionTimeout: 20,    // timeout for discussion phase (if not skipping Discussion)
   silentHost: false,        // Do not log messages if host
-  skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker'] // Host should quickly skip certain states
+  skipStates: ['Discussion', 'Night', 'MainVote', 'Tiebreaker', 'LastWord'] // Host should quickly skip certain states
 });
 
 const QuickMode = Object.freeze({
@@ -140,7 +140,7 @@ class MafiaBot {
       this.skip(this.config.skipStateTimeout);
       return;
     }
-    if(this.game.gameState === 'Discussion'){
+    if(this.game.gameState === 'Discussion' || this.game.gameState === 'LastWord'){
       this.skip(this.config.discussionTimeout);
     }
   }

@@ -84,6 +84,10 @@
         <div><b>Wait till the players discuss and nominate suspects.</b></div>
         <div><button (click)="next()" class="btn btn-sm btn-outline-primary">Start voting</button></div>
       </ng-container>
+      <ng-container *ngIf="game.gameState === 'LastWord'">
+        <div><b>Give guilty a chance to stay last word. If needed - discuss with the group.</b></div>
+        <div><button (click)="next()" class="btn btn-sm btn-outline-primary">Start night</button></div>
+      </ng-container>
     </ng-container>
     <ng-template #hostStartGame>
       <button class="btn btn-sm btn-outline-primary mr-1" *ngIf="!game.gameOn" type="button" (click)="startGame()">Start Game</button>

@@ -167,6 +167,8 @@ export class RoomComponent implements OnInit, OnDestroy {
         return 'suspect';
       case 'MainVote':
         return 'guilty';
+      case 'LastWord': // No buttons in this state
+        return null;
       case 'Night':
         if (this.mafiaRole(this.player.role)){
           return 'murder';

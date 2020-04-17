@@ -97,6 +97,7 @@ class MafiaGame {
               discussionTimeout = 0, // Discussion phase - no time limit
               mainVoteTimeout = 30,  // 30 seconds to let them vote during day
               nightTimetout = 60,      // 60 seconds night time
+              lastWordTimetout = 120,   // 120 seconds for lastWord discussion
               expectCivilianVoteAtNight = true, // Force civilians to vote somehow to enable open-eye game
               allowAutoCompleteVote = true // Complete vote automatically when all expected players votes
               )
@@ -117,6 +118,7 @@ class MafiaGame {
     this.discussionTimeout = discussionTimeout;
     this.mainVoteTimeout = mainVoteTimeout;
     this.nightTimetout = nightTimetout;
+    this.lastWordTimetout = lastWordTimetout;
     this.players = [];
     this.detectiveKnows = [];
     this.votesRegistry = {}; // Here we register votesCounters
@@ -251,6 +253,11 @@ class MafiaGame {
         this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
                                             .filter(element => parseInt(element[1]) === parseInt(accusedNumber))
                                             .map(element => parseInt(element[0])));
+        this.gameState = GameStates.LastWord;
+        timeout = this.lastWordTimetout;
+        break;
+
+      case GameStates.LastWord: // Nothing special, just starting the night
         this.gameState = GameStates.Night;
         timeout = this.nightTimetout;
         break;
@@ -287,9 +294,8 @@ class MafiaGame {
                                                 .map(element => parseInt(element[0])));
         }
 
-        console.log("Tiebreaker: switching to Night");
-        this.gameState = GameStates.Night;
-        timeout = this.nightTimetout;
+        this.gameState = GameStates.LastWord;
+        timeout = this.lastWordTimetout;
         break;
     }
 
