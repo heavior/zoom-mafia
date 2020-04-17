@@ -267,6 +267,21 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
+  voteButtonClass(selected, unselected) {
+    if (!selected && unselected) {
+      return 'btn-secondary';
+    }
+    switch (this.game.gameState) {
+      case 'MainVote':
+      case 'Night':
+      case 'Tiebreaker':
+        return 'btn-danger';
+      default:
+        return 'btn-primary';
+
+    }
+  }
+
   join() {
     this.chatService.joinRoom({
       roomId: this.chatService.roomId,

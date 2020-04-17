@@ -109,7 +109,7 @@
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
               (click)="vote(-1)"
-              [ngClass]="{'btn-primary': votedFor === null || votedFor, 'btn-secondary': votedFor !== null && !votedFor}"
+              [ngClass]="voteButtonClass(votedFor === null || votedFor, votedFor !== null && !votedFor)"
               [disabled]="votedFor !== null">guilty</button> &nbsp;
       <span *ngIf="!player.isAlive" class="badge badge-danger"> Guilty </span>
       <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
@@ -121,7 +121,7 @@
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
               (click)="vote(0)"
-              [ngClass]="{'btn-primary': votedFor === null || !votedFor, 'btn-secondary': votedFor !== null && votedFor}"
+              [ngClass]="voteButtonClass(votedFor === null || !votedFor, votedFor !== null && votedFor)"
               [disabled]="votedFor !== null">Not guilty</button>
       <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
         (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
@@ -147,7 +147,7 @@
       <button *ngIf="gPlayer.isCandidate && voteButtonCaption() && gPlayer.name !== player.name"
               class="btn btn-sm"
               (click)="vote(gPlayer.number)"
-              [ngClass]="{'btn-primary':!votedFor || votedFor === gPlayer.number, 'btn-secondary': votedFor && votedFor !== gPlayer.number}"
+              [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
               [disabled]="disableButton(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
       <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
          class="btn btn-sm btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
