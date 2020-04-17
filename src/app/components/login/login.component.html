@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="card-header">Welcome To Mafia</div>
+  <div class="card-body">
+    <h5 class="card-title text-center">{{action}} the room to play Mafia</h5>
+    <div class="form-group">
+      <label for="username">Your name in video conference</label>
+      <input id="username" class="form-control"
+             [(ngModel)]="userName" autoFocus
+             (keyup.enter)="userName && submit()" required />
+      <small id="usernameHelp" class="form-text text-muted">Name must be unique within the room</small>
+    </div>
+
+    <div *ngIf="!join" class="form-group">
+      <label for="videoLink">Video conference link <span class="text-muted">(optional)</span></label>
+      <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="submit()"/>
+    </div>
+
+    <div class="mt-3 d-flex justify-content-center">
+      <button class="btn btn-primary" (click)="submit()" [disabled]="!userName">{{action}} Room</button>
+    </div>
+  </div>
+</div>

@@ -28,7 +28,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   guests: IPlayer[] = [];
   roomLink: string;
   state: string;
-  userName: string;
   videoLink = '';
   dayTime: string;
   endGameMessage: string;
@@ -39,7 +38,6 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.roomLink = this.chatService.roomLink;
-    this.userName = this.chatService.userName;
 
     this.gameSubject = this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
@@ -198,14 +196,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         return 'btn-primary';
 
     }
-  }
-
-  join() {
-    this.chatService.joinRoom({
-      roomId: this.chatService.roomId,
-      userId: this.userName,
-      userName: this.userName
-    });
   }
 
   toggleJoinGame() {

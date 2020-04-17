@@ -16,6 +16,7 @@ import { PlayerInfoComponent } from './components/player-info/player-info.compon
 import { GameInfoComponent } from './components/game-info/game-info.component';
 import { HostInfoComponent } from './components/host-info/host-info.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
+import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { MessengerComponent } from './components/messenger/messenger.component';
     PlayerInfoComponent,
     GameInfoComponent,
     HostInfoComponent,
-    MessengerComponent
+    MessengerComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,

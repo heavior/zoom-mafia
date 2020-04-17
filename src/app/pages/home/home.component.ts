@@ -8,24 +8,8 @@ import {BehaviorSubject} from "rxjs";
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  joining: boolean = false;
-  userName: string;
-  videoLink: string = '';
 
-  constructor(private chatService: ChatService) { }
+  constructor() { }
 
-  ngOnInit(): void {
-    this.joining = !!this.chatService.roomId;
-    this.userName = this.chatService.userName;
-  }
-
-  createRoom() {
-    const data = {
-      userId: this.userName,
-      userName: this.userName,
-      videoLink: this.videoLink
-    };
-    this.chatService.createRoom(data);
-  }
-
+  ngOnInit(): void { }
 }
