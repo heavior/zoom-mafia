@@ -330,7 +330,7 @@ interface IVoter {
   role: string|null;
 }
 
-interface IYou{
+interface IYou {
   isAlive: boolean;
   name: string;
   number: number;
