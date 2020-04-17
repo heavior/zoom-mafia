@@ -181,6 +181,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
   phaseCaption() {
     const phases = {
+      LastWord: {
+        Guest: 'Last words of convicted',
+        Mafia: 'Last words of convicted',
+        Civilian: 'Last words of convicted',
+        Detective: 'Last words of convicted'
+      },
       Discussion: {
         Guest: '',
         Mafia: 'Deceive civilians',
@@ -211,6 +217,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
   hintCaption() {
     const hints = {
+      LastWord: {
+        Guest: 'Found guilty have a chance to say their last piece',
+        Mafia: 'Found guilty have a chance to say their last piece',
+        Civilian: 'Found guilty have a chance to say their last piece',
+        Detective: 'Found guilty have a chance to say their last piece'
+      },
       Discussion: {
         Guest: 'Players are discussing who are the suspects',
         Mafia: 'Be active, deceive civilians to convict innocent. Suspect someone wisely',
