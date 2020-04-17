@@ -587,7 +587,8 @@ class MafiaGame {
 
       case GameStates.Night: // Note: mafia can vote to kill one of their own
         return this.players.filter(player => player.isAlive).map(player => player.number);
-
+      case GameStates.LastWord: // No candidates here
+        return [];
       case GameStates.MainVote:
         if(!this.votesCounters.length){
           return this.players.filter(player => player.isAlive).map(player => player.number);
