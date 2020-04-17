@@ -26,7 +26,7 @@ export class ChatService {
 
   private init() {
     this.socket.on('roomEvent', (data) => {
-      console.log(data);
+      console.log('Room Event >>', data);
       switch(data.event) {
         case 'created':
         case 'joined':
@@ -39,6 +39,18 @@ export class ChatService {
           Object.assign(this.data, data);
           this.roomSubject.next(this.data)
           return;
+      }
+    });
+
+    this.socket.on('directMessage', (message) => {
+      switch (message.event) {
+        case 'gameStatus':
+          this.gameSubject.next(message.data);
+          break;
+        case 'roomDirectEvent':
+          this.settingsSubject.next(message.settings);
+        default:
+          break;
       }
     });
 
@@ -105,15 +117,6 @@ export class ChatService {
       });
       this.socket.on('directMessage', (message) => {
         observer.next('directMessage' + JSON.stringify(message, null, 2));
-        switch (message.event) {
-          case 'gameStatus':
-            this.gameSubject.next(message.data);
-            break;
-          case 'roomDirectEvent':
-            this.settingsSubject.next(message.settings);
-          default:
-            break;
-        }
       });
     });
   }

@@ -1,0 +1,17 @@
+<div>Welcome, <b>{{player.name}}</b></div>
+<div>This game is <b>{{state}}</b></div>
+
+<ng-container *ngIf="player.role === 'Guest'">
+  <div>You are a guest</div>
+</ng-container>
+
+<ng-container *ngIf="gameOn && player.role !== 'Guest'">
+  <div>Your role is <b [class]="roleToClass(player.role)">{{player.role}}</b></div>
+  <div>Your number is <b>{{player.number}}</b></div>
+  <div>You are <b>{{player.isAlive ? 'alive' : 'dead'}}</b></div>
+</ng-container>
+
+<ng-container *ngIf="!gameOn && winner">
+  <div class="text-danger"><b>{{winner}}</b></div>
+  <div *ngIf="endGameMessage">{{endGameMessage}}</div>
+</ng-container>

@@ -12,6 +12,10 @@ import { AutoFocusDirective } from './directives/auto-focus.directive';
 import { NewsComponent } from './components/news/news.component';
 import { ColorizeUserDirective } from './directives/colorize-user.directive';
 import { ColorizeUserListComponent } from './components/colorize-user-list/colorize-user-list.component';
+import { PlayerInfoComponent } from './components/player-info/player-info.component';
+import { GameInfoComponent } from './components/game-info/game-info.component';
+import { HostInfoComponent } from './components/host-info/host-info.component';
+import { MessengerComponent } from './components/messenger/messenger.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +25,11 @@ import { ColorizeUserListComponent } from './components/colorize-user-list/color
     AutoFocusDirective,
     NewsComponent,
     ColorizeUserDirective,
-    ColorizeUserListComponent
+    ColorizeUserListComponent,
+    PlayerInfoComponent,
+    GameInfoComponent,
+    HostInfoComponent,
+    MessengerComponent
   ],
   imports: [
     BrowserModule,

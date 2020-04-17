@@ -1,0 +1,14 @@
+<div class="mb-1">
+  <b>Chat</b>
+  <button class="btn btn-sm btn-outline-secondary ml-1" type="button" (click)="clearChat()">Clear chat</button>
+</div>
+<div class="input-group">
+  <input class="form-control" type="text"
+         [(ngModel)]="newMessage" (keyup.enter)="newMessage && sendMessage()" required/>
+  <div class="input-group-append">
+    <button class="btn btn-sm btn-outline-primary" (click)="sendMessage()" [disabled]="!newMessage">Send</button>
+  </div>
+</div>
+<div class="px-2">
+  <pre *ngFor="let message of messages">{{message}}</pre>
+</div>
