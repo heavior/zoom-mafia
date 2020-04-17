@@ -7,7 +7,7 @@
     <div>Link to this room:</div>
     <div>
       <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
-      <button class="btn btn-sm btn-outline-secondary ml-1 " id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button>
+      <button class="btn btn-sm btn-outline-secondary ml-1 "id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button>
     </div>
     <div *ngIf="videoLink" ><a href="{{videoLink}}" target="_blank">Join video conference</a></div>
     <div class="form-check pl-1">
@@ -83,7 +83,7 @@
     </ng-container>
 
     <b>Players: </b>
-    <div class="" *ngFor="let gPlayer of players"
+    <div class="" *ngFor="let gPlayer of players; trackBy: trackByName"
          [ngClass]="{'text-muted': !gPlayer.isOnline}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
          [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
@@ -92,18 +92,17 @@
 
       <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
       <ng-container *ngIf="player.name === game.host">(host)</ng-container>
-      <span *ngIf="gPlayer.role"
-            appColorizeUser [player]="gPlayer"> - {{gPlayer.role}}</span>
-      &nbsp;
+      <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> - {{gPlayer.role}}</span>
       <button *ngIf="gPlayer.isCandidate && voteButtonCaption() && gPlayer.name !== player.name"
-              class="btn btn-sm"
+              class="btn btn-sm ml-1"
               (click)="vote(gPlayer.number)"
               [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
-              [disabled]="disableButton(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
+              [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
       <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
-         class="btn btn-sm btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
+         class="btn btn-sm ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
-      <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')" class="badge badge-pill badge-warning">accused</span>
+      <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')"
+            class="badge badge-pill badge-warning">accused</span>
 
       <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
@@ -114,7 +113,7 @@
 
   <ng-container *ngIf="guests.length">
     <b>Guests:</b>
-    <div class="" *ngFor="let gPlayer of guests"
+    <div class="" *ngFor="let gPlayer of guests trackBy: trackByName"
          [ngClass]="{'text-muted': !gPlayer.isOnline}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
     >
