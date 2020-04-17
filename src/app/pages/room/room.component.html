@@ -109,10 +109,10 @@
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
               (click)="vote(-1)"
-              [ngClass]="{'btn-primary':votedFor === null || votedFor, 'btn-secondary': votedFor === 0}"
-              [disabled]="votedFor !== null">guilty</button> &nbsp;
+              [ngClass]="{'btn-primary': votedFor === null || votedFor, 'btn-secondary': votedFor !== null && !votedFor}"
+              [disabled]="votedFor !== null && votedFor">guilty</button> &nbsp;
       <span *ngIf="!player.isAlive" class="badge badge-danger"> Guilty </span>
-      <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[-1].length">
+      <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
         (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
       </ng-container>
       <br>
@@ -121,9 +121,9 @@
       <button class="btn btn-sm"
               *ngIf="player.isAlive"
               (click)="vote(0)"
-              [ngClass]="{'btn-primary':!votedFor, 'btn-secondary': votedFor}"
-              [disabled]="votedFor !== null">not guilty</button>
-      <ng-container *ngIf="game.tiebreakerVoted && game.tiebreakerVoted[0].length">
+              [ngClass]="{'btn-primary': votedFor === null || !votedFor, 'btn-secondary': votedFor !== null && votedFor}"
+              [disabled]="votedFor !== null && !votedFor">Not guilty</button>
+      <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
         (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
       </ng-container>
 
