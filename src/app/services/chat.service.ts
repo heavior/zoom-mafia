@@ -54,6 +54,10 @@ export class ChatService {
       }
     });
 
+    this.socket.on('reconnect', () => {
+      this.joinRoom({...this.data});
+    });
+
     this.userName = localStorage.getItem('userName');
     setTimeout(() => {
       this.roomId = this.router.url.replace('/', '');
