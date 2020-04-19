@@ -30,5 +30,20 @@ export class PlayerInfoComponent implements OnInit {
         return '';
     }
   }
+  getGoal(){
+    if (!this.player.isAlive){
+      return '☠️ You are dead ☠️';
+    }
+    switch (this.player.role) {
+      case 'Civilian':
+      case 'Detective':
+        return 'Your goal is to convict all mafia';
+      case 'Mafia':
+      case 'Don':
+        return 'Your goal is to overcome civilians';
+      default:
+        return '';
+    }
+  }
 
 }
