@@ -510,7 +510,9 @@ class MafiaGame {
   }
 
   clearOldNews(){
-    this.news = this.news.filter(news => news.dayNumber >= this.dayNumber-1); // Remove news older that one day
+    this.news = this.news.filter(news => (news.dayNumber === this.dayNumber) // Keep fresh news (today)
+                                      || ((news.dayNumber >= this.dayNumber-1) // or for yesterday
+                                      && (news.gameState === GameStates.Night))); // keep only night news
   }
   addNews(event, playerNumber=null, data){
     console.log("addNews", event);
