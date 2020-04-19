@@ -2,3 +2,16 @@ hr {
   margin-top:0.5rem;
   margin-bottom:0.5rem;
 }
+
+.player-list-item{
+  &.player-me{
+    .player-name {
+      font-weight: bold;
+    }
+  }
+  &.player-dead {
+    .player-name {
+      text-decoration-line: line-through;
+    }
+  }
+}

@@ -75,26 +75,52 @@
     </ng-container>
 
     <b>Players: </b>
-    <div class="" *ngFor="let gPlayer of players; trackBy: trackByName"
-         [ngClass]="{'text-muted': !gPlayer.isOnline}"
+    <div class="player-list-item" *ngFor="let gPlayer of players; trackBy: trackByName"
+         [ngClass]="{'text-muted': !gPlayer.isOnline,
+         'player-dead': !gPlayer.isAlive,
+         'player-me': player.name === gPlayer.name}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
-         [style.textDecorationLine]="gPlayer.isAlive ? '' : 'line-through'"
     >
-      {{gPlayer.number}}: {{gPlayer.name}}
 
-      <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
-      <ng-container *ngIf="player.name === game.host">(host)</ng-container>
-      <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> - {{gPlayer.role}}</span>
-      <button *ngIf="gPlayer.isCandidate && voteButtonCaption() && gPlayer.name !== player.name"
+      <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption(); else notCandidate">
+        <i *ngIf="votedFor !== gPlayer.number"
+          (click)="vote(gPlayer.number)"
+           title="{{voteButtonCaption()}}"
+           class="far fa-check-circle text-primary"></i>
+        <i *ngIf="votedFor === gPlayer.number"
+           title="{{voteButtonCaption()}}"
+           class="fas fa-check-circle text-primary"></i>&nbsp;
+      </ng-container>
+
+        <!--
+              <i class="far fa-circle"></i> - vote
+              <i class="far fa-dot-circle"></i> - vote - checked
+        -->
+
+      <ng-template #notCandidate>
+        <ng-container *ngIf="gPlayer.isAlive && player.name === gPlayer.name">🤭 </ng-container>
+        <ng-container *ngIf="gPlayer.isAlive && player.name !== gPlayer.name">😎 </ng-container>
+        <ng-container *ngIf="!gPlayer.isAlive">☠️ </ng-container>
+      </ng-template>
+
+      <!--
+      <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
               class="btn btn-sm ml-1"
               (click)="vote(gPlayer.number)"
               [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
               [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
-      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
-         class="btn btn-sm ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
+      -->
+
+      <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
+        <ng-container *ngIf="gPlayer.name === hostName">(host)</ng-container>
+        <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
+      </span>
 
       <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')"
             class="badge badge-pill badge-warning">accused</span>
+
+      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
+         class="btn btn-sm ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
       <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
@@ -112,15 +138,11 @@
   </ng-container>
 
   <ng-container *ngIf="guests.length">
-    <b>Guests:</b>
-    <div class="" *ngFor="let gPlayer of guests trackBy: trackByName"
-         [ngClass]="{'text-muted': !gPlayer.isOnline}"
+    <b>Guests ({{guests.length}}): </b>
+    <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
+         [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
-    >
-      {{gPlayer.name}}
-      <ng-container *ngIf="player.name === gPlayer.name">(you)</ng-container>
-      <ng-container *ngIf="player.name === game.host">(host)</ng-container>
-    </div>
+    >{{gPlayer.name}}<ng-container *ngIf="player.name === game.host">(host)</ng-container>{{isLast ? '' : ', '}}</span>
   </ng-container>
 
   <ng-container *ngIf="false">

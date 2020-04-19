@@ -24,6 +24,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   gamePlayers: any[] = [];
   guests: IPlayer[] = [];
   isHost: boolean = false;
+  hostName: string = '';
   player: IYou = undefined;
   players: IPlayer[] = [];
   roomLink: string;
@@ -120,7 +121,6 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.roomLink = this.chatService.roomLink;
-
     this.gameSubject = this.chatService.gameSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data: any) => {
@@ -140,6 +140,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       .subscribe((data: any) => {
         console.log('>> roomSubject', data);
         this.roomLink = this.chatService.roomLink;
+        this.hostName = data.host;
         this.isHost = this.player && [this.player.name, this.player.userId].some((field) => field === data.host);
         this.roomPlayers = data.players || this.roomPlayers;
         this.videoLink = data.videoLink || this.videoLink;
