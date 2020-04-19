@@ -685,7 +685,7 @@ class MafiaGame {
     let unusedVotesCounter = 0;
 
     if(this.isVoteMandatory || this.isMafiaVoteUnanimous){
-      unusedVotesCounter = this.whoCounts().filter(player => !(player.number in this.votesRegistry));
+      unusedVotesCounter = this.whoCounts().filter(player => !(player.number in this.votesRegistry)).length;
     }
 
     // Count votesCounters
