@@ -47,7 +47,7 @@
   </ng-container>
 
   <ng-container *ngIf="players.length">
-    <ng-container *ngIf="game.gameState === 'Night' && player.role === 'Civilian'">
+    <ng-container *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'">
       Once you are ready:
       <button class="btn btn-sm btn-primary"
               (click)="vote(0)"

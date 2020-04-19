@@ -45,9 +45,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!game.gameOn) {
       this.countdown = 0;
     }
-    if (this.countdownSubject) {
-      this.countdownSubject.unsubscribe();
-    }
     let countdown = game.countdown || 0;
     if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
       const wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
@@ -63,7 +60,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.wakeUpTimer = null;
       }, wakeUpTime * 1000);
       this.countdown = 0;
-    }else if (event !== 'vote' && event !== 'joined') {
+    } else if (event !== 'vote' && event !== 'joined') {
       // If the event was vote - do not flush some local variables
       this.votedFor = null;
       if (this.wakeUpTimer){
@@ -71,8 +68,12 @@ export class RoomComponent implements OnInit, OnDestroy {
         clearTimeout(this.wakeUpTimer);
         this.wakeUpTimer = null;
       }
+      this.countdown = 0;
     }
-    this.countdownSubject = timer(1000, 1000)
+    if (this.countdownSubject) {
+      this.countdownSubject.unsubscribe();
+    }
+    this.countdownSubject = timer(0, 1000)
       .pipe(takeWhile(() => countdown > 0))
       .subscribe(() => {
         --countdown;

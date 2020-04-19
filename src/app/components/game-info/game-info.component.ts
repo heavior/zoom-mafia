@@ -20,7 +20,6 @@ export class GameInfoComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.game?.currentValue) {
-      console.log(changes.game.currentValue);
       this.dayTime = changes.game.currentValue.gameState === 'Night' ? 'Night' : 'Day';
     }
 
