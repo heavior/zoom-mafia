@@ -20,9 +20,10 @@ export class HostInfoComponent implements OnInit {
     this.chatService.next();
   }
 
-  startGame() {
-    this.chatService.startGame();
-    this.gameStarting.emit(null);
+  startGame(needConfirmation = false) {
+    if (!needConfirmation || confirm('Are you sure you want to restart the game? All progress will be lost for all players.')) {
+      this.chatService.startGame();
+      this.gameStarting.emit(null);
+    }
   }
-
 }
