@@ -752,6 +752,7 @@ class MafiaGame {
     this.gameOn = false;
     this.civiliansWin = civiliansWin;
     this.votesCounters = {};
+    this.startTimer(0); // Stop the timer
     this.addNews("ended", null, {players: this.players.filter(player=>player.isAlive).map(player => player.number)});
     this.informPlayers("ended");
   }
