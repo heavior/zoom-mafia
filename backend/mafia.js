@@ -23,7 +23,7 @@
     {event: "gameOver", data:{you:...}}
 */
 
-const TIMER_LATENCY = 1000; // One second we add to every timer to cover latency issues. Basically timer should end strictly after user sees 0 on his screen
+const TIMER_LATENCY = 2000; // Two seconds we add to every timer to cover latency issues. Basically timer should end strictly after user sees 0 on his screen
 
 const MafiaRoles = Object.freeze({
   Player: 'Player', // hardcoded
@@ -473,7 +473,9 @@ class MafiaGame {
       number: player.number,
       name: player.name,
       isAlive: player.isAlive,
-      isCandidate: this.candidates.indexOf(player.number) >= 0,
+      isCandidate: (this.candidates.indexOf(player.number) >= 0)
+        && ((player.number !== requester.number) || (this.gameState !== GameStates.Discussion)),
+        // During discussion - cannot vote for yourself, no chaos, please
       votedBy: this._playerVotedBy(player.number, requester)
     };
 
