@@ -26,14 +26,6 @@
     <hr>
   </ng-container>
 
-  <ng-container *ngIf="game">
-    <app-news [currentDay]="game.dayNumber"
-              [news]="game.news"
-              [player]="player"
-              [civiliansWin]="game.civiliansWin"></app-news>
-    <hr>
-  </ng-container>
-
   <ng-container *ngIf="game?.gameOn">
     <game-info [countdown]="countdown"
                [game]="game"
@@ -108,6 +100,14 @@
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </ng-container>
     </div>
+    <hr>
+  </ng-container>
+
+  <ng-container *ngIf="game">
+    <app-news [currentDay]="game.dayNumber"
+              [news]="game.news"
+              [player]="player"
+              [civiliansWin]="game.civiliansWin"></app-news>
     <hr>
   </ng-container>
 
