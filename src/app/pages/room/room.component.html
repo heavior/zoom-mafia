@@ -33,20 +33,7 @@
     <hr>
   </ng-container>
 
-  <ng-container *ngIf="isHost">
-    <host-info [game]="game" (gameStarting)="votedFor=$event"></host-info>
-    <hr>
-  </ng-container>
-
   <ng-container *ngIf="players.length">
-    <ng-container *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'">
-      Once you are ready:
-      <button class="btn btn-sm btn-primary"
-              (click)="vote(0)"
-              [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
-      <hr>
-    </ng-container>
-
     <ng-container *ngIf="game.gameState === 'Tiebreaker'">
       <b>Accused: </b>
       <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
@@ -80,7 +67,6 @@
       </ng-container>
       <hr>
     </ng-container>
-
 
     <b>Players: </b>
     <div class="player-list-item" *ngFor="let gPlayer of players; trackBy: trackByName"
@@ -133,6 +119,21 @@
     </div>
     <hr>
   </ng-container>
+
+  <!-- action buttons under the players list -->
+  <ng-container *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'">
+    Once you are ready:
+    <button class="btn btn-sm btn-primary"
+            (click)="vote(0)"
+            [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
+    <hr>
+  </ng-container>
+
+  <ng-container *ngIf="isHost">
+    <host-info [game]="game" (gameStarting)="votedFor=$event"></host-info>
+    <hr>
+  </ng-container>
+  <!-- end of action buttons under the players list -->
 
   <ng-container *ngIf="game">
     <app-news [currentDay]="game.dayNumber"
