@@ -64,11 +64,11 @@ function createRoom(socket, userId, videoLink="", forceRoomId = null){
      // (hostName, videoLink, hostId, roomId)
     let room = roomManager.createRoom(videoLink, forceRoomId,
       (event, roomId)=>{
-        console.debug("roomEvent " + JSON.stringify(event, null, 2));
+        console.debug("roomEvent " + event.event /*JSON.stringify(event, null, 2)*/);
         io.to(roomId).emit('roomEvent', event);
       },
       (event, roomId)=>{
-        console.debug("gameEvent " + JSON.stringify(event, null, 2));
+        console.debug("gameEvent " + event.event /*JSON.stringify(event, null, 2)*/);
         io.to(roomId).emit('gameEvent', event);
       },
       (roomId, userId, eventName, eventData) => {
