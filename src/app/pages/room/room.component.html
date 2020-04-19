@@ -48,31 +48,39 @@
     </ng-container>
 
     <ng-container *ngIf="game.gameState === 'Tiebreaker'">
-      How do you find <colorize-user-list [players]="candidates()"></colorize-user-list>?<br>
-      <button class="btn btn-sm"
-              *ngIf="player.isAlive"
-              (click)="vote(-1)"
-              [ngClass]="voteButtonClass(votedFor === null || votedFor, votedFor !== null && !votedFor)"
-              [disabled]="votedFor !== null">guilty</button> &nbsp;
-      <span *ngIf="!player.isAlive" class="badge badge-danger"> Guilty </span>
-      <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
-        (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
-      </ng-container>
-      <br>
+      <b>Accused: </b>
+      <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
+           [ngClass]="{'text-muted': !gPlayer.isOnline,
+           'player-me': player.name === gPlayer.name}"
+           title="{{gPlayer.isOnline?'':'Offline'}}"
+      >
+        <span class="player-name">😟 {{gPlayer.number}}: {{gPlayer.name}}
+          <ng-container *ngIf="gPlayer.name === hostName">(host)</ng-container>
+          <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
+        </span>
+        (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
+      </div>
+      <hr>
 
-      <span *ngIf="!player.isAlive" class="badge badge-success"> Not guilty </span>
-      <button class="btn btn-sm"
-              *ngIf="player.isAlive"
-              (click)="vote(0)"
-              [ngClass]="voteButtonClass(votedFor === null || !votedFor, votedFor !== null && votedFor)"
-              [disabled]="votedFor !== null">Not guilty</button>
-      <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
-        (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
+      <ng-container *ngIf="player.isAlive && votedFor === null">
+        <button class="btn btn-sm btn-primary" (click)="vote(-1)">Guilty</button> &nbsp;
+        <button class="btn btn-sm btn-primary"(click)="vote(0)">Not guilty</button>
       </ng-container>
 
-
+      <ng-container *ngIf="!player.isAlive || votedFor !== null">
+        <span class="badge badge-danger"> Guilty </span>
+        <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
+          (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
+        </ng-container>
+        <br>
+        <span class="badge badge-success"> Not guilty </span>
+        <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
+          (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
+        </ng-container>
+      </ng-container>
       <hr>
     </ng-container>
+
 
     <b>Players: </b>
     <div class="player-list-item" *ngFor="let gPlayer of players; trackBy: trackByName"
@@ -116,13 +124,10 @@
         <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
       </span>
 
-      <span *ngIf="gPlayer.isCandidate && (game.gameState === 'Tiebreaker')"
-            class="badge badge-pill badge-warning">accused</span>
-
       <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
          class="btn btn-sm ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
-      <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
+      <ng-container *ngIf="(game.gameState !== 'Tiebreaker') && gPlayer.votedBy && gPlayer.votedBy.length">
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </ng-container>
     </div>
