@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { IGame } from "../../interfaces";
 import { ChatService } from "../../services/chat.service";
 
@@ -9,7 +9,6 @@ import { ChatService } from "../../services/chat.service";
 })
 export class HostInfoComponent implements OnInit {
   @Input() game: IGame;
-  @Output() gameStarting: EventEmitter<any> = new EventEmitter();
 
   constructor(private chatService: ChatService) { }
 
@@ -23,7 +22,6 @@ export class HostInfoComponent implements OnInit {
   startGame(needConfirmation = false) {
     if (!needConfirmation || confirm('Are you sure you want to restart the game? All progress will be lost for all players.')) {
       this.chatService.startGame();
-      this.gameStarting.emit(null);
     }
   }
 }
