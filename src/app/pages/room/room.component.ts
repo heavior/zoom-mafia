@@ -144,7 +144,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.isHost = this.player && [this.player.name, this.player.userId].some((field) => field === data.host);
         this.roomPlayers = data.players || this.roomPlayers;
         this.videoLink = data.videoLink || this.videoLink;
-        this.votedFor = null;
+        //this.votedFor = null;
 
         this.updateLists();
       });
@@ -236,4 +236,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.vote(Number(playerNumber));
   }
 
+  startGame(needConfirmation){
+    if (!needConfirmation || confirm('Are you sure you want to restart the game? All progress will be lost for all players.')) {
+      this.chatService.startGame();
+      this.votedFor = null;
+    }
+  }
 }

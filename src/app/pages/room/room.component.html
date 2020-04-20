@@ -67,8 +67,6 @@
       </ng-container>
       <hr>
     </ng-container>
-
-    <b>Players: </b>
     <div class="player-list-item" *ngFor="let gPlayer of players; trackBy: trackByName"
          [ngClass]="{'text-muted': !gPlayer.isOnline,
          'player-dead': !gPlayer.isAlive,
@@ -150,6 +148,12 @@
          title="{{gPlayer.isOnline?'':'Offline'}}"
     >{{gPlayer.name}}<ng-container *ngIf="player.name === game.host">(host)</ng-container>{{isLast ? '' : ', '}}</span>
   </ng-container>
+
+
+  <div *ngIf="isHost && game.gameOn" class="mb-1">
+    <hr>
+    <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
+  </div>
 
   <ng-container *ngIf="false">
     <messenger></messenger>
