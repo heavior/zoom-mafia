@@ -2,7 +2,7 @@
   <div>📰 News</div>
   <div *ngIf="!news.length">No news yet</div>
   <div *ngFor="let item of news">
-    <span class="text-underline" [class]="{'night': item.gameState === 'Night'}">{{calcTime(item)}}:</span>&nbsp;
+    <span class="text-underline">{{calcTime(item)}}:</span>&nbsp;
     <b *ngIf="item.event === 'ended'">{{winner}} won the game.<br></b>
     <span>{{calcMessage(item)}}</span>
     <div class="font-italic text-secondary" *ngIf="item.votedBy && item.votedBy.length">{{votedBy(item.votedBy)}}</div>

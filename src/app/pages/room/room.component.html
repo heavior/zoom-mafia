@@ -3,6 +3,7 @@
 </ng-container>
 
 <ng-template #showGame>
+<div [ngClass]="{'bg-dark text-white': game.gameState === 'Night'}" class="px-2 pt-3">
   <div>
     <div>Link to this room:</div>
     <div>
@@ -157,4 +158,5 @@
   <ng-container *ngIf="false">
     <messenger></messenger>
   </ng-container>
+</div>
 </ng-template>
