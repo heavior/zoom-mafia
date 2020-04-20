@@ -1,17 +1,17 @@
-<div class="d-flex">
-  <div class="mr-5">{{dayEmoji}} {{dayTime}} {{game.dayNumber}}</div>
+<div class="text-small">
+  <div class="text-secondary" *ngIf="showHint else hideHint">
+    <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;<a (click)="showHint = false;" href>[&times;]</a>
+  </div>
+  <ng-template #hideHint>
+    <a (click)="showHint = true; false" href>[ show hint >> ]</a>
+  </ng-template>
+</div>
+
+<hr>
+
+<div class="d-flex text-small">
+  <div class="mr-5 text-nowrap">{{dayEmoji}} {{dayTime}} {{game.dayNumber}}</div>
   <div *ngIf="player.role !== 'Guest'">
     <div>{{game.gameState}} - {{phaseCaption()}}</div>
   </div>
 </div>
-
-<br *ngIf="player.role !== 'Guest'">
-
-<div class="text-secondary" *ngIf="showHint else hideHint">
-  <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;
-  <a (click)="showHint = false;" href>[&times;]</a>
-</div>
-
-<ng-template #hideHint>
-  <div><a (click)="showHint = true; false" href>[ show hint >> ]</a></div>
-</ng-template>
