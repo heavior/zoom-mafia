@@ -27,8 +27,7 @@
   </ng-container>
 
   <ng-container *ngIf="game?.gameOn">
-    <game-info [countdown]="countdown"
-               [game]="game"
+    <game-info [game]="game"
                [player]="player"></game-info>
     <hr>
   </ng-container>
@@ -73,8 +72,7 @@
          'player-me': player.name === gPlayer.name}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
     >
-
-      <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption(); else notCandidate">
+      <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">
         <i *ngIf="votedFor !== gPlayer.number"
           (click)="vote(gPlayer.number)"
            title="{{voteButtonCaption()}}"
@@ -115,20 +113,19 @@
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </ng-container>
     </div>
-    <hr>
   </ng-container>
 
-  <!-- action buttons under the players list -->
-  <ng-container *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'">
-    Once you are ready:
-    <button class="btn btn-sm btn-primary"
+  <div class="d-flex flex-column align-items-center">
+    <div *ngIf="countdown" class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
+    <button *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'"
+            class="btn btn-sm btn-primary"
             (click)="vote(0)"
             [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
-    <hr>
-  </ng-container>
+  </div>
+  <hr>
 
   <ng-container *ngIf="isHost">
-    <host-info [game]="game" (gameStarting)="votedFor=$event"></host-info>
+    <host-info [game]="game"></host-info>
     <hr>
   </ng-container>
   <!-- end of action buttons under the players list -->
@@ -138,10 +135,10 @@
               [news]="game.news"
               [player]="player"
               [civiliansWin]="game.civiliansWin"></app-news>
-    <hr>
   </ng-container>
 
   <ng-container *ngIf="guests.length">
+    <hr>
     <b>Guests ({{guests.length}}): </b>
     <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
          [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
