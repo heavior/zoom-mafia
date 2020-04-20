@@ -1,18 +1,20 @@
-import {Directive, ElementRef, HostBinding, Input, OnInit} from '@angular/core';
+import { Directive, HostBinding, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Directive({
   selector: '[appColorizeUser]'
 })
-export class ColorizeUserDirective implements OnInit {
+export class ColorizeUserDirective implements OnChanges {
   @Input() player: any;
 
   @HostBinding('class') className: string;
 
   constructor() {}
 
-  ngOnInit(): void {
-    const { role } = this.player;
-    this.className = this.mafiaRole(role) ? 'text-danger' : this.civilianRole(role) ? 'text-success' : '';
+  ngOnChanges(changes: SimpleChanges): void {
+    if(!changes.player.previousValue || this.player.role !== changes.player.previousValue.role) {
+      const { role } = this.player;
+      this.className = this.mafiaRole(role) ? 'text-danger' : this.civilianRole(role) ? 'text-success' : '';
+    }
   }
 
   private civilianRole(role){
