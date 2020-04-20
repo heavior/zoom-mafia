@@ -7,7 +7,6 @@ import {IGame, IPlayer} from "../../interfaces";
   styleUrls: ['./game-info.component.scss']
 })
 export class GameInfoComponent implements OnInit, OnChanges {
-  @Input() countdown: number;
   @Input() game: IGame;
   @Input() player: IPlayer;
   dayTime: string;
