@@ -133,12 +133,11 @@
 
   <!-- end of action buttons under the players list -->
 
-  <ng-container *ngIf="game">
-    <app-news [currentDay]="game.dayNumber"
-              [news]="game.news"
-              [player]="player"
-              [civiliansWin]="game.civiliansWin"></app-news>
-  </ng-container>
+  <app-news *ngIf="game"
+            [currentDay]="game.dayNumber"
+            [news]="game.news"
+            [player]="player"
+            [civiliansWin]="game.civiliansWin"></app-news>
 
   <ng-container *ngIf="guests.length">
     <hr>
@@ -146,7 +145,7 @@
     <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
          [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
-    >{{gPlayer.name}}<ng-container *ngIf="player.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
+    >{{gPlayer.name}}<ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
   </ng-container>
 
 
