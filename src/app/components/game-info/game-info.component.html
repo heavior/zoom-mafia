@@ -2,7 +2,7 @@
 
 <ng-container *ngIf="player.role !== 'Guest'">
   <div><b>{{phaseCaption()}}</b></div>
-  <div *ngIf="countdown">Time left: <b>{{countdown}}</b> seconds</div>
+  <div *ngIf="countdown">Time left: <b>{{countdown | minuteSecond}}</b> seconds</div>
 </ng-container>
 
 <br *ngIf="player.role !== 'Guest'">
