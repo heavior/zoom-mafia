@@ -6,7 +6,7 @@
 
 <br *ngIf="player.role !== 'Guest'">
 
-<div class="text-muted" *ngIf="showHint else hideHint">
+<div class="text-secondary" *ngIf="showHint else hideHint">
   <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;
   <a (click)="showHint = false;" href>[&times;]</a>
 </div>

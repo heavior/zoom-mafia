@@ -1,15 +1,16 @@
-<div><b>You are the moderator!</b></div>
 <ng-container *ngIf="game.gameOn else hostStartGame">
-  <ng-container *ngIf="game.gameState === 'Discussion'">
-    <div>Wait till the players discuss and nominate suspects.</div>
-    <div><button (click)="next()" class="btn btn-sm btn-primary">Start voting</button></div>
-  </ng-container>
-  <ng-container *ngIf="game.gameState === 'LastWord'">
-    <div>Give guilty a chance to stay last word. If needed - discuss with the group.</div>
-    <div><button (click)="next()" class="btn btn-sm btn-primary">Start night</button></div>
-  </ng-container>
+  <div *ngIf="game.gameState === 'Discussion'" class="d-flex flex-column align-items-center mb-3">
+    <button (click)="next()" class="btn btn-sm btn-primary">Start voting</button>
+    <div class="text-secondary font-italic text-center">Wait till the players discuss and nominate suspects.</div>
+  </div>
+  <div *ngIf="game.gameState === 'LastWord'" class="d-flex flex-column align-items-center my-3">
+    <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
+    <div class="text-secondary font-italic text-center">Give guilty a chance to stay last word. If needed - discuss with the group.</div>
+  </div>
 </ng-container>
 
 <ng-template #hostStartGame>
-  <button class="btn btn-sm btn-primary mr-2 mt-2" type="button" (click)="startGame()">Start game</button>
+  <div class="d-flex flex-column align-items-center my-3">
+    <button class="btn btn-sm btn-primary" type="button" (click)="startGame()">Start game</button>
+  </div>
 </ng-template>

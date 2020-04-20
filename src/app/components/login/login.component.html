@@ -7,11 +7,11 @@
       <input id="username" class="form-control"
              [(ngModel)]="userName" autoFocus
              (keyup.enter)="userName && submit()" required />
-      <small id="usernameHelp" class="form-text text-muted">Name must be unique within the room</small>
+      <small id="usernameHelp" class="form-text text-secondary">Name must be unique within the room</small>
     </div>
 
     <div *ngIf="!join" class="form-group">
-      <label for="videoLink">Video conference link <span class="text-muted">(optional)</span></label>
+      <label for="videoLink">Video conference link <span class="text-secondary">(optional)</span></label>
       <input id="videoLink" class="form-control" [(ngModel)]="videoLink" (keyup.enter)="submit()"/>
     </div>
 
