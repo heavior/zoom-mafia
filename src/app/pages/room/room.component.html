@@ -41,17 +41,19 @@
            title="{{gPlayer.isOnline?'':'Offline'}}"
       >
         <span class="player-name">😟 {{gPlayer.number}}: {{gPlayer.name}}
-          <ng-container *ngIf="gPlayer.name === hostName">(host)</ng-container>
           <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
         </span>
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
       </div>
       <hr>
 
-      <ng-container *ngIf="player.isAlive && votedFor === null">
+      <div *ngIf="countdown " class="d-flex flex-column align-items-center mt-3">
+        <div class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
+      </div>
+      <div class="d-flex flex-column align-items-center mb-3" *ngIf="player.isAlive && votedFor === null">
         <button class="btn btn-sm btn-primary" (click)="vote(-1)">Guilty</button> &nbsp;
         <button class="btn btn-sm btn-primary"(click)="vote(0)">Not guilty</button>
-      </ng-container>
+      </div>
 
       <ng-container *ngIf="!player.isAlive || votedFor !== null">
         <span class="badge badge-danger"> Guilty </span>
@@ -102,7 +104,7 @@
       -->
 
       <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
-        <ng-container *ngIf="gPlayer.name === hostName">(host)</ng-container>
+        <ng-container *ngIf="gPlayer.name === game.host">(moderator)</ng-container>
         <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
       </span>
 
@@ -115,10 +117,12 @@
     </div>
   </ng-container>
 
-  <div class="d-flex flex-column align-items-center">
-    <div *ngIf="countdown" class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
-    <button *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'"
-            class="btn btn-sm btn-primary"
+  <div *ngIf="countdown && game.gameState !== 'Tiebreaker'" class="d-flex flex-column align-items-center mt-3">
+    <div class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
+  </div>
+  <div *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'"
+       class="d-flex flex-column align-items-center mb-3">
+    <button class="btn btn-sm btn-primary"
             (click)="vote(0)"
             [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
   </div>
@@ -143,12 +147,12 @@
     <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
          [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
          title="{{gPlayer.isOnline?'':'Offline'}}"
-    >{{gPlayer.name}}<ng-container *ngIf="player.name === game.host">(host)</ng-container>{{isLast ? '' : ', '}}</span>
+    >{{gPlayer.name}}<ng-container *ngIf="player.name === game.host">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
   </ng-container>
 
 
-  <div *ngIf="isHost && game.gameOn" class="mb-1">
-    <hr>
+  <hr *ngIf="isHost && game.gameOn" >
+  <div *ngIf="isHost && game.gameOn" class="d-flex flex-column align-items-center my-3">
     <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
   </div>
 
