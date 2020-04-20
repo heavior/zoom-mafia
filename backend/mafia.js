@@ -505,7 +505,7 @@ class MafiaGame {
           votedBy: news.votedBy ? news.votedBy.map(playerNumber => this._playerPublicInfo(this.players[playerNumber-1], requester)) : null,
           personal: news.players.indexOf(requester.number) >= 0
         })
-      ),
+      ).reverse(),
       tiebreakerVoted: tiebreakerVoted,
       countdown: this.timeLeft()
     };
