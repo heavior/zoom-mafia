@@ -9,6 +9,7 @@ import {IGame, IPlayer} from "../../interfaces";
 export class GameInfoComponent implements OnInit, OnChanges {
   @Input() game: IGame;
   @Input() player: IPlayer;
+  dayEmoji: string;
   dayTime: string;
   showHint: boolean = true;
 
@@ -20,6 +21,7 @@ export class GameInfoComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.game?.currentValue) {
       this.dayTime = changes.game.currentValue.gameState === 'Night' ? 'Night' : 'Day';
+      this.dayEmoji = this.dayTime === 'Day' ? '🌞' : '🌜';
     }
 
     if (changes.game?.currentValue || changes.player?.currentValue) {

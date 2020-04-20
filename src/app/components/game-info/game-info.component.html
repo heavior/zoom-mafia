@@ -1,8 +1,9 @@
-<div>It is <b [class]="dayTime === 'Night' ? 'night' : ''">{{dayTime}} #{{game.dayNumber}} <ng-container *ngIf="dayTime !== 'Night'">({{game.gameState}})</ng-container></b></div>
-
-<ng-container *ngIf="player.role !== 'Guest'">
-  <div><b>{{phaseCaption()}}</b></div>
-</ng-container>
+<div class="d-flex">
+  <div class="mr-5">{{dayEmoji}} {{dayTime}} {{game.dayNumber}}</div>
+  <div *ngIf="player.role !== 'Guest'">
+    <div>{{game.gameState}} - {{phaseCaption()}}</div>
+  </div>
+</div>
 
 <br *ngIf="player.role !== 'Guest'">
 
