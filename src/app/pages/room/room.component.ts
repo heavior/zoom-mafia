@@ -237,10 +237,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatService.vote(Number(playerNumber));
   }
 
-  startGame(needConfirmation){
+  startGame(needConfirmation = false){
     if (!needConfirmation || confirm('Are you sure you want to restart the game? All progress will be lost for all players.')) {
       this.chatService.startGame();
       this.votedFor = null;
     }
+  }
+
+  next() {
+    this.chatService.next();
   }
 }
