@@ -4,20 +4,6 @@
 
 <ng-template #showGame>
 <div [ngClass]="{'bg-dark text-white': game.gameState === 'Night'}" class="p-2">
-  <div>
-    <div>Link to this room:</div>
-    <div>
-      <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
-      <button class="btn btn-sm btn-outline-secondary ml-1 "id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button>
-    </div>
-    <div *ngIf="videoLink" ><a href="{{videoLink}}" target="_blank">Join video conference</a></div>
-    <div class="form-check pl-1">
-      <input class="form-check-inline" id="autoJoin" type="checkbox" [(ngModel)]="autoJoin" (click)="toggleJoinGame()"/>
-      <label class="form-check-label" for="autoJoin">Automatically join next game</label>
-    </div>
-  </div>
-  <hr>
-
   <ng-container *ngIf="player">
     <player-info [endGameMessage]="endGameMessage"
                  [gameOn]="game?.gameOn"
@@ -109,7 +95,7 @@
       </span>
 
       <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
-         class="btn btn-sm ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
+         class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
       <ng-container *ngIf="(game.gameState !== 'Tiebreaker') && gPlayer.votedBy && gPlayer.votedBy.length">
         (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
@@ -152,6 +138,44 @@
   <div *ngIf="isHost && game.gameOn" class="d-flex flex-column align-items-center my-3">
     <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
   </div>
+
+
+  <hr>
+
+  <div class="form-check pl-1">
+    <input class="form-check-inline" id="autoJoin" type="checkbox" [(ngModel)]="autoJoin" (click)="toggleJoinGame()"/>
+    <label class="form-check-label" for="autoJoin">Automatically join next game</label>
+  </div>
+
+
+  <div >
+    <div *ngIf="!hideRoomInfo else hideRoomInfoBlock" class="mt-1">
+      <div>
+
+        <button class="btn btn-sm py-0 btn-outline-primary mr-1 "
+                (click)="hideRoomInfo = true; false" ><< hide </button>
+        Link to this room:
+      </div>
+
+      <div class="d-flex flex-column align-items-center my-3">
+        <qrcode [qrdata]="roomLink" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+      <div>
+        <a href="{{roomLink}}" target="_blank"> {{roomLink}}</a>
+        <button class="btn btn-sm py-0 btn-primary ml-1 "id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button>
+      </div>
+      <div *ngIf="videoLink" ><a href="{{videoLink}}" target="_blank">Join video conference</a></div>
+
+    </div>
+    <ng-template #hideRoomInfoBlock>
+      <div  class="d-flex flex-column align-items-center my-3">
+        <button class="btn btn-sm btn-outline-primary ml-1 "
+                (click)="hideRoomInfo = false; false" >Share this room</button>
+      </div>
+    </ng-template>
+  </div>
+
+  <hr>
 
   <ng-container *ngIf="false">
     <messenger></messenger>

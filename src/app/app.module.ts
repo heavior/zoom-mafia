@@ -18,6 +18,9 @@ import { HostInfoComponent } from './components/host-info/host-info.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
 import { LoginComponent } from './components/login/login.component';
 import { MinuteSecondPipe } from './pipes/minute-second.pipe';
+import { QRCodeModule } from 'angularx-qrcode';
+
+
 
 @NgModule({
   declarations: [
@@ -41,6 +44,7 @@ import { MinuteSecondPipe } from './pipes/minute-second.pipe';
     HttpClientModule,
     FormsModule,
     ClipboardModule,
+    QRCodeModule
   ],
   providers: [],
   bootstrap: [AppComponent]

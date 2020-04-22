@@ -17,6 +17,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   private settingsSubject: Subscription;
 
   autoJoin: boolean = true;
+  hideRoomInfo: boolean = true;
   countdown: number = 0;
   dayTime: string;
   endGameMessage: string;
