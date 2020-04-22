@@ -215,6 +215,9 @@ class Room {
     }
     // Only online players join the game
     let onlinePlayers = this.players.filter(player => player.isOnline && player.autoJoin);
+    if(onlinePlayers.length < 6){
+      return;
+    }
     this.game.start(onlinePlayers);
 
     this.players.filter(player => player.isOnline && !player.autoJoin).forEach(player => this.game.join(player));
