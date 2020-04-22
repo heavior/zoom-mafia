@@ -184,8 +184,8 @@ class MafiaGame {
       let activeB = MafiaGame._isActiveRole(b.role);
       if(activeA === activeB){
         // Sort by name is the role is active
-        let nameA = a.name.toUpperCase(); // ignore upper and lowercase
-        let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+        let nameA = a.name?a.name.toUpperCase():''; // ignore upper and lowercase
+        let nameB = b.name?b.name.toUpperCase():''; // ignore upper and lowercase
         if (nameA < nameB) {
           return -1;
         }
@@ -199,7 +199,12 @@ class MafiaGame {
     });
   }
   informPlayers(event = null){
-    this.players.forEach(player => {
+    let players = this.players;
+    if(event === 'vote' && this.gameState === GameStates.Night){
+      // Vote at night goes to mafia only
+      players = players.filter(player => player.isMafia);
+    }
+    players.forEach(player => {
       this._playerUpdate(player, event);
     });
   }
@@ -413,12 +418,13 @@ class MafiaGame {
       role: player.role
     };
   }
-  _openVote(){
-    return this.gameState !== GameStates.Night;
+  _openVote(requester = null){
+    // At Night Mafia sees votes
+    return !requester || this.gameState !== GameStates.Night || requester.isMafia;
   }
 
   _playerVotedBy(playerNumber, requester){
-    if(!this._openVote()){
+    if(!this._openVote(requester)){
       return null;
     }
 
@@ -429,7 +435,7 @@ class MafiaGame {
     }
 
     // Filter players who voted for me
-    return Object.entries(registry) // Dict to array to iterate easier
+    let votes = Object.entries(registry) // Dict to array to iterate easier
                .filter(element => parseInt(element[1]) === playerNumber) // Filter votesCounters for this player
                .map(element => {
                  let player = this.players[element[0]-1];
@@ -439,6 +445,11 @@ class MafiaGame {
                    role: this._playerRoleForAnothePlayer(player, requester)
                  }
                }); // Map to player names
+    if(this.gameState === GameStates.Night){
+      // Mafia sees only mafia votes at night
+      votes = votes.filter( player => MafiaGame._isMafiaRole(player.role));
+    }
+    return votes;
   }
 
   _playerRoleForAnothePlayer(player, requester){
