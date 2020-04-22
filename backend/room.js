@@ -46,7 +46,7 @@ IDEA: Later - maybe there is a time coordination for the room later
  */
 const mafia = require('./mafia');
 
-const HOST_RECONNECT_TIMEOUT = 30*1000; // How much time do we give host to reconnect
+const HOST_RECONNECT_TIMEOUT = 20*1000; // How much time do we give host to reconnect
 
 class Room {
 

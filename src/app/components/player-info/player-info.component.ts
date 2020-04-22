@@ -9,6 +9,7 @@ import { IPlayer } from "../../interfaces";
 export class PlayerInfoComponent implements OnInit {
   @Input() endGameMessage: string;
   @Input() gameOn: boolean;
+  @Input() isHost: boolean;
   @Input() player: IPlayer;
   @Input() state: string;
   @Input() winner: string;
