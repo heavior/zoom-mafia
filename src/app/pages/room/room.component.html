@@ -22,6 +22,7 @@
 
   <ng-container *ngIf="players.length">
     <ng-container *ngIf="game.gameState === 'Tiebreaker'">
+      <b>Accused: </b>
       <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
            [ngClass]="{'text-muted': !gPlayer.isOnline,
            'player-me': player.name === gPlayer.name}"
@@ -38,8 +39,8 @@
         <div class="text-danger" style="font-size: 20px"><b>{{countdown | minuteSecond}}</b></div>
       </div>
       <div class="d-flex justify-content-around align-items-center mb-3 mx-4" *ngIf="player.isAlive && votedFor === null">
-        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(-1)">Kill</button>
-        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(0)">Spare</button>
+        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(-1)">Guilty</button>
+        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(0)">Not guilty</button>
       </div>
 
       <ng-container *ngIf="!player.isAlive || votedFor !== null">
