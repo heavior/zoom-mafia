@@ -71,38 +71,38 @@ export class GameInfoComponent implements OnInit, OnChanges {
   phaseCaption() {
     const phases = {
       LastWord: {
-        Guest: 'Last words of convicted',
-        Mafia: 'Last words of convicted',
-        Civilian: 'Last words of convicted',
-        Detective: 'Last words of convicted'
+        Guest: '- Last words of convicted',
+        Mafia: '- Last words of convicted',
+        Civilian: '- Last words of convicted',
+        Detective: '- Last words of convicted'
       },
       Discussion: {
         Guest: '',
-        Mafia: 'Deceive civilians',
-        Civilian: 'Discuss your suspicions',
-        Detective: 'Look out for mafia'
+        Mafia: '- Deceive civilians',
+        Civilian: '- Discuss your suspicions',
+        Detective: '- Look out for mafia'
       },
       MainVote: {
-        Guest: 'The jury is out',
-        Mafia: 'Who to vote for?',
-        Civilian: 'Who is guilty?',
-        Detective: 'Choose wisely'
+        Guest: '- The jury is out',
+        Mafia: '- Who to vote for?',
+        Civilian: '- Who is guilty?',
+        Detective: '- Choose wisely'
       },
       Night: {
-        Guest: 'Dark deeds',
-        Mafia: 'Choose your victim',
-        Civilian: 'Sleep well',
-        Detective: 'Who to check?'
+        Guest: '- Dark deeds',
+        Mafia: '- Choose your victim',
+        Civilian: '- Sleep well',
+        Detective: '- Who to check?'
       },
       Tiebreaker: {
-        Guest: 'There was a tie',
-        Mafia: 'Do you want to kill them?',
-        Civilian: 'What is your verdict?',
-        Detective: 'What is your verdict?',
+        Guest: '- There was a tie',
+        Mafia: '- Do you want to kill them?',
+        Civilian: '- What is your verdict?',
+        Detective: '- What is your verdict?',
       }
     };
     const role = this.player.isAlive ? this.player.role : 'Guest';
-    return phases[ this.game.gameState][role] || phases[ this.game.gameState]['Guest'];
+    return phases[this.game.gameState][role] || phases[ this.game.gameState].Guest;
   }
 
 }
