@@ -8,14 +8,12 @@ import {ChatService} from "../../services/chat.service";
 })
 export class LoginComponent implements OnInit {
   @Input() join: boolean;
-  action: string;
   userName: string;
   videoLink: string;
 
   constructor(private chatService: ChatService) { }
 
   ngOnInit(): void {
-    this.action = this.join ? 'Join' : 'Create';
     this.userName = this.chatService.userName;
   }
 
