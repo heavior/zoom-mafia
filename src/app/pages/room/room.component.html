@@ -145,9 +145,8 @@
           <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
           <div class="text-secondary text-small font-italic text-center">Give guilty a chance to stay last word. If needed - discuss with the group.</div>
         </div>
+        <hr>
       </ng-container>
-
-      <hr>
 
       <!-- news block -->
       <app-news *ngIf="game"
@@ -179,9 +178,6 @@
           <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
         </div>
       </ng-container>
-
-
-      <hr>
 
       <!-- disabled game chat -->
       <ng-container *ngIf="false">
