@@ -4,6 +4,7 @@ import {filter, takeWhile} from 'rxjs/operators';
 
 import { IGame, IPlayer, IYou} from "../../interfaces";
 import { ChatService } from '../../services/chat.service';
+import { StyleService } from "../../services/style.service";
 
 @Component({
   selector: 'app-room',
@@ -37,7 +38,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   wakeUpTimer: any;
   winner: string;
 
-  constructor(private chatService: ChatService) { }
+  constructor(private chatService: ChatService,
+              private styleService: StyleService) { }
 
   static mafiaRole(role){
     return role === 'Mafia' || role === 'Don';
@@ -48,6 +50,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.countdown = 0;
     }
     let countdown = game.countdown || 0;
+    this.styleService.dayStyle = game.gameState;
     if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
       const wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
       console.log('wake up in', wakeUpTime);
@@ -158,6 +161,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.styleService.dayStyle = '';
     if (this.countdownSubject) {
       this.countdownSubject.unsubscribe();
     }
