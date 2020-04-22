@@ -11,11 +11,13 @@ export class LoginComponent implements OnInit {
   action: string;
   userName: string;
   videoLink: string;
+  roomLink: string;
 
   constructor(private chatService: ChatService) { }
 
   ngOnInit(): void {
     this.userName = this.chatService.userName;
+    this.roomLink = document.location.href;
     this.action = this.join ? 'Join' : 'Create a';
   }
 
