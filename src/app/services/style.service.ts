@@ -8,6 +8,7 @@ export class StyleService {
   constructor(@Inject(DOCUMENT) private document: Document) { }
 
   set dayStyle(mode) {
-    this.document.body.setAttribute('class', mode === 'Night' ? 'bg-dark text-white' : '');
+    const style = `d-flex flex-grow-1 flex-column${mode === 'Night' ? ' bg-dark text-white' : ''}`;
+    this.document.body.setAttribute('class', style);
   }
 }

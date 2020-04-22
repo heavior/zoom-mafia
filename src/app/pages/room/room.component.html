@@ -3,187 +3,189 @@
 </ng-container>
 
 <ng-template #showGame>
-  <div class="p-2 pb-0">
+  <div class="d-flex flex-grow-1 align-self-center align-content-center">
+    <div class="p-2 pb-0">
 
-    <!-- player info -->
-    <ng-container *ngIf="player">
-      <div class="px-2">
-        <player-info [endGameMessage]="endGameMessage"
-                     [gameOn]="game?.gameOn"
-                     [player]="player"
-                     [state]="state"
-                     [winner]="winner"></player-info>
-      </div>
-    </ng-container>
+      <!-- player info -->
+      <ng-container *ngIf="player">
+        <div class="px-2">
+          <player-info [endGameMessage]="endGameMessage"
+                       [gameOn]="game?.gameOn"
+                       [player]="player"
+                       [state]="state"
+                       [winner]="winner"></player-info>
+        </div>
+      </ng-container>
 
-    <!-- game on info - hint and state -->
-    <ng-container *ngIf="game.gameOn else gameOffBlock">
-      <game-info [game]="game"
-                 [player]="player"></game-info>
-    </ng-container>
+      <!-- game on info - hint and state -->
+      <ng-container *ngIf="game?.gameOn else gameOffBlock">
+        <game-info [game]="game"
+                   [player]="player"></game-info>
+      </ng-container>
 
-    <!-- game off - nudge to invite players-->
-    <ng-template #gameOffBlock>
-      <room-share></room-share>
-    </ng-template>
+      <!-- game off - nudge to invite players-->
+      <ng-template #gameOffBlock>
+        <room-share></room-share>
+      </ng-template>
 
 
-    <!-- start new game button for host -->
-    <ng-container *ngIf="isHost && !game.gameOn">
-      <div class="d-flex flex-column align-items-center my-3">
-        <button class="btn btn-sm btn-primary" type="button" (click)="startGame()">Start new game</button>
-      </div>
-      <hr>
-    </ng-container>
+      <!-- start new game button for host -->
+      <ng-container *ngIf="isHost && !game.gameOn">
+        <div class="d-flex flex-column align-items-center my-3">
+          <button class="btn btn-sm btn-primary" type="button" (click)="startGame()">Start new game</button>
+        </div>
+        <hr>
+      </ng-container>
 
-    <!-- tiebreaker block -->
-    <ng-container *ngIf="game.gameState === 'Tiebreaker'">
-      <b>Accused: </b>
-      <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
+      <!-- tiebreaker block -->
+      <ng-container *ngIf="game?.gameState === 'Tiebreaker'">
+        <b>Accused: </b>
+        <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
+             [ngClass]="{'text-muted': !gPlayer.isOnline,
+             'player-me': player.name === gPlayer.name}"
+             title="{{gPlayer.isOnline?'':'Offline'}}"
+        >
+          <span class="player-name">😟 {{gPlayer.number}}: {{gPlayer.name}}
+            <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
+          </span>
+          (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
+        </div>
+        <div *ngIf="countdown " class="d-flex flex-column align-items-center my-3">
+          <div class="text-danger" style="font-size: 20px"><b>{{countdown | minuteSecond}}</b></div>
+        </div>
+        <div class="d-flex justify-content-around align-items-center mb-3 mx-4" *ngIf="player.isAlive && votedFor === null">
+          <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(-1)">Guilty</button>
+          <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(0)">Not guilty</button>
+        </div>
+
+        <ng-container *ngIf="!player.isAlive || votedFor !== null">
+          <span class="badge badge-danger"> Guilty </span>
+          <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
+            (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
+          </ng-container>
+          <br>
+          <span class="badge badge-success"> Not guilty </span>
+          <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
+            (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
+          </ng-container>
+        </ng-container>
+        <hr>
+      </ng-container>
+
+      <!-- players list -->
+      <div class="player-list-item px-2" *ngFor="let gPlayer of players; trackBy: trackByName"
            [ngClass]="{'text-muted': !gPlayer.isOnline,
+           'player-dead': !gPlayer.isAlive,
            'player-me': player.name === gPlayer.name}"
            title="{{gPlayer.isOnline?'':'Offline'}}"
       >
-        <span class="player-name">😟 {{gPlayer.number}}: {{gPlayer.name}}
-          <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
-        </span>
-        (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
-      </div>
-      <div *ngIf="countdown " class="d-flex flex-column align-items-center my-3">
-        <div class="text-danger" style="font-size: 20px"><b>{{countdown | minuteSecond}}</b></div>
-      </div>
-      <div class="d-flex justify-content-around align-items-center mb-3 mx-4" *ngIf="player.isAlive && votedFor === null">
-        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(-1)">Guilty</button>
-        <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(0)">Not guilty</button>
-      </div>
-
-      <ng-container *ngIf="!player.isAlive || votedFor !== null">
-        <span class="badge badge-danger"> Guilty </span>
-        <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
-          (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
+        <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">
+          <i *ngIf="votedFor !== gPlayer.number"
+            (click)="vote(gPlayer.number)"
+             title="{{voteButtonCaption()}}"
+             class="far fa-check-circle text-primary"></i>
+          <i *ngIf="votedFor === gPlayer.number"
+             title="{{voteButtonCaption()}}"
+             class="fas fa-check-circle text-primary"></i>&nbsp;
         </ng-container>
-        <br>
-        <span class="badge badge-success"> Not guilty </span>
-        <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
-          (<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)
-        </ng-container>
-      </ng-container>
-      <hr>
-    </ng-container>
 
-    <!-- players list -->
-    <div class="player-list-item px-2" *ngFor="let gPlayer of players; trackBy: trackByName"
-         [ngClass]="{'text-muted': !gPlayer.isOnline,
-         'player-dead': !gPlayer.isAlive,
-         'player-me': player.name === gPlayer.name}"
-         title="{{gPlayer.isOnline?'':'Offline'}}"
-    >
-      <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">
-        <i *ngIf="votedFor !== gPlayer.number"
-          (click)="vote(gPlayer.number)"
-           title="{{voteButtonCaption()}}"
-           class="far fa-check-circle text-primary"></i>
-        <i *ngIf="votedFor === gPlayer.number"
-           title="{{voteButtonCaption()}}"
-           class="fas fa-check-circle text-primary"></i>&nbsp;
-      </ng-container>
+          <!--
+                <i class="far fa-circle"></i> - vote
+                <i class="far fa-dot-circle"></i> - vote - checked
+          -->
+
+        <ng-template #notCandidate>
+          <ng-container *ngIf="gPlayer.isAlive && player.name === gPlayer.name">🤭 </ng-container>
+          <ng-container *ngIf="gPlayer.isAlive && player.name !== gPlayer.name">😎 </ng-container>
+          <ng-container *ngIf="!gPlayer.isAlive">☠️ </ng-container>
+        </ng-template>
 
         <!--
-              <i class="far fa-circle"></i> - vote
-              <i class="far fa-dot-circle"></i> - vote - checked
+        <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
+                class="btn btn-sm ml-1"
+                (click)="vote(gPlayer.number)"
+                [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
+                [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
         -->
 
-      <ng-template #notCandidate>
-        <ng-container *ngIf="gPlayer.isAlive && player.name === gPlayer.name">🤭 </ng-container>
-        <ng-container *ngIf="gPlayer.isAlive && player.name !== gPlayer.name">😎 </ng-container>
-        <ng-container *ngIf="!gPlayer.isAlive">☠️ </ng-container>
-      </ng-template>
+        <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
+          <ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>
+          <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
+        </span>
 
-      <!--
-      <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
-              class="btn btn-sm ml-1"
-              (click)="vote(gPlayer.number)"
-              [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
-              [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
-      -->
+        <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
+           class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
-      <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
-        <ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>
-        <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
-      </span>
+        <ng-container *ngIf="(game.gameState !== 'Tiebreaker') && gPlayer.votedBy && gPlayer.votedBy.length">
+          (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
+        </ng-container>
+      </div>
 
-      <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
-         class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
+      <!-- countdown for other steps -->
+      <div *ngIf="countdown && game.gameState !== 'Tiebreaker'" class="d-flex flex-column align-items-center mt-3 mb-1">
+        <div class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
+      </div>
 
-      <ng-container *ngIf="(game.gameState !== 'Tiebreaker') && gPlayer.votedBy && gPlayer.votedBy.length">
-        (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
+      <!-- wake up button for civilians-->
+      <div *ngIf="player && player.isAlive && game?.gameState === 'Night' && player.role === 'Civilian'"
+           class="d-flex flex-column align-items-center mb-3">
+        <button class="btn btn-sm btn-primary"
+                (click)="vote(0)"
+                [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
+      </div>
+
+      <!-- game control buttons for moderator ("next") -->
+      <ng-container *ngIf="isHost && game.gameOn">
+        <div *ngIf="game.gameState === 'Discussion'" class="d-flex flex-column align-items-center my-3">
+          <button (click)="next()" class="btn btn-sm btn-primary">Start voting</button>
+          <div class="text-secondary text-small font-italic text-center mt-2">Wait till the players discuss and nominate suspects.</div>
+        </div>
+        <div *ngIf="game.gameState === 'LastWord'" class="d-flex flex-column align-items-center mb-3">
+          <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
+          <div class="text-secondary text-small font-italic text-center">Give guilty a chance to stay last word. If needed - discuss with the group.</div>
+        </div>
+      </ng-container>
+
+      <hr>
+
+      <!-- news block -->
+      <app-news *ngIf="game"
+                [currentDay]="game.dayNumber"
+                [news]="game.news"
+                [player]="player"
+                [civiliansWin]="game.civiliansWin"></app-news>
+
+      <!-- guests block -->
+      <ng-container *ngIf="guests.length">
+        <hr>
+        <div class="text-small">
+          <b>Guests ({{guests.length}}): </b>
+          <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
+               [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
+               title="{{gPlayer.isOnline?'':'Offline'}}"
+          >{{gPlayer.name}}<ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
+        </div>
+      </ng-container>
+
+      <hr>
+
+      <!-- skip game controls & current room link -->
+      <room-share *ngIf="game?.gameOn"></room-share>
+
+      <!-- restart game button -->
+      <ng-container *ngIf="isHost && game.gameOn">
+        <div class="d-flex flex-column align-items-center my-3">
+          <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
+        </div>
+      </ng-container>
+
+
+      <hr>
+
+      <!-- disabled game chat -->
+      <ng-container *ngIf="false">
+        <messenger></messenger>
       </ng-container>
     </div>
-
-    <!-- countdown for other steps -->
-    <div *ngIf="countdown && game.gameState !== 'Tiebreaker'" class="d-flex flex-column align-items-center mt-3 mb-1">
-      <div class="text-danger"><b>{{countdown | minuteSecond}}</b></div>
-    </div>
-
-    <!-- wake up button for civilians-->
-    <div *ngIf="player.isAlive && game.gameState === 'Night' && player.role === 'Civilian'"
-         class="d-flex flex-column align-items-center mb-3">
-      <button class="btn btn-sm btn-primary"
-              (click)="vote(0)"
-              [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
-    </div>
-
-    <!-- game control buttons for moderator ("next") -->
-    <ng-container *ngIf="isHost && game.gameOn">
-      <div *ngIf="game.gameState === 'Discussion'" class="d-flex flex-column align-items-center my-3">
-        <button (click)="next()" class="btn btn-sm btn-primary">Start voting</button>
-        <div class="text-secondary text-small font-italic text-center mt-2">Wait till the players discuss and nominate suspects.</div>
-      </div>
-      <div *ngIf="game.gameState === 'LastWord'" class="d-flex flex-column align-items-center mb-3">
-        <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
-        <div class="text-secondary text-small font-italic text-center">Give guilty a chance to stay last word. If needed - discuss with the group.</div>
-      </div>
-    </ng-container>
-
-    <hr>
-
-    <!-- news block -->
-    <app-news *ngIf="game"
-              [currentDay]="game.dayNumber"
-              [news]="game.news"
-              [player]="player"
-              [civiliansWin]="game.civiliansWin"></app-news>
-
-    <!-- guests block -->
-    <ng-container *ngIf="guests.length">
-      <hr>
-      <div class="text-small">
-        <b>Guests ({{guests.length}}): </b>
-        <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
-             [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
-             title="{{gPlayer.isOnline?'':'Offline'}}"
-        >{{gPlayer.name}}<ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
-      </div>
-    </ng-container>
-
-    <hr>
-
-    <!-- skip game controls & current room link -->
-    <room-share *ngIf="game?.gameOn"></room-share>
-
-    <!-- restart game button -->
-    <ng-container *ngIf="isHost && game.gameOn">
-      <div class="d-flex flex-column align-items-center my-3">
-        <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
-      </div>
-    </ng-container>
-
-
-    <hr>
-
-    <!-- disabled game chat -->
-    <ng-container *ngIf="false">
-      <messenger></messenger>
-    </ng-container>
   </div>
 </ng-template>

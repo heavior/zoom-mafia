@@ -159,7 +159,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
     this.gameSubject.unsubscribe();
     this.roomSubject.unsubscribe();
-    this.settingsSubject.unsubscribe();
+    if (this.settingsSubject) {
+      this.settingsSubject.unsubscribe();
+    }
   }
 
   candidates(){
