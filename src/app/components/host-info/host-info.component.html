@@ -1,7 +1,7 @@
 <ng-container *ngIf="game.gameOn else hostStartGame">
   <div *ngIf="game.gameState === 'Discussion'" class="d-flex flex-column align-items-center my-3">
     <button (click)="next()" class="btn btn-sm btn-primary">Start voting</button>
-    <div class="text-secondary text-small font-italic text-center">Wait till the players discuss and nominate suspects.</div>
+    <div class="text-secondary text-small font-italic text-center mt-2">Wait till the players discuss and nominate suspects.</div>
   </div>
   <div *ngIf="game.gameState === 'LastWord'" class="d-flex flex-column align-items-center mb-3">
     <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
