@@ -14,7 +14,7 @@ import { ColorizeUserDirective } from './directives/colorize-user.directive';
 import { ColorizeUserListComponent } from './components/colorize-user-list/colorize-user-list.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
 import { GameInfoComponent } from './components/game-info/game-info.component';
-import { HostInfoComponent } from './components/host-info/host-info.component';
+import { RoomShareComponent } from './components/room-share/room-share.component';
 import { MessengerComponent } from './components/messenger/messenger.component';
 import { LoginComponent } from './components/login/login.component';
 import { MinuteSecondPipe } from './pipes/minute-second.pipe';
@@ -33,7 +33,7 @@ import { QRCodeModule } from 'angularx-qrcode';
     ColorizeUserListComponent,
     PlayerInfoComponent,
     GameInfoComponent,
-    HostInfoComponent,
+    RoomShareComponent,
     MessengerComponent,
     LoginComponent,
     MinuteSecondPipe

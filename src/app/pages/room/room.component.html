@@ -17,14 +17,14 @@
     </ng-container>
 
     <!-- game on info - hint and state -->
-    <ng-container *ngIf="game?.gameOn else gameOffBlock">
+    <ng-container *ngIf="game.gameOn else gameOffBlock">
       <game-info [game]="game"
                  [player]="player"></game-info>
     </ng-container>
 
     <!-- game off - nudge to invite players-->
     <ng-template #gameOffBlock>
-
+      <room-share></room-share>
     </ng-template>
 
 
@@ -157,51 +157,27 @@
     <!-- guests block -->
     <ng-container *ngIf="guests.length">
       <hr>
-      <b>Guests ({{guests.length}}): </b>
-      <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
-           [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
-           title="{{gPlayer.isOnline?'':'Offline'}}"
-      >{{gPlayer.name}}<ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
+      <div class="text-small">
+        <b>Guests ({{guests.length}}): </b>
+        <span class="" *ngFor="let gPlayer of guests trackBy: trackByName; let isLast=last"
+             [ngClass]="{'text-muted': !gPlayer.isOnline, 'font-weight-bold': player.name === gPlayer.name}"
+             title="{{gPlayer.isOnline?'':'Offline'}}"
+        >{{gPlayer.name}}<ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>{{isLast ? '' : ', '}}</span>
+      </div>
     </ng-container>
+
+    <hr>
+
+    <!-- skip game controls & current room link -->
+    <room-share *ngIf="game?.gameOn"></room-share>
 
     <!-- restart game button -->
     <ng-container *ngIf="isHost && game.gameOn">
-      <hr >
       <div class="d-flex flex-column align-items-center my-3">
         <button class="btn btn-sm btn-outline-danger mt-2" type="button" (click)="startGame(true)">Restart game</button>
       </div>
     </ng-container>
 
-
-    <hr>
-    <!-- skip game controls-->
-    <div class="form-check pl-1">
-      <input class="form-check-inline" id="autoJoin" type="checkbox" [(ngModel)]="autoJoin" (click)="toggleJoinGame()"/>
-      <label class="form-check-label" for="autoJoin">Automatically join next game</label>
-    </div>
-
-    <!-- current room link -->
-    <ng-container>
-      <div *ngIf="!hideRoomInfo else hideRoomInfoBlock" class="mt-1">
-        <hr>
-        <div class="d-flex flex-column align-items-center">
-          <div class="text-center"><b>Share this link to invite more people:</b></div>
-          <qrcode [qrdata]="roomLink" [width]="256" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
-          <div><a href="{{roomLink}}" target="_blank"> {{roomLink}}</a></div>
-          <div><button class="btn btn-sm btn-primary my-1 "id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button></div>
-        </div>
-        <div>
-          <button class="btn btn-sm btn-outline-primary mr-1 "
-                  (click)="hideRoomInfo = true; false" >Hide</button>
-        </div>
-      </div>
-      <ng-template #hideRoomInfoBlock>
-        <div  class="d-flex flex-column align-items-center my-3">
-          <button class="btn btn-sm btn-outline-primary ml-1 "
-                  (click)="hideRoomInfo = false; false" >Share room link</button>
-        </div>
-      </ng-template>
-    </ng-container>
 
     <hr>
 

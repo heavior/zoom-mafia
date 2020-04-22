@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {Subscription, timer} from 'rxjs';
 import {filter, takeWhile} from 'rxjs/operators';
 
-import { IGame, IPlayer, IYou} from "../../interfaces";
+import { IGame, IPlayer, IYou} from '../../interfaces';
 import { ChatService } from '../../services/chat.service';
-import { StyleService } from "../../services/style.service";
+import { StyleService } from '../../services/style.service';
 
 @Component({
   selector: 'app-room',
@@ -17,22 +17,21 @@ export class RoomComponent implements OnInit, OnDestroy {
   private roomSubject: Subscription;
   private settingsSubject: Subscription;
 
-  autoJoin: boolean = true;
-  hideRoomInfo: boolean = true;
-  countdown: number = 0;
+  hideRoomInfo = true;
+  countdown = 0;
   dayTime: string;
   endGameMessage: string;
   game: IGame = undefined;
   gamePlayers: any[] = [];
   guests: IPlayer[] = [];
-  isHost: boolean = false;
-  hostName: string = '';
+  isHost = false;
+  hostName = '';
   player: IYou = undefined;
   players: IPlayer[] = [];
   roomLink: string;
   roomPlayers: IPlayer[] = [];
   state: string;
-  videoLink: string = '';
+  videoLink = '';
   votedFor: number = null;
   wakeUpReady: boolean;
   wakeUpTimer: any;
@@ -69,7 +68,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       // If the event was vote - do not flush some local variables
       this.votedFor = null;
       if (this.wakeUpTimer){
-        console.log("clear wakeUpTimer");
+        console.log('clear wakeUpTimer');
         clearTimeout(this.wakeUpTimer);
         this.wakeUpTimer = null;
       }
@@ -95,7 +94,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
     if (event === 'ended') {
       this.winner = game.civiliansWin ? '=== Civilians win ===' : '=== Mafia wins===';
-      switch(this.player.role) {
+      switch (this.player.role) {
         case 'Guest':
           break;
         case 'Mafia':
@@ -148,15 +147,8 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.isHost = this.player && [this.player.name, this.player.userId].some((field) => field === data.host);
         this.roomPlayers = data.players || this.roomPlayers;
         this.videoLink = data.videoLink || this.videoLink;
-        //this.votedFor = null;
-
+        // this.votedFor = null;
         this.updateLists();
-      });
-
-    this.settingsSubject = this.chatService.settingsSubject
-      .pipe(filter((data) => data !== undefined))
-      .subscribe((data) => {
-        this.autoJoin = data.settings.autoJoin;
       });
   }
 
@@ -218,7 +210,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   voteButtonDisabled(samePlayer) {
-    switch(this.game.gameState) {
+    switch (this.game.gameState) {
       case 'MainVote':
       case 'Night':
       case 'Tiebreaker':
@@ -230,10 +222,6 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   kick(playerId: string) {
     this.chatService.kickPlayer(playerId);
-  }
-
-  toggleJoinGame() {
-    this.chatService.joinGame(!this.autoJoin);
   }
 
   vote(playerNumber) {
