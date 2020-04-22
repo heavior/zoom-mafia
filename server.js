@@ -139,6 +139,11 @@ io.on('connection', (socket) => {
           socket.emit("message", "You are already in the room " + roomId);
           return; // Cannot create new room from here
         }
+        if(!data.userId){
+          console.warn("User didn't send a name");
+          socket.emit("message", "You didn't send a name");
+          return; // Cannot create new room from here
+        }
         room = createRoom(socket, data.userId, data.videoLink);
         roomId = room.id;
         // Ideally, this event would be triggered from inside the room code, but the user hasn't joined the game yet
@@ -153,6 +158,11 @@ io.on('connection', (socket) => {
         if(roomId){
           console.warn("User already in the room " + roomId);
           socket.emit("message", "You are already in the room " + roomId);
+          return; // Cannot create new room from here
+        }
+        if(!data.userId){
+          console.warn("User didn't send a name");
+          socket.emit("message", "You didn't send a name");
           return; // Cannot create new room from here
         }
         roomId = data.roomId;
