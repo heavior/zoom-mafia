@@ -53,14 +53,14 @@ const MafiaRoles = Object.freeze({
  */
 const CardsDeck = [
       MafiaRoles.Mafia,
-      MafiaRoles.Civilian,
+      MafiaRoles.Detective,
       MafiaRoles.Civilian,
       MafiaRoles.Civilian,
       MafiaRoles.Mafia,
       MafiaRoles.Civilian,  // 6 players
       MafiaRoles.Civilian,  // 7 players
       MafiaRoles.Mafia,     // 8 players
-      MafiaRoles.Detective, // 9 players - introduce Detective
+      MafiaRoles.Civilian,  // 9 players 
       MafiaRoles.Civilian,  // 10 players
       MafiaRoles.Mafia,     // MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
