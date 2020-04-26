@@ -4,6 +4,7 @@ export interface IGame {
   dayNumber: number;
   gameOn: boolean;
   gameState: string;
+  lastGameState: string;
   host: string;
   news: any;
   tiebreakerVoted: any;

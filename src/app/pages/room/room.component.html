@@ -18,6 +18,12 @@
         </div>
       </ng-container>
 
+
+      <!-- game off - nudge to invite players-->
+      <ng-container *ngIf="game && !game.gameOn">
+        <room-share></room-share>
+      </ng-container>
+
       <!-- game on info - hint and state -->
       <ng-container *ngIf="game">
         <game-help [game]="game"
@@ -25,12 +31,6 @@
         <game-info [game]="game"
                    [player]="player"></game-info>
       </ng-container>
-
-      <!-- game off - nudge to invite players-->
-      <ng-container *ngIf="game && !game.gameOn">
-        <room-share></room-share>
-      </ng-container>
-
 
       <!-- start new game button for host -->
       <ng-container *ngIf="isHost && !game.gameOn">
@@ -41,7 +41,7 @@
       </ng-container>
 
       <!-- tiebreaker block -->
-      <ng-container *ngIf="game?.gameState === 'Tiebreaker'">
+      <ng-container *ngIf="game?.gameState === 'Tiebreaker' || game?.lastGameState === 'Tiebreaker' ">
         <b>Accused: </b>
         <div class="player-list-item" *ngFor="let gPlayer of candidates(); trackBy: trackByName"
              [ngClass]="{'text-muted': !gPlayer.isOnline,
@@ -53,15 +53,16 @@
           </span>
           (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
         </div>
-        <div *ngIf="countdown " class="d-flex flex-column align-items-center my-3">
+        <div *ngIf="countdown && game?.lastGameState !== 'Tiebreaker'" class="d-flex flex-column align-items-center my-3">
           <div class="text-danger" style="font-size: 20px"><b>{{countdown | minuteSecond}}</b></div>
         </div>
-        <div class="d-flex justify-content-around align-items-center mb-3 mx-4" *ngIf="player.isAlive && votedFor === null">
+        <div class="d-flex justify-content-around align-items-center mb-3 mx-4"
+             *ngIf="player.isAlive && votedFor === null && game.lastGameState !== 'Tiebreaker'">
           <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(-1)">Guilty</button>
           <button class="btn btn-sm btn-primary" style="width: 118px" (click)="vote(0)">Not guilty</button>
         </div>
 
-        <ng-container *ngIf="!player.isAlive || votedFor !== null">
+        <ng-container *ngIf="!player.isAlive || votedFor !== null || game.lastGameState === 'Tiebreaker'">
           <span class="badge badge-danger"> Guilty </span>
           <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
             (<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)
@@ -117,7 +118,7 @@
         <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
            class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
 
-        <ng-container *ngIf="(game.gameState !== 'Tiebreaker') && gPlayer.votedBy && gPlayer.votedBy.length">
+        <ng-container *ngIf="gPlayer.votedBy && gPlayer.votedBy.length">
           (<colorize-user-list [players]="gPlayer.votedBy"></colorize-user-list>)
         </ng-container>
       </div>

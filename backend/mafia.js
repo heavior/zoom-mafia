@@ -95,7 +95,7 @@ class MafiaGame {
               isMafiaVoteUnanimous = false, // Should mafia vote by unanimous (professional rules)
               killDoubleTie = false,
               discussionTimeout = 0, // Discussion phase - no time limit
-              mainVoteTimeout = 30,  // 30 seconds to let them vote during day
+              mainVoteTimeout = 60,  // 30 seconds to let them vote during day
               nightTimetout = 60,      // 60 seconds night time
               lastWordTimetout = 120,   // 120 seconds for lastWord discussion
               expectCivilianVoteAtNight = true, // Force civilians to vote somehow to enable open-eye game
@@ -115,6 +115,7 @@ class MafiaGame {
     this.gameOn = false;
     this.civiliansWin = false;
     this.gameState = GameStates.Discussion;
+    this.lastGameState = null;
     this.discussionTimeout = discussionTimeout;
     this.mainVoteTimeout = mainVoteTimeout;
     this.nightTimetout = nightTimetout;
@@ -138,6 +139,7 @@ class MafiaGame {
     //this.players = this.players.filter(player => player.role !== MafiaRoles.Guest);
     this.players.forEach((player,index)=>{ player.number = index + 1 }); // Assign game numbers
     this.gameOn = true;
+    this.lastGameState = null;
     this.gameState = GameStates.Discussion;
     this.detectiveKnows = [];
     this.dayNumber = 1;
@@ -208,6 +210,10 @@ class MafiaGame {
       this._playerUpdate(player, event);
     });
   }
+  _nextGameState(state){
+    this.lastGameState = this.gameState;
+    this.gameState = state;
+  }
   next(){
     // This function implements main game process:
     /*
@@ -227,14 +233,15 @@ class MafiaGame {
         }
         if(this.votesCounters.length === 1){
           // Single candidate during daytime vote - run tie breaker
-          this.gameState = GameStates.Tiebreaker; // Front end must support this
+
+          this._nextGameState(GameStates.Tiebreaker);
           timeout = this.mainVoteTimeout;
           console.log("Discussion: one vote - tie breaker");
           break;
         }
 
         console.log("Discussion: switching to MainVote");
-        this.gameState = GameStates.MainVote;
+        this._nextGameState(GameStates.MainVote);
         timeout = this.mainVoteTimeout;
         break;
 
@@ -247,7 +254,7 @@ class MafiaGame {
           // tie breaker
 
           console.log("MainVote: switching to Tiebreaker");
-          this.gameState = GameStates.Tiebreaker; // Front end must support this
+          this._nextGameState(GameStates.Tiebreaker);
           timeout = this.mainVoteTimeout;
           break;
         }
@@ -258,12 +265,12 @@ class MafiaGame {
         this.addNewsVoted("guilty",  Object.entries(this.votesRegistry)
                                             .filter(element => parseInt(element[1]) === parseInt(accusedNumber))
                                             .map(element => parseInt(element[0])));
-        this.gameState = GameStates.LastWord;
+        this._nextGameState(GameStates.LastWord);
         timeout = this.lastWordTimetout;
         break;
 
       case GameStates.LastWord: // Nothing special, just starting the night
-        this.gameState = GameStates.Night;
+        this._nextGameState(GameStates.Night);
         timeout = this.nightTimetout;
         break;
 
@@ -277,13 +284,12 @@ class MafiaGame {
         console.log("MainVote: switching to Discussion");
         this.dayNumber ++;
         this.clearOldNews();
-        this.gameState = GameStates.Discussion;
+        this._nextGameState(GameStates.Discussion);
         timeout = this.discussionTimeout;
         break;
 
       case GameStates.Tiebreaker:
         // People vote to kill both, or spare both: 0 or 1
-        // TODO: check if it works, maybe redo how it works after UI implemented
         let tieBreakerResolved = this.resolveVote();
         console.debug("Tiebreaker resolve", tieBreakerResolved, this.votesCounters, this.candidates);
         if((!tieBreakerResolved && this.killDoubleTie) // Double tie with strict rules - kill all
@@ -299,7 +305,7 @@ class MafiaGame {
                                                 .map(element => parseInt(element[0])));
         }
 
-        this.gameState = GameStates.LastWord;
+        this._nextGameState(GameStates.LastWord);
         timeout = this.lastWordTimetout;
         break;
     }
@@ -429,7 +435,7 @@ class MafiaGame {
     }
 
     let registry = this.votesRegistry;
-    if(this.gameState === GameStates.Tiebreaker && playerNumber > 0){
+    if((this.gameState === GameStates.Tiebreaker || this.lastGameState === GameStates.Tiebreaker)&& playerNumber > 0){
       // In Tiebreaker we show older votes for players
       registry = this.lastVotesRegistry;
     }
@@ -501,7 +507,7 @@ class MafiaGame {
   publicInfo(requester){
     // Whatever is publicly available
     let tiebreakerVoted = {};
-    if(this.gameState === GameStates.Tiebreaker){
+    if((this.gameState === GameStates.Tiebreaker) || (this.lastGameState === GameStates.Tiebreaker)){
       tiebreakerVoted[0] = this._playerVotedBy(0, requester);
       tiebreakerVoted[-1] = this._playerVotedBy(-1, requester);
     }
@@ -509,6 +515,7 @@ class MafiaGame {
       gameOn: this.gameOn,
       civiliansWin: this.civiliansWin,
       gameState: this.gameState,
+      lastGameState: this.lastGameState,
       dayNumber: this.dayNumber,
       news: this.news.map(news => Object.assign({}, news,
         {
@@ -636,10 +643,14 @@ class MafiaGame {
     3) Daytime - tie braker (kill both or not)
     4) Nighttime - mafia only - who to eliminate
      */
+    if(this.gameState === GameStates.LastWord) { // In the last word we don't touch the vote results
+      return;
+    }
     this.candidates = this.checkCandidates();
     this.votesCounters = [];
     this.lastVotesRegistry = this.votesRegistry; // Save for later
     this.votesRegistry = {};
+
     this.mafiaVotes = this.gameState === GameStates.Night;
     this.autoCompleteVote = this.allowAutoCompleteVote && (this.gameState !== GameStates.Discussion);
 
@@ -648,6 +659,9 @@ class MafiaGame {
   }
   vote(whoVotes, choicePlayer){
     if(!this.gameOn){ // Game not started
+      return;
+    }
+    if(this.gameState === GameStates.LastWord){ // No votes accepted at this step
       return;
     }
     let player = this.players[whoVotes-1];
