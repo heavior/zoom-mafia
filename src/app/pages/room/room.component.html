@@ -64,15 +64,18 @@
         </div>
 
         <ng-container *ngIf="!player.isAlive || votedFor !== null || game.lastGameState === 'Tiebreaker'">
-          <span class="badge badge-danger" [title]="titles.guiltyTitle"> Guilty </span>
-          <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
-            <span [title]="titles.guiltyTitle">&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)</span>
-          </ng-container>
-          <br>
-          <span class="badge badge-success" [title]="titles.notGuiltyTitle"> Not guilty </span>
-          <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
-            <span [title]="titles.notGuiltyTitle">&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)</span>
-          </ng-container>
+          <div [title]="titles.guiltyTitle">
+            <span class="badge badge-danger"> Guilty </span>
+            <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
+              <span>&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)</span>
+            </ng-container>
+          </div>
+          <div [title]="titles.notGuiltyTitle">
+            <span class="badge badge-success"> Not guilty </span>
+            <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
+              <span>&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)</span>
+            </ng-container>
+          </div>
         </ng-container>
         <hr>
       </ng-container>
