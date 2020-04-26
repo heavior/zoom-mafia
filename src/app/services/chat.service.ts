@@ -48,7 +48,8 @@ export class ChatService {
           this.gameSubject.next(message.data);
           break;
         case 'roomDirectEvent':
-          this.settingsSubject.next(message.settings);
+          this.settingsSubject.next(message.data);
+          break;
         default:
           break;
       }
@@ -120,6 +121,7 @@ export class ChatService {
         observer.next('roomEvent' + JSON.stringify(message, null, 2));
       });
       this.socket.on('directMessage', (message) => {
+        console.log(message)
         observer.next('directMessage' + JSON.stringify(message, null, 2));
       });
     });
