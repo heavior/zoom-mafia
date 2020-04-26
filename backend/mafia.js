@@ -60,7 +60,7 @@ const CardsDeck = [
       MafiaRoles.Civilian,  // 6 players
       MafiaRoles.Civilian,  // 7 players
       MafiaRoles.Mafia,     // 8 players
-      MafiaRoles.Civilian,  // 9 players 
+      MafiaRoles.Civilian,  // 9 players
       MafiaRoles.Civilian,  // 10 players
       MafiaRoles.Mafia,     // MafiaRoles.Don,       // 11 players
       MafiaRoles.Civilian,  // 12 players
@@ -662,7 +662,7 @@ class MafiaGame {
       console.warn("This is not a valid Tiebreaker vote", this.gameState, choicePlayer);
       return; // This is not a valid Tiebreaker vote, ignore
     }
-    if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker){
+    if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker && this.gameState !== GameStates.Discussion){
       return; // This is a Tiebreaker vote, but the state is wrong
     }
     if(choicePlayer === 0 && this.gameState !== GameStates.Tiebreaker){
@@ -675,7 +675,11 @@ class MafiaGame {
     }
 
     let alreadyVoted = !!this.votesRegistry[whoVotes];
-    this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
+    if (choicePlayer === -1 && this.gameState === GameStates.Discussion) {
+      delete this.votesRegistry[whoVotes];
+    } else {
+      this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
+    }
 
     if(!alreadyVoted && player.role === MafiaRoles.Detective && this.gameState === GameStates.Night){
       // this is a detecitve. we remember that he knows about this player now, with next game update he will get information

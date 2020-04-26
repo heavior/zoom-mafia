@@ -173,14 +173,14 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   // Helper functions for the vote button.
-  voteButtonCaption(){
+  voteButtonCaption(playerNumber) {
     // TODO: make into variable and calculate once per phase
     if (!this.player.isAlive || !this.game.gameOn){ // Dead don't vote
       return null;
     }
     switch (this.game.gameState){
       case 'Discussion':
-        return 'suspect';
+        return playerNumber !== this.votedFor ? 'suspect' : 'unselect';
       case 'MainVote':
         return 'guilty';
       case 'LastWord': // No buttons in this state
@@ -218,7 +218,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       case 'Tiebreaker':
         return this.votedFor !== null;
       default:
-        return samePlayer;
+        return false;
     }
   }
 
@@ -227,6 +227,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   vote(playerNumber) {
+    if (this.votedFor === playerNumber) {
+      playerNumber = -1;
+    }
     this.votedFor = playerNumber;
     this.chatService.vote(Number(playerNumber));
   }
