@@ -46,7 +46,7 @@ export class GameHelpComponent implements OnInit, OnChanges {
     }
 
     if(!this.storageShowHint || !this.storageShowRules) {
-      if (changes.game?.currentValue?.gameOn != changes.game?.previousValue?.gameOn) {
+      if (changes.game.previousValue && changes.game.currentValue.gameOn != changes.game?.previousValue.gameOn) {
         if (!this.showHint) {
           this.showHint = true;
         }
