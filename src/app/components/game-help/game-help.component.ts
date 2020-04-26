@@ -60,34 +60,35 @@ export class GameHelpComponent implements OnInit, OnChanges {
   hintCaption() {
     const hints = {
       LastWord: {
-        Guest: 'Found guilty have a chance to say their last piece',
-        Mafia: 'Found guilty have a chance to say their last piece',
-        Civilian: 'Found guilty have a chance to say their last piece',
-        Detective: 'Found guilty have a chance to say their last piece'
+        Guest: 'Convicted have a chance to say their last piece.',
+        Mafia: 'Convicted have a chance to say their last piece.',
+        Civilian: 'Convicted have a chance to say their last piece.',
+        Detective: 'Convicted have a chance to say their last piece.'
       },
       Discussion: {
-        Guest: 'Players are discussing who are the suspects',
-        Mafia: 'Be active, deceive civilians to convict innocent. Suspect someone wisely',
-        Civilian: 'Talk to other players and try to find mafia and prove your position to other players. Then chose who do you suspect',
-        Detective: 'Try to steer the civilians to eliminate mafia. Do not blow your cover, the vote is open'
+        Guest: 'Players are discussing who are the suspects.',
+        Mafia: 'Be active, partner with civilians, deceive civilians and blame innocent. Suspect someone wisely.',
+        Civilian: 'Be active, voice your thoughts and suspicions. Watch how players act, what they say and what they do. ' +
+                  'Try to find mafia, then chose who do you suspect.',
+        Detective: 'Steer the civilians to eliminate mafia, watch what players do. Do not blow your cover, the vote is open.'
       },
       MainVote: {
-        Guest: 'The jury is out to reach the verdict',
-        Mafia: 'Choose who to vote for, keep in mind that the vote is open',
-        Civilian: 'Choose who is mafia',
-        Detective: 'Choose who to vote for, keep in mind that the vote is open'
+        Guest: 'The jury is out to reach the verdict.',
+        Mafia: 'Choose who to vote for, keep in mind that the vote is open.',
+        Civilian: 'Choose who is mafia.',
+        Detective: 'Choose who to vote for, keep in mind that the vote is open.'
       },
       Night: {
-        Guest: 'Mafia kills, Detective investigates, Civilians sleep',
-        Mafia: 'Choose who to murder. Remember, you need majority shoot, the tie will miss',
-        Civilian: 'Wake up once the button is unlocked',
-        Detective: 'Choose who to investigate. Tomorrow you\'ll know the team of that player'
+        Guest: 'Mafia kills, Detective investigates, Civilians sleep.',
+        Mafia: 'You can see how other mafia votes. Choose who to murder. Remember, you need majority vote to kill, the tie means you\'ve missed.',
+        Civilian: 'Wake up once the button is unlocked.',
+        Detective: 'Choose who to investigate. Tomorrow you\'ll know the team of that player.'
       },
       Tiebreaker: {
         Guest: 'There was a tie, now jury decides the fate of all accused',
-        Mafia: 'Think: is it good for you too kill all the accused?',
-        Civilian: 'Think: is it good for you too kill all the accused?',
-        Detective: 'Think: is it good for you too kill all the accused?'
+        Mafia: 'Think: do you want to eliminate all the accused?',
+        Civilian: 'Think: do you want to eliminate all the accused?',
+        Detective: 'Think: do you want to eliminate all the accused?'
       }
     };
     const role = this.player.isAlive ? this.player.role : 'Guest';

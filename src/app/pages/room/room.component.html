@@ -140,12 +140,12 @@
       <!-- game control buttons for moderator ("next") -->
       <ng-container *ngIf="isHost && game.gameOn">
         <div *ngIf="game.gameState === 'Discussion'" class="d-flex flex-column align-items-center my-3">
-          <button (click)="next()" class="btn btn-sm btn-primary">Start voting</button>
-          <div class="text-secondary text-small font-italic text-center mt-2">Wait till the players discuss and nominate suspects.</div>
+          <button (click)="next()" class="btn btn-sm btn-warning">Start voting</button>
+          <div class="text-secondary text-warning text-small font-italic text-center mt-2">Wait till the players discuss and nominate suspects.</div>
         </div>
         <div *ngIf="game.gameState === 'LastWord'" class="d-flex flex-column align-items-center mb-3">
-          <button (click)="next()" class="btn btn-sm btn-primary">Start night</button>
-          <div class="text-secondary text-small font-italic text-center">Give guilty a chance to stay last word. If needed - discuss with the group.</div>
+          <button (click)="next()" class="btn btn-sm btn-warning">Start night</button>
+          <div class="text-secondary text-warning text-small font-italic text-center">Give guilty a chance to stay last word</div>
         </div>
         <hr>
       </ng-container>

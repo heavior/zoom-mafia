@@ -3,11 +3,13 @@
 
 <ng-container *ngIf="player.role === 'Guest'">
   <div *ngIf="!isHost">You are a guest</div>
-  <div *ngIf="isHost">You are moderator</div>
+  <div *ngIf="isHost">You are <b class="text-warning">moderator</b></div>
 </ng-container>
 
 <ng-container *ngIf="gameOn && player.role !== 'Guest'">
-  <div>Remember, you are <b [class]="roleToClass(player.role)">{{player.role}}</b><span *ngIf="isHost">&nbsp;and <u>moderator</u></span></div>
+  <div>Remember, you are&nbsp;
+    <b [class]="roleToClass(player.role)">{{player.role}}</b>
+    <span *ngIf="isHost">&nbsp;and&nbsp;<b class="text-warning">moderator</b></span></div>
   <div>{{getGoal()}}</div>
 </ng-container>
 

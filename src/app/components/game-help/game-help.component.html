@@ -1,52 +1,56 @@
 <div class="text-small px-2">
-  <div class="text-secondary" *ngIf="game && showHint else hideHint">
+  <div class="text-secondary" *ngIf="game?.gameOn && showHint else hideHint">
     <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;<a (click)="showHint = false;" href>[&times;]</a>
   </div>
   <ng-template #hideHint>
-    <a *ngIf="game" (click)="showHint = true; false" href>[ show hint >> ]</a>
+    <a *ngIf="game?.gameOn" (click)="showHint = true; false" href>[ show hint >> ]</a>
   </ng-template>
   <div *ngIf="showRules else showButton">
     <div class="d-flex justify-content-between">
-      <h5>Quick Rules</h5>
-      <a (click)="showRules = false; false" style="line-height: 2.2" href>[x]</a>
+      <b>Quick Rules</b>
+      <a (click)="showRules = false; false" style="line-height: 2.2" href>[ << hide ]</a>
     </div>
-    You randomly join a team: <span class='text-danger'>mafia</span> or <span class='text-success'>civilians</span>,
-    and your objective is to eliminate opponents<br>
-
+    You randomly join a team: <b class='text-danger'>mafia</b> or <b class='text-success'>civilians</b>,
+    your objective is to eliminate opponents<br>
     <b>Game has 4 phases:</b>
     <ol>
-      <li>Day - discussion: discuss your suspicions, build alliances</li>
-      <li>Day - main vote: choose who is guilty</li>
-      <li>Day - last word: convicted people has their last chance to sway public opinion</li>
-      <li>Night: civilians sleep, mafia kills a player, detective check the role of one player</li>
-      <ol>
-        <li>Players murdered at night do not have a last word</li>
-      </ol>
+    <li>Day - discussion: discuss your suspicions, build alliances. <em>Start the game by introducing yourself and convincing that you are innocent</em></li>
+    <li>Day - main vote: choose who is guilty</li>
+    <li>Day - last word: convicted people have their last chance to sway public opinion</li>
+    <li>Night: civilians sleep, mafia kills a player, detective checks the role of one player. <em>Players murdered at night do not have a last word</em></li>
     </ol>
-    <b>Hints for civilians:</b>
     <ul>
-      <li>Start the first day by introducing yourself and convincing other players that you are civilian</li>
-      <li>Be active, voice your thoughts and suspicions, that helps your team</li>
-      <li>Watch how people act, what do the say and what do they do</li>
+    <li>All phases except discussion have limited time</li>
     </ul>
-    <b>Hints for mafia:</b>
+    <b>Vote rules:</b>
     <ul>
-      <li>Build alliances with civilians during daytime</li>
-      <li>Pay attention to your night vote, do not miss</li>
-    </ul>
-    <b>Hints for detective:</b>
-    <ul>
-      <li>You are playing for civilians</li>
-      <li>Hide your identity from mafia</li>
+    <li>Each vote is <strong>open</strong></li>
+    <li>Main vote is <strong>mandatory</strong>, abstained votes count for the first candidate</li>
+    <li>If there is a tie during daytime - players vote to save or convict <strong>all candidates</strong></li>
+    <li>If there is a tie during nighttime - mafia <strong>misses</strong></li>
     </ul>
     <b>Fair game rules:</b>
     <ul>
-      <li>Do not show your screen or give out any other evidence of your role&nbsp;</li>
-      <li>Do not take oaths during the game</li>
-      <li>Any verbal claim for role can be a deception</li>
-      <li>Dead players and guests do not participate the discussion or affect the game</li>
-      <li>Do not text, use only voice and video</li>
+    <li>Do not show your screen or give out any other evidence of your role&nbsp;</li>
+    <li>Do not take oaths during the game</li>
+    <li>Anyone who claims a role could be lying</li>
+    <li>Dead players and guests do not participate the discussion or affect the game</li>
+    <li>Do not text, use only voice and video</li>
     </ul>
+    <b>Game <b class='text-warning'>moderator</b>:</b>
+    <ul>
+    <li>Moderator also has a role and plays for some team</li>
+    <li>If moderator is not alive in the game - he still acts as moderator</li>
+    <li>Moderator&rsquo;s responsibilities:</li>
+    <ul>
+    <li>start the game when players are ready</li>
+    <li>facilitate the discussion</li>
+    <li>start main vote, and start the night</li>
+    <li>restart the game if players agree to</li>
+    <li>remove players who lost internet and cannot reconnect</li>
+    </ul>
+    </ul>
+
   </div>
   <ng-template #showButton>
     <a (click)="showRules = true; false" href>[ quick rules >> ]</a>
