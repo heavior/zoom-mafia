@@ -16,50 +16,10 @@
             (click)="hideRoomInfo = true; false" >Hide</button>
   </div>
   <hr>
-  <div>
-    <h5>Quick Rules</h5>
-    You randomly join a team: <span class='text-danger'>mafia</span> or <span class='text-success'>civilians</span>,
-    and your objective is to eliminate opponents<br>
-
-<b>Game has 4 phases:</b>
-<ol>
-<li>Day - discussion: discuss your suspicions, build alliances</li>
-<li>Day - main vote: choose who is guilty</li>
-<li>Day - last word: convicted people has their last chance to sway public opinion</li>
-<li>Night: civilians sleep, mafia kills a player, detective check the role of one player</li>
-<ol>
-<li>Players murdered at night do not have a last word</li>
-</ol>
-</ol>
-<b>Hints for civilians:</b>
-<ul>
-<li>Start the first day by introducing yourself and convincing other players that you are civilian</li>
-<li>Be active, voice your thoughts and suspicions, that helps your team</li>
-<li>Watch how people act, what do the say and what do they do</li>
-</ul>
-<b>Hints for mafia:</b>
-<ul>
-<li>Build alliances with civilians during daytime</li>
-<li>Pay attention to your night vote, do not miss</li>
-</ul>
-<b>Hints for detective:</b>
-<ul>
-<li>You are playing for civilians</li>
-<li>Hide your identity from mafia</li>
-</ul>
-<b>Fair game rules:</b>
-<ul>
-<li>Do not show your screen or give out any other evidence of your role&nbsp;</li>
-<li>Do not take oaths during the game</li>
-<li>Any verbal claim for role can be a deception</li>
-<li>Dead players and guests do not participate the discussion or affect the game</li>
-<li>Do not text, use only voice and video</li>
-</ul>
-  </div>
 </div>
 <ng-template #hideRoomInfoBlock>
   <div  class="d-flex flex-column align-items-center my-3">
     <button class="btn btn-sm btn-outline-primary ml-1 "
-            (click)="hideRoomInfo = false; false" >Room link & quick rules</button>
+            (click)="hideRoomInfo = false; false" >Room link</button>
   </div>
 </ng-template>

@@ -19,6 +19,7 @@ import { MessengerComponent } from './components/messenger/messenger.component';
 import { LoginComponent } from './components/login/login.component';
 import { MinuteSecondPipe } from './pipes/minute-second.pipe';
 import { QRCodeModule } from 'angularx-qrcode';
+import { GameHelpComponent } from './components/game-help/game-help.component';
 
 
 
@@ -36,7 +37,8 @@ import { QRCodeModule } from 'angularx-qrcode';
     RoomShareComponent,
     MessengerComponent,
     LoginComponent,
-    MinuteSecondPipe
+    MinuteSecondPipe,
+    GameHelpComponent
   ],
   imports: [
     BrowserModule,
