@@ -24,13 +24,14 @@
         <room-share></room-share>
       </ng-container>
 
-      <!-- game on info - hint and state -->
-      <ng-container *ngIf="game">
-        <game-help [game]="game"
-                   [player]="player"></game-help>
-        <game-info [game]="game"
-                   [player]="player"></game-info>
-      </ng-container>
+      <!-- game hint (if game not started - showing only quick rules -->
+      <hr class="mb-2">
+      <game-help [game]="game"
+                 [player]="player"></game-help>
+
+      <!-- game state -->
+      <game-info *ngIf="game" [game]="game"
+                 [player]="player"></game-info>
 
       <!-- start new game button for host -->
       <ng-container *ngIf="isHost && !game.gameOn">

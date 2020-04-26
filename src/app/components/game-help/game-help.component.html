@@ -1,10 +1,9 @@
-<hr class="mb-2">
 <div class="text-small px-2">
-  <div class="text-secondary" *ngIf="showHint else hideHint">
+  <div class="text-secondary" *ngIf="game && showHint else hideHint">
     <ng-container><i>{{hintCaption()}}</i></ng-container>&nbsp;<a (click)="showHint = false;" href>[&times;]</a>
   </div>
   <ng-template #hideHint>
-    <a (click)="showHint = true; false" href>[ show hint >> ]</a>
+    <a *ngIf="game" (click)="showHint = true; false" href>[ show hint >> ]</a>
   </ng-template>
   <div *ngIf="showRules else showButton">
     <div class="d-flex justify-content-between">
