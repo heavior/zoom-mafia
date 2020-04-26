@@ -211,7 +211,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  voteButtonDisabled(samePlayer) {
+  voteButtonDisabled(playerNumber) {
     switch (this.game.gameState) {
       case 'MainVote':
       case 'Night':

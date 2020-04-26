@@ -661,36 +661,47 @@ class MafiaGame {
     if(!this.gameOn){ // Game not started
       return;
     }
-    if(this.gameState === GameStates.LastWord){ // No votes accepted at this step
-      return;
-    }
     let player = this.players[whoVotes-1];
     if(!player || !player.isAlive){ // Not a player, or dead
       return;
     }
-
     if(choicePlayer < -1){
       return; // Ignore this vote - basic validation
     }
-    if(this.gameState === GameStates.Tiebreaker && choicePlayer > 0){
-      console.warn("This is not a valid Tiebreaker vote", this.gameState, choicePlayer);
-      return; // This is not a valid Tiebreaker vote, ignore
-    }
-    if(choicePlayer === -1 && this.gameState !== GameStates.Tiebreaker && this.gameState !== GameStates.Discussion){
-      return; // This is a Tiebreaker vote, but the state is wrong
-    }
-    if(choicePlayer === 0 && this.gameState !== GameStates.Tiebreaker){
-      if(this.gameState !== GameStates.Night){
+
+    // vote validation:
+    switch (this.gameState){
+      case GameStates.Tiebreaker: // allowed only 0 and -1
+        if(choicePlayer > 0){
+          return;
+        }
+        break;
+      case GameStates.Discussion: // allowed -1 and positive values
+        if(choicePlayer === 0){
+          return;
+        }
+        break;
+      case GameStates.MainVote: // main vote - only positive ;
+        if(choicePlayer<1){
+          return;
+        }
+        break;
+      case GameStates.Night: // allowed 0 and positive
+        if(choicePlayer === -1){
+          return;
+        }
+        if(choicePlayer === 0 && player.role !== MafiaRoles.Civilian){
+          return; // Night vote, 0 is allowed for only civilians
+        }
+        break;
+      case GameStates.LastWord: // no votes during last word
+      default: // yet uncoded state - do not accept votes
         return;
-      }
-      if(player.role !== MafiaRoles.Civilian){
-        return; // Night vote, 0 is allowed for civilians
-      }
     }
 
     let alreadyVoted = !!this.votesRegistry[whoVotes];
     if (choicePlayer === -1 && this.gameState === GameStates.Discussion) {
-      delete this.votesRegistry[whoVotes];
+      delete this.votesRegistry[whoVotes]; // special hack to remove suspicion
     } else {
       this.votesRegistry[whoVotes] = choicePlayer; // Using array to have unique vote per player
     }
