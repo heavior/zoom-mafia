@@ -80,39 +80,37 @@
            'player-me': player.name === gPlayer.name}"
            title="{{gPlayer.isOnline?'':'Offline'}}"
       >
-        <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">
-          <i *ngIf="votedFor !== gPlayer.number"
-            (click)="vote(gPlayer.number)"
-             title="{{voteButtonCaption()}}"
-             class="far fa-check-circle text-primary"></i>
-          <i *ngIf="votedFor === gPlayer.number"
-             title="{{voteButtonCaption()}}"
-             class="fas fa-check-circle text-primary"></i>&nbsp;
-        </ng-container>
+<!--        <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">-->
+<!--          <i *ngIf="votedFor !== gPlayer.number"-->
+<!--            (click)="vote(gPlayer.number)"-->
+<!--             title="{{voteButtonCaption()}}"-->
+<!--             class="far fa-check-circle text-primary"></i>-->
+<!--          <i *ngIf="votedFor === gPlayer.number"-->
+<!--             title="{{voteButtonCaption()}}"-->
+<!--             class="fas fa-check-circle text-primary"></i>&nbsp;-->
+<!--        </ng-container>-->
 
           <!--
                 <i class="far fa-circle"></i> - vote
                 <i class="far fa-dot-circle"></i> - vote - checked
           -->
 
-        <ng-template #notCandidate>
+        <ng-container #notCandidate>
           <ng-container *ngIf="gPlayer.isAlive && player.name === gPlayer.name">🤭 </ng-container>
           <ng-container *ngIf="gPlayer.isAlive && player.name !== gPlayer.name">😎 </ng-container>
           <ng-container *ngIf="!gPlayer.isAlive">☠️ </ng-container>
-        </ng-template>
-
-        <!--
-        <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
-                class="btn btn-sm ml-1"
-                (click)="vote(gPlayer.number)"
-                [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
-                [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
-        -->
+        </ng-container>
 
         <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
           <ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>
           <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
         </span>
+
+        <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
+                class="btn btn-sm ml-1"
+                (click)="vote(gPlayer.number)"
+                [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
+                [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
 
         <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
            class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
