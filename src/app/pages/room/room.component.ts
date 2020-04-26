@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {Subscription, timer} from 'rxjs';
 import {filter, takeWhile} from 'rxjs/operators';
 
-import { IGame, IPlayer, IYou} from '../../interfaces';
+import { IGame, IPlayer, ITitles, IYou} from '../../interfaces';
 import { ChatService } from '../../services/chat.service';
 import { StyleService } from '../../services/style.service';
 
@@ -31,6 +31,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomLink: string;
   roomPlayers: IPlayer[] = [];
   state: string;
+  titles: ITitles = {
+    guiltyTitle: '',
+    notGuiltyTitle: ''
+  };
   videoLink = '';
   votedFor: number = null;
   wakeUpReady: boolean;
@@ -102,6 +106,14 @@ export class RoomComponent implements OnInit, OnDestroy {
           break;
         default:
           this.endGameMessage = game.civiliansWin ? 'That\'s your team, congratulations!!!' : 'Sorry :(';
+      }
+    }
+    if (game.gameState === 'Tiebreaker') {
+      if (game.tiebreakerVoted[-1].length) {
+        this.titles.guiltyTitle = this.candidates().length === 1 ? 'Who voted for this player' : 'Who voted guilty';
+      }
+      if(game.tiebreakerVoted[0].length) {
+        this.titles.notGuiltyTitle = 'Who voted not guilty';
       }
     }
   }

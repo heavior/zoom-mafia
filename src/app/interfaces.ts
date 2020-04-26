@@ -20,6 +20,11 @@ export interface IPlayer {
   votedBy: IVoter[];
 }
 
+export interface ITitles {
+  guiltyTitle: string;
+  notGuiltyTitle: string;
+}
+
 export interface IVoter {
   name: string;
   number: number;
