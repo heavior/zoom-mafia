@@ -10,6 +10,13 @@
     <qrcode [qrdata]="roomLink" [width]="200" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
     <div><a href="{{roomLink}}" target="_blank"> {{roomLink}}</a></div>
     <div><button class="btn btn-sm btn-primary my-1 "id="roomLink" ngxClipboard [cbContent]="roomLink">Copy</button></div>
+    <div><share-buttons [theme]="'modern-dark'"
+         [include]="['facebook','twitter','linkedin','reddit','whatsapp']"
+         [show]="5"
+         [showText]="true"
+         [showCount]="true"
+        ></share-buttons>
+    </div>
   </div>
   <div>
     <button class="btn btn-sm btn-outline-primary mr-1 "
