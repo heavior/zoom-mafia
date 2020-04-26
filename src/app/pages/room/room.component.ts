@@ -180,7 +180,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
     switch (this.game.gameState){
       case 'Discussion':
-        return playerNumber !== this.votedFor ? 'suspect' : 'unselect';
+        return playerNumber !== this.votedFor ? 'suspect' : 'drop charges';
       case 'MainVote':
         return 'guilty';
       case 'LastWord': // No buttons in this state
