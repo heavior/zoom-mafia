@@ -22,7 +22,9 @@ export class RoomShareComponent implements OnInit {
     this.settingsSubject = this.chatService.settingsSubject
       .pipe(filter((data) => data !== undefined))
       .subscribe((data) => {
-        this.autoJoin = data.settings.autoJoin;
+        if (data.settings && data.settings.autoJoin) {
+          this.autoJoin = data.settings.autoJoin;
+        }
       });
   }
   toggleJoinGame() {
