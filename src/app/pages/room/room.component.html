@@ -114,7 +114,7 @@
                 class="btn btn-sm py-0 ml-1"
                 (click)="vote(gPlayer.number)"
                 [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
-                [disabled]="voteButtonDisabled(gPlayer.number)">{{voteButtonCaption(gPlayer.number)}}</button>
+                [disabled]="voteButtonDisabled()">{{voteButtonCaption(gPlayer.number)}}</button>
 
         <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
            class="btn btn-sm py-0 ml-1 btn-outline-warning" (click)="kick(gPlayer.name)">Kick</button>
