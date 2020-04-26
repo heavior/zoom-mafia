@@ -107,7 +107,7 @@
         </span>
 
         <button *ngIf="gPlayer.isCandidate && voteButtonCaption()"
-                class="btn btn-sm ml-1"
+                class="btn btn-sm py-0 ml-1"
                 (click)="vote(gPlayer.number)"
                 [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
                 [disabled]="voteButtonDisabled(votedFor === gPlayer.number)">{{voteButtonCaption()}}</button>
