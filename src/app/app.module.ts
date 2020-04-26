@@ -20,8 +20,8 @@ import { LoginComponent } from './components/login/login.component';
 import { MinuteSecondPipe } from './pipes/minute-second.pipe';
 import { QRCodeModule } from 'angularx-qrcode';
 import { GameHelpComponent } from './components/game-help/game-help.component';
-
-
+import { ShareButtonsModule } from 'ngx-sharebuttons/buttons';
+import { ShareIconsModule } from 'ngx-sharebuttons/icons';
 
 @NgModule({
   declarations: [
@@ -46,7 +46,9 @@ import { GameHelpComponent } from './components/game-help/game-help.component';
     HttpClientModule,
     FormsModule,
     ClipboardModule,
-    QRCodeModule
+    QRCodeModule,
+    ShareButtonsModule,
+    ShareIconsModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]
