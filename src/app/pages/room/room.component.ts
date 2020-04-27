@@ -222,8 +222,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     return null; // Don't show button in any other scenario
   }
 
-  voteButtonClass(selected, unselected) {
-    if (!selected && unselected) {
+  voteButtonClass(playerNumber) {
+    const selectedOtherPLayer = this.votedFor && this.votedFor !== playerNumber;
+    if (selectedOtherPLayer) {
       return 'btn-secondary';
     }
     switch (this.game.gameState) {
@@ -254,7 +255,10 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   vote(playerNumber) {
     if (this.votedFor === playerNumber) {
-      playerNumber = -1;
+       // Special case - unselect
+      this.chatService.vote(-1);
+      this.votedFor = null;
+      return;
     }
     this.votedFor = playerNumber;
     this.chatService.vote(Number(playerNumber));

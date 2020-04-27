@@ -64,16 +64,18 @@
         </div>
 
         <ng-container *ngIf="!player.isAlive || votedFor !== null || game.lastGameState === 'Tiebreaker'">
-          <div [title]="titles.guiltyTitle">
-            <span class="badge badge-danger"> Guilty </span>
+          <div>
+            <span class="badge badge-danger badge-pill"
+                  [ngClass]="{'px-3 py-2': game?.tiebreakerVoted[-1]?.length > game?.tiebreakerVoted[0]?.length}">Guilty</span>
             <ng-container *ngIf="game?.tiebreakerVoted[-1]?.length">
-              <span>&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)</span>
+              <span [title]="titles.guiltyTitle">&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[-1]"></colorize-user-list>)</span>
             </ng-container>
           </div>
-          <div [title]="titles.notGuiltyTitle">
-            <span class="badge badge-success"> Not guilty </span>
+          <div>
+            <span class="badge badge-success badge-pill"
+                  [ngClass]="{'px-3 py-2': game?.tiebreakerVoted[-1]?.length <= game?.tiebreakerVoted[0]?.length}">Not guilty</span>
             <ng-container *ngIf="game?.tiebreakerVoted[0]?.length">
-              <span>&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)</span>
+              <span [title]="titles.notGuiltyTitle">&nbsp;(<colorize-user-list [players]="game.tiebreakerVoted[0]"></colorize-user-list>)</span>
             </ng-container>
           </div>
         </ng-container>
@@ -108,7 +110,7 @@
           <ng-container *ngIf="!gPlayer.isAlive">☠️ </ng-container>
         </ng-container>
 
-        <span class="player-name">{{gPlayer.number}}: {{gPlayer.name}}
+        <span class="player-name"><!--{{gPlayer.number}}: -->{{gPlayer.name}}
           <ng-container *ngIf="gPlayer.name === hostName">(moderator)</ng-container>
           <span *ngIf="gPlayer.role" appColorizeUser [player]="gPlayer"> &mdash; {{gPlayer.role}}</span>
         </span>
@@ -116,7 +118,7 @@
         <button *ngIf="gPlayer.isCandidate && voteButtonCaption(gPlayer.number)"
                 class="btn btn-sm py-0 ml-1"
                 (click)="vote(gPlayer.number)"
-                [ngClass]="voteButtonClass(!votedFor || votedFor === gPlayer.number, votedFor && votedFor !== gPlayer.number)"
+                [ngClass]="voteButtonClass(gPlayer.number)"
                 [disabled]="voteButtonDisabled()">{{voteButtonCaption(gPlayer.number)}}</button>
 
         <button *ngIf="isHost && player.number !== gPlayer.number && !gPlayer.isOnline && gPlayer.isAlive"
