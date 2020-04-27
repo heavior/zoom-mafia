@@ -658,6 +658,7 @@ class MafiaGame {
     // Autocomplete doesn't work during discussion
   }
   vote(whoVotes, choicePlayer){
+    choicePlayer = parseInt(choicePlayer);
     if(!this.gameOn){ // Game not started
       return;
     }
