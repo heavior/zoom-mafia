@@ -85,7 +85,7 @@
            [ngClass]="{'text-muted': !gPlayer.isOnline,
            'player-dead': !gPlayer.isAlive,
            'player-me': player.name === gPlayer.name}"
-           title="{{gPlayer.isOnline?'':'Offline'}}"
+           [title]="playerToolTip(gPlayer)"
       >
 <!--        <ng-container *ngIf="gPlayer.isCandidate && voteButtonCaption() else notCandidate">-->
 <!--          <i *ngIf="votedFor !== gPlayer.number"-->

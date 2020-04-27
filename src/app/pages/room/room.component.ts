@@ -184,6 +184,19 @@ export class RoomComponent implements OnInit, OnDestroy {
     return user.name;
   }
 
+  playerToolTip(player: IPlayer) {
+    if(!player.isOnline) {
+      return 'Offline';
+    }
+    const { gameState, lastGameState, tiebreakerVoted } = this.game;
+    if (gameState === 'Tiebreaker' || gameState === 'LastWord' && lastGameState === 'Tiebreaker') {
+      const votedGuilty = tiebreakerVoted[-1].find((votePlayer) => votePlayer.number === player.number);
+      const votedNotGuilty = tiebreakerVoted[0].find((votePlayer) => votePlayer.number === player.number);
+      return votedGuilty ? 'Voted guilty' : votedNotGuilty ? 'Voted not guilty' : 'Hasn\'t voted yet';
+    }
+    return '';
+  }
+
   // Helper functions for the vote button.
   voteButtonCaption(playerNumber) {
     // TODO: make into variable and calculate once per phase
