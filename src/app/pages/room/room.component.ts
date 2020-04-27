@@ -184,17 +184,18 @@ export class RoomComponent implements OnInit, OnDestroy {
     return user.name;
   }
 
-  playerToolTip(player: IPlayer) {
-    if(!player.isOnline) {
-      return 'Offline';
+  listTooltip(user: IPlayer) {
+    const who = user.number === this.player.number ? 'you' : user.name;
+    switch (this.game.gameState) {
+      case 'Discussion':
+        return `Who suspects ${who}`;
+      case 'LastWord':
+      case 'MainVote':
+        return `Who voted ${who} guilty`;
+      case 'Night':
+        return `Who voted to murder ${who}`;
+
     }
-    const { gameState, lastGameState, tiebreakerVoted } = this.game;
-    if (gameState === 'Tiebreaker' || gameState === 'LastWord' && lastGameState === 'Tiebreaker') {
-      const votedGuilty = tiebreakerVoted[-1].find((votePlayer) => votePlayer.number === player.number);
-      const votedNotGuilty = tiebreakerVoted[0].find((votePlayer) => votePlayer.number === player.number);
-      return votedGuilty ? 'Voted guilty' : votedNotGuilty ? 'Voted not guilty' : 'Hasn\'t voted yet';
-    }
-    return '';
   }
 
   // Helper functions for the vote button.
