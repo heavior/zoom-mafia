@@ -311,6 +311,7 @@ class MafiaGame {
     }
 
     if(this.checkGameOver()){
+      this.startTimer(0);
       return;
     }
     this.startVote(); // restart the vote for the new state
