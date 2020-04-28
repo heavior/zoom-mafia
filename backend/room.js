@@ -218,6 +218,7 @@ class Room {
     if(onlinePlayers.length < 6){
       return;
     }
+    this.game.startTimer(0);
     this.game.start(onlinePlayers);
 
     this.players.filter(player => player.isOnline && !player.autoJoin).forEach(player => this.game.join(player));
