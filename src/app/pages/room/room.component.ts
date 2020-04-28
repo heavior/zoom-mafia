@@ -15,6 +15,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   private countdownSubject: Subscription;
   private gameSubject: Subscription;
   private roomSubject: Subscription;
+  private wakeUpSubject: Subscription;
 
   countdown = 0;
   dayTime: string;
@@ -36,7 +37,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   videoLink = '';
   votedFor: number = null;
   wakeUpReady: boolean;
-  wakeUpTimer: any;
+  wakeUpIn: number;
   winner: string;
 
   constructor(private chatService: ChatService,
@@ -53,27 +54,34 @@ export class RoomComponent implements OnInit, OnDestroy {
     let countdown = game.countdown || 0;
     this.styleService.dayStyle = game.gameState;
     if (countdown && game.gameState === 'Night' && this.player.role === 'Civilian') {
-      const wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
+      let wakeUpTime = Math.floor(countdown * Math.random() * 0.5);
       console.log('wake up in', wakeUpTime);
-      if (this.wakeUpTimer){
-        clearTimeout(this.wakeUpTimer);
+      if (this.wakeUpSubject){
+        this.wakeUpSubject.unsubscribe();
+        this.wakeUpSubject = undefined;
       }
       this.wakeUpReady = false;
-      this.wakeUpTimer = setTimeout(() => {
-        console.log('ready to wake up');
-        this.votedFor = null;
-        this.wakeUpReady = true;
-        this.wakeUpTimer = null;
-      }, wakeUpTime * 1000);
+      this.wakeUpSubject = timer(0, 1000)
+        .pipe(takeWhile(() => wakeUpTime > 0))
+        .subscribe(() => {
+          --wakeUpTime;
+          this.wakeUpIn = wakeUpTime;
+          if (!wakeUpTime) {
+            console.log('ready to wake up');
+            this.votedFor = null;
+            this.wakeUpReady = true;
+          }
+        });
       this.countdown = 0;
     } else if (event !== 'vote' && event !== 'joined') {
       // If the event was vote - do not flush some local variables
       this.votedFor = null;
-      if (this.wakeUpTimer){
+      if (this.wakeUpSubject){
         console.log('clear wakeUpTimer');
-        clearTimeout(this.wakeUpTimer);
-        this.wakeUpTimer = null;
+        this.wakeUpSubject.unsubscribe();
+        this.wakeUpSubject = undefined;
       }
+      this.wakeUpIn = 0;
       this.countdown = 0;
     }
     if (this.countdownSubject) {

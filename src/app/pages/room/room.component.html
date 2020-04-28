@@ -138,8 +138,9 @@
       <div *ngIf="player && player.isAlive && game?.gameState === 'Night' && player.role === 'Civilian'"
            class="d-flex flex-column align-items-center mb-3">
         <button class="btn btn-sm btn-primary"
+                title="Press the button to end the night faster"
                 (click)="vote(0)"
-                [disabled]="votedFor !== null || !wakeUpReady">wake up</button>
+                [disabled]="votedFor !== null || !wakeUpReady">Wake up in {{wakeUpIn | minuteSecond}}</button>
       </div>
 
       <!-- game control buttons for moderator ("next") -->
