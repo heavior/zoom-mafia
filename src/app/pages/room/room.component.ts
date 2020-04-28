@@ -15,9 +15,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   private countdownSubject: Subscription;
   private gameSubject: Subscription;
   private roomSubject: Subscription;
-  private settingsSubject: Subscription;
 
-  hideRoomInfo = true;
   countdown = 0;
   dayTime: string;
   endGameMessage: string;
@@ -171,9 +169,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
     this.gameSubject.unsubscribe();
     this.roomSubject.unsubscribe();
-    if (this.settingsSubject) {
-      this.settingsSubject.unsubscribe();
-    }
   }
 
   candidates(){

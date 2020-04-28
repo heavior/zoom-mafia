@@ -216,6 +216,8 @@ class Room {
     // Only online players join the game
     let onlinePlayers = this.players.filter(player => player.isOnline && player.autoJoin);
     if(onlinePlayers.length < 6){
+      const data = {event: "error", msg: "You need at least 6 online players to start the game"};
+      this.directMessage(playerId, "roomDirectEvent", data);
       return;
     }
     this.game.startTimer(0);

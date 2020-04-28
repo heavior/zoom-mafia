@@ -48,6 +48,9 @@ export class ChatService {
           this.gameSubject.next(message.data);
           break;
         case 'roomDirectEvent':
+          if (message.data.event === 'error') {
+            alert(message.data.msg);
+          }
           this.settingsSubject.next(message.data);
           break;
         default:
