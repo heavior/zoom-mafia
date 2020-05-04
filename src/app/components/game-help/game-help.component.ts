@@ -37,7 +37,7 @@ export class GameHelpComponent implements OnInit, OnChanges {
     this.storageShowHint = showHint !== null;
     this.storageShowRules = showRules !== null;
     this.showHint = showHint !== null ? showHint === 'true' : false;
-    this.showRules = showRules !== null ? showRules === 'true' : true;
+    this.showRules = showRules !== null ? showRules === 'true' : false;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
