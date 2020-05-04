@@ -10,7 +10,7 @@ export class GameHelpComponent implements OnInit, OnChanges {
   @Input() player: any;
 
   _showHint: boolean = false;
-  _showRules: boolean = true;
+  _showRules: boolean = false;
   private storageShowHint: boolean;
   private storageShowRules: boolean;
 
