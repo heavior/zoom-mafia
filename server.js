@@ -50,6 +50,9 @@ const TRY_RECREATE_ROOMS = true; // Trying to recreate rooms with unknown id. Le
  */
 
 app.use(express.static(__dirname + '/dist'));
+app.get('/api/ping', function(req, res) {
+  console.log('ping');
+});
 app.get('*', function (req, res) {
   res.sendFile(__dirname + '/dist/index.html');
 });
