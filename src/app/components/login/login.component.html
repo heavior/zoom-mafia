@@ -4,7 +4,7 @@
     <div class="d-flex flex-column flex-sm-row">
       <div class="p-0 col-12 col-sm-6">
         <div class="text-center">
-          <img class="my-3 col-6" src="../../../assets/images/hat.png">
+<!--          <img class="my-3 col-6" src="../../../assets/images/hat.png">-->
           <h5>Quarantined?</h5>
           <h5>Why not play some Mafia!</h5>
         </div>
@@ -26,7 +26,7 @@
         <!-- div class="text-muted text-center" style="font-size: 12px">By starting a game room, you will automatically become the host.</div -->
       </div>
 
-      <div class="d-flex flex-column align-items-center my-3">
+      <div *ngIf="false" class="d-flex flex-column align-items-center my-3">
         <h5>Or switch to another device:</h5>
         <qrcode [qrdata]="roomLink" [width]="200" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
         <div class="text-muted text-center" style="font-size: 12px">
