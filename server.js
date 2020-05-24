@@ -8,6 +8,10 @@ const io = socketIo(server);
 const rooms = require("./backend/roomManager");
 const roomManager = new rooms.RoomManager();
 
+const wakeUp = require('wakeUp.js');
+const HOST_URL = 'http://zoom-mafia.herokuapp.com/';
+const TIMER = 25 * 60 * 1000;
+
 const TRY_RECREATE_ROOMS = true; // Trying to recreate rooms with unknown id. Lets user create their custom room names
 
 /**
@@ -58,7 +62,9 @@ app.get('/:roomId', function (req, res) {
   res.sendFile(__dirname + '/dist/index.html');
 });
 
-server.listen(process.env.PORT || 8080);
+server.listen(process.env.PORT || 8080, () => {
+  wakeUp(HOST_URL, TIMER);
+});
 
 function createRoom(socket, userId, videoLink="", forceRoomId = null){
      // (hostName, videoLink, hostId, roomId)
