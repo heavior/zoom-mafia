@@ -9,7 +9,7 @@ import {BehaviorSubject, fromEvent, Observable} from "rxjs";
 })
 export class ChatService {
   private socket: any;
-  private url: string = 'http://localhost:8080';
+  private url: string = '/';
   data: any = {};
   gameSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
   roomSubject: BehaviorSubject<any> = new BehaviorSubject(undefined);
